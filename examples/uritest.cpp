@@ -35,96 +35,39 @@
 #include <functional>
 #include <deque>
 #include <set>
-#include <fix8/fiber.hpp>
+#include <fix8/uri.hpp>
 
 //-----------------------------------------------------------------------------------------
 using namespace FIX8;
 using namespace std::literals;
 
 //-----------------------------------------------------------------------------------------
-void doit(int arg)
-{
-	std::cout << this_fiber::name(("sub"s + std::to_string(arg)).c_str());
-	std::cout << "\tstarting " << arg << '\n';
-	for (int ii{}; ii < arg; )
-	{
-		std::cout << '\t' << this_fiber::name() << ' ' << arg << ": " << ++ii << '\n';
-		this_fiber::yield();
-	}
-	std::cout << "\tleaving " << arg << '\n';
-	fibers::print();
-}
-
-struct foo
-{
-	void sub(int arg)
-	{
-		doit(arg);
-	}
-	void sub1(int arg, const char *str)
-	{
-		std::cout << str << '\n';
-		doit(arg);
-	}
-	void sub3(int arg, const char *str)
-	{
-		auto st { "sub"s + std::to_string(arg) };
-		this_fiber::name(st.c_str());
-		std::cout << "\tsub2 starting " << arg << '\n';
-		for (int ii{}; ii < arg; )
-		{
-			std::cout << '\t' << this_fiber::name() << ' ' << arg << ": " << ++ii << '\n';
-			//this_fiber::sleep_until(std::chrono::steady_clock::now() + 500ms);
-			this_fiber::sleep_for(100ms);
-		}
-		std::cout << "\tsub2 leaving " << arg << '\n';
-	}
-	void sub2()
-	{
-		doit(4);
-	}
-};
-
-//-----------------------------------------------------------------------------------------
 int main(void)
 {
-	foo bar;
-	fiber sub_co({.stacksz=2048}, &doit, 3),
-			sub_co1({.stacksz=16384}, &foo::sub2, &bar),
-			sub_co2({.stacksz=32768}, &foo::sub, &bar, 5),
-			sub_co3({.stacksz=8192}, &foo::sub1, &bar, 8., "hello"),
-			sub_co4(std::bind(&foo::sub3, &bar, 12, "there"));
-	fiber sub_lam({.name="sub lambda",.stack=std::make_unique<f8_fixedsize_mapped_stack>()}, [](int arg)
-	//char stack[4096];
-	//fiber sub_lam({.name="sub lambda",.stacksz=sizeof(stack),.stack=std::make_unique<f8_fixedsize_placement_stack>(stack)}, [](int arg)
+	try
 	{
-		std::cout << "\tlambda starting " << arg << '\n';
-		for (int ii{}; ii < arg; )
+		static constexpr std::array tests
 		{
-			std::cout << '\t' << this_fiber::name() << ' ' << arg << ": " << ++ii << '\n';
-			this_fiber::yield();
-		}
-		std::cout << "\tlambda leaving " << arg << '\n';
-	}, 15);
-	for (int ii{}; fibers::has_fibers(); ++ii)
-	{
-		if (ii == 0)
-		{
-			fibers::print(std::cout);
-			sub_co3.resume();
-			fibers::print(std::cout);
-		}
-		this_fiber::yield();
-		std::cout << "main: " << std::dec << ii << '\n';
-		//fibers::print(std::cout);
+			"https://www.blah.com/",
+			"https://dakka@www.blah.com/",
+			"https://www.blah.com:3000/test",
+			"https://dakka@www.blah.com:3000/",
+			"mailto:John.Doe@example.com",
+		};
+
+		for (const auto *pp : tests)
+			std::cout << uri{pp} << '\n';
+
+		uri t1{tests[3]};
+		std::cout << t1.get_component(uri::port) << '\n';
+
+		//std::cout << t1.get_component(uri::count) << '\n';
+		//std::cout << t1.get_name(uri::count) << '\n';
 	}
-	std::cout	<< "Exiting from main\n"
-					<< fibers::size_finished() << " fibers finished\n"
-					<< "fiber: " << sizeof(fiber) << '\n'
-					<< "fiber::cvars: " << sizeof(fiber::cvars) << '\n'
-					<< "fiber::all_cvars: " << sizeof(fiber::all_cvars) << '\n'
-					<< "fiber_id: " << sizeof(fiber_id) << '\n'
-					<< "fiber_base: " << sizeof(fiber_base) << '\n'
-					<< "fiber_params: " << sizeof(fiber_params) << std::endl;
+	catch (const std::exception& e)
+	{
+		std::cerr << "exception: " << e.what() << '\n';
+	}
 	return 0;
 }
+

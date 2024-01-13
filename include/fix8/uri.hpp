@@ -55,18 +55,102 @@
 namespace FIX8 {
 
 //-----------------------------------------------------------------------------------------
-enum class uri_components { scheme, userinfo, host, port, path, query, fragment };
-
-//-----------------------------------------------------------------------------------------
 class uri
 {
-
 public:
-	constexpr uri(const char *uristr)
+	enum uri_components : unsigned { scheme, userinfo, host, port, path, query, fragment, count };
+private:
+	std::string_view _source;
+	std::array<std::pair<std::string::size_type, std::string::size_type>, uri_components::count> _ranges;
+	std::bitset<uri_components::count> _present;
+	static constexpr const std::array uri_names { "scheme", "userinfo", "host", "port", "path", "query", "fragment" };
+public:
+	constexpr uri(std::string_view src) : _source(src) { parse(); }
+	constexpr uri() = default;
+	~uri() = default;
+
+	constexpr std::string_view get_component(uri_components what) const
 	{
+		if (what < count)
+			return _source.substr(_ranges[what].first, _ranges[what].second);
+		throw(std::out_of_range("invalid component index"));
+	}
+	constexpr std::string_view get_name(uri_components what) const
+	{
+		if (what < count)
+			return uri_names[what];
+		throw(std::out_of_range("invalid component index"));
 	}
 
-	~uri() = default;
+	constexpr int parse()
+	{
+		if (_source.find_first_of("\t\r\n ") != std::string::npos)
+			throw(std::logic_error("invalid uri"));
+		std::string::size_type pos{}, prt{}, hst{};
+		if (auto sch {_source.find_first_of(':')}; sch != std::string::npos)
+		{
+			_ranges[scheme] = std::make_pair(0, sch);
+			_present.set(scheme);
+			pos = sch + 1;
+			//std::cout << "pos=" << pos << ",sch=" << sch << '\n';
+		}
+		if (auto auth {_source.find_first_of("//", pos)}; auth != std::string::npos)
+		{
+			auth += 2;
+			if (auto usr {_source.find_first_of('@', auth)}; usr != std::string::npos)
+			{
+				_ranges[userinfo] = std::make_pair(auth, usr - auth);
+				_present.set(userinfo);
+				hst = pos = usr + 1;
+			}
+			else
+				hst = pos = auth;
+
+			if ((prt = _source.find_first_of(':', pos)) != std::string::npos)
+			{
+				++prt;
+				_ranges[port] = std::make_pair(prt, _source.size() - prt);
+				_present.set(port);
+			}
+		}
+		auto pth {_source.find_first_of('/', pos)};
+		if (pth != std::string::npos)
+		{
+			if (_present[port])
+			{
+				_ranges[port].second = pth - _ranges[port].first;
+				_ranges[host] = std::make_pair(hst, _ranges[port].first - 1 - hst);
+			}
+			else
+				_ranges[host] = std::make_pair(hst, _source.size() - hst - 1);
+			_present.set(host);
+
+			_ranges[path] = std::make_pair(pth, _source.size() - pth);
+			_present.set(path);
+			pos += _ranges[path].second;
+		}
+		if (pth == std::string::npos)
+		{
+			_ranges[path] = std::make_pair(pos, _source.size() - pos);
+			_present.set(path);
+		}
+		return 0;
+	}
+
+	friend std::ostream& operator<<(std::ostream& os, const uri& what)
+	{
+		os << what._source << '\n';
+		for (int ii{}; ii < count; ++ii)
+		{
+			if (what._present[ii])
+			{
+				os << uri_names[ii] << ": " << what._source.substr(what._ranges[ii].first, what._ranges[ii].second) << '\n';
+				os << '\t' << what._ranges[ii].first << '(' << what._ranges[ii].second << ")\n";
+			}
+		}
+		return os;
+	}
 };
 
+} // FIX8
 #endif // FIX8_URI_HPP_

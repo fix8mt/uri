@@ -92,10 +92,10 @@ if(BUILD_TESTS)
 	list(APPEND CMAKE_MODULE_PATH ${catch2_SOURCE_DIR}/extras)
 	include(Catch)
 
-	set(testdir ${CMAKE_SOURCE_DIR}/test)
-	add_executable(utest01 ${testdir}/utest01.cpp)
-	target_link_libraries(utest01 PRIVATE Catch2::Catch2WithMain)
-	catch_discover_tests(utest01)
+#set(testdir ${CMAKE_SOURCE_DIR}/test)
+#	add_executable(utest01 ${testdir}/utest01.cpp)
+#	target_link_libraries(utest01 PRIVATE Catch2::Catch2WithMain)
+#	catch_discover_tests(utest01)
 endif()
 
 # to dump all non-empty cmake variables

@@ -32,9 +32,8 @@
 // DEALINGS IN THE SOFTWARE.
 //-----------------------------------------------------------------------------------------
 #include <iostream>
-#include <functional>
-#include <deque>
-#include <set>
+#include <vector>
+#include <string_view>
 #include <fix8/uri.hpp>
 
 //-----------------------------------------------------------------------------------------
@@ -46,29 +45,27 @@ int main(void)
 {
 	try
 	{
-		static constexpr std::array tests
+	   static const std::vector<std::tuple<std::string_view, std::vector<std::tuple<uri::uri_components, std::string_view>>>> tests
 		{
-			"https://www.blah.com/",
-			"https://dakka@www.blah.com/",
-			"https://www.blah.com:3000/test",
-			"https://dakka@www.blah.com:3000/",
-			"mailto:John.Smith@example.com",
-			"news:comp.infosystems.www.servers.unix",
-			"tel:+1-816-555-1212",
-			"telnet://192.0.2.16:80/",
-			"urn:oasis:names:specification:docbook:dtd:xml",
-			"https://example.com/over/there?name=ferret",
-			"https://example.com/over/there?name=ferret#afrag",
+			{ "https://www.blah.com/",
+				{
+					{ uri::scheme, "https" },
+					{ uri::authority, "www.blah.com" },
+					{ uri::host, "www.blah.com" },
+					{ uri::path, "/" },
+				}
+			},
 		};
 
-		for (const auto *pp : tests)
-			std::cout << uri{pp} << '\n';
-
-		//uri t1{tests[3]};
-		//std::cout << t1.get_component(uri::port) << '\n';
-
-		//std::cout << t1.get_component(uri::count) << '\n';
-		//std::cout << t1.get_name(uri::count) << '\n';
+		for (const auto& [src,vec] : tests)
+		{
+			uri t1{src};
+			if (t1.countof() != vec.size())
+				std::cerr << "component count error: " << t1.countof() << " != " << vec.size() << '\n';
+			for (const auto& [comp,str] : vec)
+				if (t1.get_component(comp) != str)
+					std::cerr << "component mismatch(" << t1.get_name(comp) << "): " << t1.get_component(comp) << " != " << str << '\n';
+		}
 	}
 	catch (const std::exception& e)
 	{

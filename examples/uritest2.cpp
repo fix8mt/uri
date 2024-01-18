@@ -33,6 +33,7 @@
 //-----------------------------------------------------------------------------------------
 #include <iostream>
 #include <vector>
+#include <set>
 #include <string_view>
 #include <fix8/uri.hpp>
 
@@ -43,29 +44,100 @@ using namespace std::literals;
 //-----------------------------------------------------------------------------------------
 int main(void)
 {
+	//enum uri_components : unsigned { scheme, authority, userinfo, host, port, path, query, fragment, count };
+	using enum uri::uri_components;
+	static const std::vector<std::tuple<std::string_view, std::vector<std::tuple<uri::uri_components, std::string_view>>>> tests
+	{
+		{ "https://www.blah.com/",
+			{
+				{ scheme, "https" },
+				{ authority, "www.blah.com" },
+				{ host, "www.blah.com" },
+				{ path, "/" },
+			}
+		},
+		{ "https://www.blah.com",
+			{
+				{ scheme, "https" },
+				{ authority, "www.blah.com" },
+				{ host, "www.blah.com" },
+				{ path, "" }, // empty path
+			}
+		},
+		{ "https://www.blah.com:3000/test",
+			{
+				{ scheme, "https" },
+				{ authority, "www.blah.com:3000" },
+				{ host, "www.blah.com" },
+				{ port, "3000" },
+				{ path, "/test" },
+			}
+		},
+		{ "https://dakka@www.blah.com:3000/",
+			{
+				{ scheme, "https" },
+				{ authority, "dakka@www.blah.com:3000" },
+				{ userinfo, "dakka" },
+				{ host, "www.blah.com" },
+				{ port, "3000" },
+				{ path, "/" },
+			}
+		},
+		{ "https://example.com/over/there?name=ferret&time=any#afrag",
+			{
+				{ scheme, "https" },
+				{ authority, "example.com" },
+				{ host, "example.com" },
+				{ path, "/over/there" },
+				{ query, "name=ferret&time=any" },
+				{ fragment, "afrag" },
+			}
+		},
+		{ "urn:oasis:names:specification:docbook:dtd:xml",
+			{
+				{ scheme, "urn" },
+				{ path, "oasis:names:specification:docbook:dtd:xml" },
+			}
+		},
+		{ "mailto:John.Smith@example.com",
+			{
+				{ scheme, "mailto" },
+				{ path, "John.Smith@example.com" },
+			}
+		},
+		{ "news:comp.infosystems.www.servers.unix",
+			{
+				{ scheme, "news" },
+				{ path, "comp.infosystems.www.servers.unix" },
+			}
+		},
+	};
+
 	try
 	{
-	   static const std::vector<std::tuple<std::string_view, std::vector<std::tuple<uri::uri_components, std::string_view>>>> tests
-		{
-			{ "https://www.blah.com/",
-				{
-					{ uri::scheme, "https" },
-					{ uri::authority, "www.blah.com" },
-					{ uri::host, "www.blah.com" },
-					{ uri::path, "/" },
-				}
-			},
-		};
-
+		int testnum{};
+		std::set<int> errors;
 		for (const auto& [src,vec] : tests)
 		{
-			uri t1{src};
+			++testnum;
+			const uri t1{src};
 			if (t1.countof() != vec.size())
-				std::cerr << "component count error: " << t1.countof() << " != " << vec.size() << '\n';
+			{
+				std::cerr << "test(" << testnum << "): component count error: " << t1.countof() << " != " << vec.size() << '\n';
+				errors.insert(testnum);
+			}
 			for (const auto& [comp,str] : vec)
+			{
 				if (t1.get_component(comp) != str)
-					std::cerr << "component mismatch(" << t1.get_name(comp) << "): " << t1.get_component(comp) << " != " << str << '\n';
+				{
+					std::cerr << "test(" << testnum << "): component mismatch(" << t1.get_name(comp) << "): " << t1.get_component(comp) << " != " << str << '\n';
+					errors.insert(testnum);
+				}
+			}
 		}
+
+		for (auto ii : errors)
+			std::cerr << "error in test " << ii << '\n' << uri(std::get<0>(tests[ii - 1])) << '\n';
 	}
 	catch (const std::exception& e)
 	{

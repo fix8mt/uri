@@ -85,20 +85,22 @@ public:
 
 	constexpr int parse()
 	{
+		if (_source.empty())
+			return 0;
 		if (_source.find_first_of("\t\r\n ") != std::string::npos)
 			throw(std::logic_error("invalid uri"));
-		std::string::size_type pos{}, prt{}, hst{}, pth{};
+		std::string::size_type pos{}, hst{}, pth{std::string::npos};
 		if (auto sch {_source.find_first_of(':')}; sch != std::string::npos)
 		{
 			_ranges[scheme] = std::make_pair(0, sch);
 			_present.set(scheme);
 			pos = sch + 1;
-			//std::cout << "pos=" << pos << ",sch=" << sch << '\n';
 		}
 		if (auto auth {_source.find_first_of("//", pos)}; auth != std::string::npos)
 		{
 			auth += 2;
-			pth = _source.find_first_of('/', auth);
+			if ((pth = _source.find_first_of('/', auth)) == std::string::npos) // unterminated path
+				pth = _source.size();
 			_ranges[authority] = std::make_pair(auth, pth - auth);
 			_present.set(authority);
 			if (auto usr {_source.find_first_of('@', auth)}; usr != std::string::npos)
@@ -110,7 +112,7 @@ public:
 			else
 				hst = pos = auth;
 
-			if ((prt = _source.find_first_of(':', pos)) != std::string::npos)
+			if (auto prt { _source.find_first_of(':', pos) }; prt != std::string::npos)
 			{
 				++prt;
 				_ranges[port] = std::make_pair(prt, _source.size() - prt);
@@ -155,7 +157,7 @@ public:
 			_present.set(fragment);
 			//pos += _ranges[path].second;
 		}
-		return 0;
+		return countof();
 	}
 
 	friend std::ostream& operator<<(std::ostream& os, const uri& what)

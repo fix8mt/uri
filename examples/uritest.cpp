@@ -1,11 +1,10 @@
 //-----------------------------------------------------------------------------------------
-// fiber (header only)
-// Copyright (C) 2022-23 Fix8 Market Technologies Pty Ltd
+// uri (header only)
+// Copyright (C) 2024 Fix8 Market Technologies Pty Ltd
 //   by David L. Dight
-// see https://github.com/fix8mt/fiber
+// see https://github.com/fix8mt/uri
 //
-// Lightweight header-only stackful per-thread fiber
-//		with built-in roundrobin scheduler x86_64 / linux only
+// Lightweight header-only C++20 URI parser
 //
 // Distributed under the Boost Software License, Version 1.0 August 17th, 2003
 //

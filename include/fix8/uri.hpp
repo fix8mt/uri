@@ -58,30 +58,37 @@ namespace FIX8 {
 class uri
 {
 public:
-	enum uri_components : unsigned { scheme, authority, userinfo, host, port, path, query, fragment, count };
+	enum component : unsigned { scheme, authority, userinfo, host, port, path, query, fragment, countof };
 private:
 	std::string_view _source;
-	std::array<std::pair<std::string::size_type, std::string::size_type>, uri_components::count> _ranges;
-	std::bitset<uri_components::count> _present;
-	static constexpr const std::array uri_names { "scheme", "authority", "userinfo", "host", "port", "path", "query", "fragment", };
+	std::array<std::pair<std::string::size_type, std::string::size_type>, component::countof> _ranges;
+	std::bitset<component::countof> _present;
+	static constexpr const std::array component_names { "scheme", "authority", "userinfo", "host", "port", "path", "query", "fragment", };
 public:
 	constexpr uri(std::string_view src) : _source(src) { parse(); }
 	constexpr uri() = default;
 	~uri() = default;
 
-	constexpr std::string_view get_component(uri_components what) const
+	constexpr std::string_view get_component(component what) const
 	{
-		if (what < count)
+		if (what < countof)
 			return _source.substr(_ranges[what].first, _ranges[what].second);
 		throw(std::out_of_range("invalid component index"));
 	}
-	constexpr std::string_view get_name(uri_components what) const
+	static constexpr std::string_view get_name(component what)
 	{
-		if (what < count)
-			return uri_names[what];
+		if (what < countof)
+			return component_names[what];
 		throw(std::out_of_range("invalid component index"));
 	}
-	int countof() const { return _present.count(); }
+	constexpr std::pair<std::string_view, std::string_view> get_named_pair(component what) const
+	{
+		if (what < countof)
+			return std::make_pair(component_names[what], _source.substr(_ranges[what].first, _ranges[what].second));
+		throw(std::out_of_range("invalid component index"));
+	}
+	constexpr bool is_ipv6(std::string_view what) const { return what.front() == '[' && what.back() == ']'; }
+	int count() const { return _present.count(); } // std::bitset is constexpr in c++23
 
 	constexpr int parse()
 	{
@@ -112,7 +119,8 @@ public:
 			else
 				hst = pos = auth;
 
-			if (auto prt { _source.find_first_of(':', pos) }; prt != std::string::npos)
+			if (auto prt { _source.find_first_of(':', pos) }; prt != std::string::npos
+					&& !is_ipv6(_source.substr(_ranges[authority].first, _ranges[authority].second)))
 			{
 				++prt;
 				_ranges[port] = std::make_pair(prt, _source.size() - prt);
@@ -128,11 +136,11 @@ public:
 			}
 			else
 				_ranges[host] = std::make_pair(hst, pth - hst);
-			_present.set(host);
+			if (_ranges[host].second)
+				_present.set(host);
 
 			_ranges[path] = std::make_pair(pth, _source.size() - pth);
 			_present.set(path);
-			//pos += _ranges[path].second;
 		}
 		if (pth == std::string::npos)
 		{
@@ -146,7 +154,6 @@ public:
 				_ranges[path].second = qur - _ranges[path].first;
 			_ranges[query] = std::make_pair(qur + 1, _source.size() - qur);
 			_present.set(query);
-			//pos += _ranges[path].second;
 		}
 		const auto fra {_source.find_first_of('#', pos)};
 		if (fra != std::string::npos)
@@ -155,19 +162,18 @@ public:
 				_ranges[query].second = fra - _ranges[query].first;
 			_ranges[fragment] = std::make_pair(fra + 1, _source.size() - fra);
 			_present.set(fragment);
-			//pos += _ranges[path].second;
 		}
-		return countof();
+		return count();
 	}
 
 	friend std::ostream& operator<<(std::ostream& os, const uri& what)
 	{
 		os << "source:\t" << what._source << '\n';
-		for (int ii{}; ii < count; ++ii)
+		for (int ii{}; ii < countof; ++ii)
 		{
 			if (what._present[ii])
 			{
-				os << uri_names[ii] << ":\t" << what._source.substr(what._ranges[ii].first, what._ranges[ii].second) << '\n';
+				os << component_names[ii] << ":\t" << what._source.substr(what._ranges[ii].first, what._ranges[ii].second) << '\n';
 				//os << '\t' << what._ranges[ii].first << '(' << what._ranges[ii].second << ")\n";
 			}
 		}

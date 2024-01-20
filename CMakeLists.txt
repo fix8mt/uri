@@ -66,11 +66,14 @@ message("-- cxx flags ${CMAKE_BUILD_TYPE}: \"${CMAKE_CXX_FLAGS_${CMAKE_BUILD_TYP
 
 set(exdir ${CMAKE_SOURCE_DIR}/examples)
 file(GLOB esrc CONFIGURE_DEPENDS "${exdir}/uri*.cpp")
+enable_testing()
 foreach(x ${esrc})
 	cmake_path(GET x STEM LAST_ONLY target)
 	add_executable(${target} ${x})
 	set_target_properties(${target} PROPERTIES CXX_STANDARD 20 CXX_STANDARD_REQUIRED true)
 	get_target_property(v1 ${target} CXX_STANDARD)
+   target_link_libraries(${target} PRIVATE Catch2::Catch2WithMain)
+   target_link_libraries(${target} PRIVATE Catch2::Catch2)
 	cmake_path(GET x FILENAME fname)
 	message("-- adding ${fname} cxx std: c++${v1}")
 endforeach()
@@ -91,11 +94,8 @@ if(BUILD_TESTS)
 	FetchContent_MakeAvailable(Catch2)
 	list(APPEND CMAKE_MODULE_PATH ${catch2_SOURCE_DIR}/extras)
 	include(Catch)
+	catch_discover_tests(uritest2)
 
-#set(testdir ${CMAKE_SOURCE_DIR}/test)
-#	add_executable(utest01 ${testdir}/utest01.cpp)
-#	target_link_libraries(utest01 PRIVATE Catch2::Catch2WithMain)
-#	catch_discover_tests(utest01)
 endif()
 
 # to dump all non-empty cmake variables

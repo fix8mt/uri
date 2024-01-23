@@ -33,162 +33,15 @@
 #include <catch2/catch_test_macros.hpp>
 #include <iostream>
 #include <vector>
-#include <set>
 #include <string_view>
 #include <fix8/uri.hpp>
 
 //-----------------------------------------------------------------------------------------
 using namespace FIX8;
-using namespace std::literals;
 using enum uri::component;
 
 //-----------------------------------------------------------------------------------------
-//enum component : unsigned { scheme, authority, userinfo, host, port, path, query, fragment, countof };
-const std::vector<std::tuple<std::string_view, std::vector<std::tuple<uri::component, std::string_view>>>> tests
-{
-	{ "https://www.blah.com/",
-		{
-			{ scheme, "https" },
-			{ authority, "www.blah.com" },
-			{ host, "www.blah.com" },
-			{ path, "/" },
-		}
-	},
-	{ "https://www.blah.com",
-		{
-			{ scheme, "https" },
-			{ authority, "www.blah.com" },
-			{ host, "www.blah.com" },
-			{ path, "" }, // empty path
-		}
-	},
-	{ "https://www.blah.com:3000/test",
-		{
-			{ scheme, "https" },
-			{ authority, "www.blah.com:3000" },
-			{ host, "www.blah.com" },
-			{ port, "3000" },
-			{ path, "/test" },
-		}
-	},
-	{ "https://dakka@www.blah.com:3000/",
-		{
-			{ scheme, "https" },
-			{ authority, "dakka@www.blah.com:3000" },
-			{ userinfo, "dakka" },
-			{ host, "www.blah.com" },
-			{ port, "3000" },
-			{ path, "/" },
-		}
-	},
-	{ "https://example.com/over/there?name=ferret&time=any#afrag",
-		{
-			{ scheme, "https" },
-			{ authority, "example.com" },
-			{ host, "example.com" },
-			{ path, "/over/there" },
-			{ query, "name=ferret&time=any" },
-			{ fragment, "afrag" },
-		}
-	},
-	{ "https://example.org/./a/../b/./c",
-		{
-			{ scheme, "https" },
-			{ authority, "example.org" },
-			{ host, "example.org" },
-			{ path, "/./a/../b/./c" },
-		}
-	},
-	{ "ws://localhost:9229/f46db715-70df-43ad-a359-7f9949f39868",
-		{
-			{ scheme, "ws" },
-			{ authority, "localhost:9229" },
-			{ host, "localhost" },
-			{ port, "9229" },
-			{ path, "/f46db715-70df-43ad-a359-7f9949f39868" },
-		}
-	},
-	{ "ldap://[2001:db8::7]/c=GB?objectClass?one",
-		{
-			{ scheme, "ldap" },
-			{ authority, "[2001:db8::7]" },
-			{ host, "[2001:db8::7]" },
-			{ path, "/c=GB" },
-			{ query, "objectClass?one" },
-		}
-	},
-	{ "file:///foo/bar/test/node.js",
-		{
-			{ scheme, "file" },
-			{ authority, "" }, // empty authority
-			{ path, "/foo/bar/test/node.js" },
-		}
-	},
-	{	"http://nodejs.org:89/docs/latest/api/foo/bar/qua/13949281/0f28b/5d49/b3020/url.html"
-		"?payload1=true&payload2=false&test=1&benchmark=3&foo=38.38.011.293"
-		"&bar=1234834910480&test=19299&3992&key=f5c65e1e98fe07e648249ad41e1cfdb0#test",
-		{
-			{ scheme, "http" },
-			{ authority, "nodejs.org:89" },
-			{ host, "nodejs.org" },
-			{ port, "89" },
-			{ path, "/docs/latest/api/foo/bar/qua/13949281/0f28b/5d49/b3020/url.html" },
-			{ query, "payload1=true&payload2=false&test=1&benchmark=3&foo=38.38.011.293"
-						"&bar=1234834910480&test=19299&3992&key=f5c65e1e98fe07e648249ad41e1cfdb0" },
-			{ fragment, "test" },
-		}
-	},
-	{ "https://user:pass@example.com/path?search=1",
-		{
-			{ scheme, "https" },
-			{ authority, "user:pass@example.com" },
-			{ host, "example.com" },
-			{ userinfo, "user:pass" },
-			{ path, "/path" },
-			{ query, "search=1" },
-		}
-	},
-	{ "javascript:alert(\"nodeisawesome\");",
-		{
-			{ scheme, "javascript" },
-			{ path, "alert(\"nodeisawesome\");" },
-		}
-	},
-	{ "https://%E4%BD%A0/foo",
-		{
-			{ scheme, "https" },
-			{ authority, "%E4%BD%A0" },
-			{ host, "%E4%BD%A0" },
-			{ path, "/foo" },
-		}
-	},
-	{ "http://你好你好.在",
-		{
-			{ scheme, "http" },
-			{ authority, "你好你好.在" },
-			{ host, "你好你好.在" },
-			{ path, "" }, // empty path
-		}
-	},
-	{ "urn:oasis:names:specification:docbook:dtd:xml",
-		{
-			{ scheme, "urn" },
-			{ path, "oasis:names:specification:docbook:dtd:xml" },
-		}
-	},
-	{ "mailto:John.Smith@example.com",
-		{
-			{ scheme, "mailto" },
-			{ path, "John.Smith@example.com" },
-		}
-	},
-	{ "news:comp.infosystems.www.servers.unix",
-		{
-			{ scheme, "news" },
-			{ path, "comp.infosystems.www.servers.unix" },
-		}
-	},
-};
+#include "uriexamples.hpp"
 
 //-----------------------------------------------------------------------------------------
 TEST_CASE("uri - get component", "[uri]")
@@ -208,7 +61,7 @@ TEST_CASE("uri - get name", "[uri]")
 }
 
 //-----------------------------------------------------------------------------------------
-TEST_CASE("uri - various permutations", "[uri]")
+TEST_CASE("uri - uri component validations", "[uri]")
 {
 	for (const auto& [src,vec] : tests)
 	{
@@ -228,5 +81,36 @@ TEST_CASE("uri - get named pair", "[uri]")
 	const auto [n1,n2] { u1.get_named_pair(host) };
 	REQUIRE(n1 == "host");
 	REQUIRE(n2 == "www.blah.com");
+}
+
+//-----------------------------------------------------------------------------------------
+TEST_CASE("uri - replace", "[uri]")
+{
+	const auto& [src,vec] { tests[0] };
+	const auto& [src1,vec1] { tests[4] };
+	uri u1{src};
+	REQUIRE(u1.get_component(host) == "www.blah.com");
+	uri u2{u1.replace(src1)};
+	REQUIRE(u1.get_component(host) == "example.com");
+	REQUIRE(u2.get_component(host) == "www.blah.com");
+}
+
+//-----------------------------------------------------------------------------------------
+TEST_CASE("uri - storage", "[uri]")
+{
+	const auto& [src,vec] { tests[0] };
+	const uri u1{src};
+	REQUIRE(src == u1.get_source());
+	REQUIRE(u1.get_buffer() == u1.get_source());
+	REQUIRE(u1.get_buffer() == src);
+}
+
+//-----------------------------------------------------------------------------------------
+TEST_CASE("uri - invalid uri", "[uri]")
+{
+	REQUIRE_THROWS(uri("https://www.example.com\n"));
+	REQUIRE_THROWS(uri("https://www.example.com\r"));
+	REQUIRE_THROWS(uri("https://www. example.com"));
+	REQUIRE_THROWS(uri("https://www.example\tcom"));
 }
 

@@ -42,33 +42,37 @@
 #include <cstring>
 #include <string>
 #include <string_view>
-#include <functional>
 #include <stdexcept>
-#include <ranges>
-#include <bitset>
 #include <utility>
-#include <concepts>
-#include <set>
-#include <unordered_set>
+#include <bit>
 
 //-----------------------------------------------------------------------------------------
 namespace FIX8 {
 
 //-----------------------------------------------------------------------------------------
-class uri
+class basic_uri
 {
 public:
 	enum component : unsigned { scheme, authority, userinfo, host, port, path, query, fragment, countof };
 private:
 	std::string_view _source;
-	std::array<std::pair<std::string::size_type, std::string::size_type>, component::countof> _ranges;
-	std::bitset<component::countof> _present;
+	std::array<std::pair<std::string_view::size_type, std::string_view::size_type>, component::countof> _ranges;
+	unsigned int _present{};
+	constexpr void set(component what) { _present |= (1 << what); }
+	constexpr bool test(component what) const { return _present & (1 << what); }
 	static constexpr const std::array component_names { "scheme", "authority", "userinfo", "host", "port", "path", "query", "fragment", };
 public:
-	constexpr uri(std::string_view src) : _source(src) { parse(); }
-	constexpr uri() = default;
-	~uri() = default;
+	constexpr basic_uri(std::string_view src) : _source(src) { parse(); }
+	constexpr basic_uri() = default;
+	~basic_uri() = default;
 
+	constexpr int assign(std::string_view src)
+	{
+		_source = src;
+		_present = 0;
+		return parse();
+	}
+	constexpr std::string_view get_source() const { return _source; }
 	constexpr std::string_view get_component(component what) const
 	{
 		if (what < countof)
@@ -88,7 +92,7 @@ public:
 		throw(std::out_of_range("invalid component index"));
 	}
 	constexpr bool is_ipv6(std::string_view what) const { return what.front() == '[' && what.back() == ']'; }
-	int count() const { return _present.count(); } // std::bitset is constexpr in c++23
+	constexpr int count() const { return std::popcount(_present); } // upgrade to std::bitset when constexpr in c++23
 
 	constexpr int parse()
 	{
@@ -96,11 +100,11 @@ public:
 			return 0;
 		if (_source.find_first_of("\t\r\n ") != std::string::npos)
 			throw(std::logic_error("invalid uri"));
-		std::string::size_type pos{}, hst{}, pth{std::string::npos};
+		std::string_view::size_type pos{}, hst{}, pth{std::string::npos};
 		if (auto sch {_source.find_first_of(':')}; sch != std::string::npos)
 		{
 			_ranges[scheme] = std::make_pair(0, sch);
-			_present.set(scheme);
+			set(scheme);
 			pos = sch + 1;
 		}
 		if (auto auth {_source.find_first_of("//", pos)}; auth != std::string::npos)
@@ -109,11 +113,11 @@ public:
 			if ((pth = _source.find_first_of('/', auth)) == std::string::npos) // unterminated path
 				pth = _source.size();
 			_ranges[authority] = std::make_pair(auth, pth - auth);
-			_present.set(authority);
+			set(authority);
 			if (auto usr {_source.find_first_of('@', auth)}; usr != std::string::npos)
 			{
 				_ranges[userinfo] = std::make_pair(auth, usr - auth);
-				_present.set(userinfo);
+				set(userinfo);
 				hst = pos = usr + 1;
 			}
 			else
@@ -124,12 +128,12 @@ public:
 			{
 				++prt;
 				_ranges[port] = std::make_pair(prt, _source.size() - prt);
-				_present.set(port);
+				set(port);
 			}
 		}
 		if (pth != std::string::npos)
 		{
-			if (_present[port])
+			if (test(port))
 			{
 				_ranges[port].second = pth - _ranges[port].first;
 				_ranges[host] = std::make_pair(hst, _ranges[port].first - 1 - hst);
@@ -137,48 +141,61 @@ public:
 			else
 				_ranges[host] = std::make_pair(hst, pth - hst);
 			if (_ranges[host].second)
-				_present.set(host);
+				set(host);
 
 			_ranges[path] = std::make_pair(pth, _source.size() - pth);
-			_present.set(path);
+			set(path);
 		}
 		if (pth == std::string::npos)
 		{
 			_ranges[path] = std::make_pair(pos, _source.size() - pos);
-			_present.set(path);
+			set(path);
 		}
 		const auto qur {_source.find_first_of('?', pos)};
 		if (qur != std::string::npos)
 		{
-			if (_present[path])
+			if (test(path))
 				_ranges[path].second = qur - _ranges[path].first;
 			_ranges[query] = std::make_pair(qur + 1, _source.size() - qur);
-			_present.set(query);
+			set(query);
 		}
 		const auto fra {_source.find_first_of('#', pos)};
 		if (fra != std::string::npos)
 		{
-			if (_present[query])
+			if (test(query))
 				_ranges[query].second = fra - _ranges[query].first;
 			_ranges[fragment] = std::make_pair(fra + 1, _source.size() - fra);
-			_present.set(fragment);
+			set(fragment);
 		}
 		return count();
 	}
 
-	friend std::ostream& operator<<(std::ostream& os, const uri& what)
+	friend std::ostream& operator<<(std::ostream& os, const basic_uri& what)
 	{
 		os << "source:\t" << what._source << '\n';
 		for (int ii{}; ii < countof; ++ii)
-		{
-			if (what._present[ii])
-			{
+			if (what.test(static_cast<component>(ii)))
 				os << component_names[ii] << ":\t" << what._source.substr(what._ranges[ii].first, what._ranges[ii].second) << '\n';
-				//os << '\t' << what._ranges[ii].first << '(' << what._ranges[ii].second << ")\n";
-			}
-		}
 		return os;
 	}
+};
+
+//-----------------------------------------------------------------------------------------
+class uri : public basic_uri
+{
+	std::string _buffer;
+public:
+	constexpr uri(std::string&& src) : _buffer(std::move(src)) { assign(_buffer); }
+	constexpr uri() = default;
+	~uri() = default;
+
+	constexpr std::string replace(std::string&& src)
+	{
+		auto rbuf { std::exchange(_buffer, src) };
+		assign(_buffer);
+		return rbuf;
+	}
+	constexpr const std::string& get_buffer() const { return _buffer; }
 };
 
 } // FIX8

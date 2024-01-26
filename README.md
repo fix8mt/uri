@@ -130,6 +130,38 @@ $
 </p>
 </details>
 
+# Building
+This implementation is header only. Apart from standard C++20 includes there are no external dependencies needed in your application.
+[Catch2](https://github.com/catchorg/Catch2.git) is used for the built-in unit tests.
+
+# 1. Obtaining the source, building the examples
+To clone and default build all the examples, including the unit tests.
+```bash
+git clone git@github.com:fix8mt/uri.git
+cd uri
+mkdir build
+cd build
+cmake ..
+make -j4
+make test (or ctest)
+```
+# 3. Using in your application
+In `CMakeLists.txt` set your include path to:
+```cmake
+include_directories([uri directory]/include)
+# e.g.
+set(uridir /home/dd/prog/uri)
+include_directories(${uridir}/include)
+```
+and just include:
+```c++
+#include <fix8/uri.hpp>
+```
+in your application. Everything in this class is within the namespace `FIX8`, so you can add:
+```c++
+using namespace FIX8;
+```
+
 # API
 The base class `basic_uri` performs the bulk of the work, holding a `std::string_view` of the source uri string. If you wish to manage the scope of the source uri yourself then
 this class is the most efficient way to do so.

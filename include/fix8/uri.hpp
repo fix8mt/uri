@@ -1,4 +1,16 @@
 //-----------------------------------------------------------------------------------------
+/*
+░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░
+░        ░░░░░░░░░░░░░░░░░░░░░░░░░░░   ░░░░░░░   ░
+▒   ▒▒▒▒▒▒▒▒  ▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒  ▒▒▒▒▒  ▒   ▒▒▒    ▒▒▒▒▒   ▒▒▒▒
+▒   ▒▒▒▒▒▒▒▒▒▒▒   ▒▒▒   ▒▒   ▒▒   ▒▒   ▒   ▒ ▒   ▒▒▒▒▒   ▒▒▒▒
+▓       ▓▓▓   ▓▓▓  ▓   ▓▓   ▓▓▓▓▓  ▓   ▓▓   ▓▓   ▓▓▓▓▓   ▓▓▓▓
+▓   ▓▓▓▓▓▓▓   ▓▓▓▓  ▓▓▓▓▓▓▓   ▓  ▓▓▓   ▓▓▓  ▓▓   ▓▓▓▓▓   ▓▓▓▓
+▓   ▓▓▓▓▓▓▓   ▓▓  ▓▓   ▓▓   ▓▓▓▓   ▓   ▓▓▓▓▓▓▓   ▓▓▓▓▓   ▓▓▓▓
+█   ███████   █   ███   ███     ████   ███████   █████   ████
+█████████████████████████████████████████████████████████████
+*/
+//
 // uri (header only)
 // Copyright (C) 2024 Fix8 Market Technologies Pty Ltd
 //   by David L. Dight
@@ -44,6 +56,7 @@
 #include <string_view>
 #include <stdexcept>
 #include <utility>
+#include <cstdint>
 #include <bit>
 
 //-----------------------------------------------------------------------------------------
@@ -53,14 +66,14 @@ namespace FIX8 {
 class basic_uri
 {
 public:
-	enum component : unsigned { scheme, authority, userinfo, host, port, path, query, fragment, countof };
+	using uri_len_t = std::uint16_t;
+	enum component : uri_len_t { scheme, authority, user, password, host, port, path, query, fragment, countof };
 private:
 	std::string_view _source;
-	std::array<std::pair<std::string_view::size_type, std::string_view::size_type>, component::countof> _ranges;
-	unsigned int _present{};
-	constexpr void set(component what) { _present |= (1 << what); }
-	constexpr bool test(component what) const { return _present & (1 << what); }
-	static constexpr const std::array component_names { "scheme", "authority", "userinfo", "host", "port", "path", "query", "fragment", };
+	std::array<std::pair<uri_len_t, uri_len_t>, component::countof> _ranges;
+	uri_len_t _present{};
+	constexpr void set(component what) noexcept { _present |= (1 << what); }
+	static constexpr const std::array component_names { "scheme", "authority", "user", "password", "host", "port", "path", "query", "fragment", };
 public:
 	constexpr basic_uri(std::string_view src) : _source(src) { parse(); }
 	constexpr basic_uri() = default;
@@ -72,7 +85,7 @@ public:
 		_present = 0;
 		return parse();
 	}
-	constexpr std::string_view get_source() const { return _source; }
+	constexpr std::string_view get_source() const noexcept { return _source; }
 	constexpr std::string_view get_component(component what) const
 	{
 		if (what < countof)
@@ -91,47 +104,58 @@ public:
 			return std::make_pair(component_names[what], _source.substr(_ranges[what].first, _ranges[what].second));
 		throw(std::out_of_range("invalid component index"));
 	}
-	constexpr bool is_ipv6(std::string_view what) const { return what.front() == '[' && what.back() == ']'; }
-	constexpr int count() const { return std::popcount(_present); } // upgrade to std::bitset when constexpr in c++23
+	static constexpr bool is_ipv6(std::string_view what) noexcept { return what.front() == '[' && what.back() == ']'; }
+	constexpr int count() const noexcept { return std::popcount(_present); } // upgrade to std::bitset when constexpr in c++23
+	constexpr bool test(component what) const noexcept { return _present & (1 << what); }
 
 	constexpr int parse()
 	{
 		if (_source.empty())
 			return 0;
-		if (_source.find_first_of("\t\r\n ") != std::string::npos)
+		if (_source.size() > UINT16_MAX)
+			throw(std::out_of_range("uri too long"));
+		if (_source.find_first_of("\t\r\n ") != std::string_view::npos)
 			throw(std::logic_error("invalid uri"));
-		std::string_view::size_type pos{}, hst{}, pth{std::string::npos};
-		if (auto sch {_source.find_first_of(':')}; sch != std::string::npos)
+		std::string_view::size_type pos{}, hst{}, pth{std::string_view::npos};
+		if (auto sch {_source.find_first_of(':')}; sch != std::string_view::npos)
 		{
 			_ranges[scheme] = std::make_pair(0, sch);
 			set(scheme);
 			pos = sch + 1;
 		}
-		if (auto auth {_source.find_first_of("//", pos)}; auth != std::string::npos)
+		if (auto auth {_source.find_first_of("//", pos)}; auth != std::string_view::npos)
 		{
 			auth += 2;
-			if ((pth = _source.find_first_of('/', auth)) == std::string::npos) // unterminated path
+			if ((pth = _source.find_first_of('/', auth)) == std::string_view::npos) // unterminated path
 				pth = _source.size();
 			_ranges[authority] = std::make_pair(auth, pth - auth);
 			set(authority);
-			if (auto usr {_source.find_first_of('@', auth)}; usr != std::string::npos)
+			if (auto usr {_source.find_first_of('@', auth)}; usr != std::string_view::npos)
 			{
-				_ranges[userinfo] = std::make_pair(auth, usr - auth);
-				set(userinfo);
+				if (const auto pw {_source.find_first_of(':', auth)}; pw != std::string_view::npos && pw < usr
+					&& _source.find_first_of(':', pw + 1) == std::string_view::npos) // no nested ':' before '@'
+				{
+					_ranges[user] = std::make_pair(auth, pw - auth);
+					_ranges[password] = std::make_pair(pw + 1, usr - pw - 1);
+					set(password);
+				}
+				else
+					_ranges[user] = std::make_pair(auth, usr - auth);
+				set(user);
 				hst = pos = usr + 1;
 			}
 			else
 				hst = pos = auth;
 
-			if (auto prt { _source.find_first_of(':', pos) }; prt != std::string::npos
-					&& !is_ipv6(_source.substr(_ranges[authority].first, _ranges[authority].second)))
+			if (auto prt { _source.find_first_of(':', pos) }; prt != std::string_view::npos
+				&& !is_ipv6(get_component(authority)))
 			{
 				++prt;
 				_ranges[port] = std::make_pair(prt, _source.size() - prt);
 				set(port);
 			}
 		}
-		if (pth != std::string::npos)
+		if (pth != std::string_view::npos)
 		{
 			if (test(port))
 			{
@@ -142,17 +166,16 @@ public:
 				_ranges[host] = std::make_pair(hst, pth - hst);
 			if (_ranges[host].second)
 				set(host);
-
 			_ranges[path] = std::make_pair(pth, _source.size() - pth);
 			set(path);
 		}
-		if (pth == std::string::npos)
+		if (pth == std::string_view::npos)
 		{
 			_ranges[path] = std::make_pair(pos, _source.size() - pos);
 			set(path);
 		}
 		const auto qur {_source.find_first_of('?', pos)};
-		if (qur != std::string::npos)
+		if (qur != std::string_view::npos)
 		{
 			if (test(path))
 				_ranges[path].second = qur - _ranges[path].first;
@@ -160,7 +183,7 @@ public:
 			set(query);
 		}
 		const auto fra {_source.find_first_of('#', pos)};
-		if (fra != std::string::npos)
+		if (fra != std::string_view::npos)
 		{
 			if (test(query))
 				_ranges[query].second = fra - _ranges[query].first;
@@ -173,19 +196,27 @@ public:
 	friend std::ostream& operator<<(std::ostream& os, const basic_uri& what)
 	{
 		os << "source:\t" << what._source << '\n';
-		for (int ii{}; ii < countof; ++ii)
-			if (what.test(static_cast<component>(ii)))
-				os << component_names[ii] << ":\t" << what._source.substr(what._ranges[ii].first, what._ranges[ii].second) << '\n';
+		for (component ii{}; ii != countof; ii = component(ii + 1))
+			if (what.test(ii))
+				os << what.get_name(ii) << ":\t" << (what.get_component(ii).size() ? what.get_component(ii) : "(empty)") << '\n';
 		return os;
 	}
 };
 
 //-----------------------------------------------------------------------------------------
-class uri : public basic_uri
+struct uri_storage
 {
 	std::string _buffer;
+	constexpr uri_storage(std::string src) : _buffer(std::move(src)) {}
+	constexpr uri_storage() = delete;
+	~uri_storage() = default;
+};
+
+//-----------------------------------------------------------------------------------------
+class uri : private uri_storage, public basic_uri
+{
 public:
-	constexpr uri(std::string&& src) : _buffer(std::move(src)) { assign(_buffer); }
+	constexpr uri(std::string&& src) : uri_storage(src), basic_uri(_buffer) {}
 	constexpr uri() = default;
 	~uri() = default;
 
@@ -195,7 +226,7 @@ public:
 		assign(_buffer);
 		return rbuf;
 	}
-	constexpr const std::string& get_buffer() const { return _buffer; }
+	constexpr const std::string& get_buffer() const noexcept { return _buffer; }
 };
 
 } // FIX8

@@ -1,5 +1,5 @@
 <p align="center">
-  <a href="https://www.fix8mt.com"><img src="https://github.com/fix8mt/uri/assets/fix8mt_Master_Logo_Green_Trans.png" width="200"></a>
+  <a href="https://www.fix8mt.com"><img src="https://github.com/fix8mt/uri/blob/master/assets/fix8mt_Master_Logo_Green_Trans.png" width="200"></a>
 </p>
 
 # uri
@@ -13,7 +13,7 @@ This is a lightweight URI parser implementation featuring zero-copy, minimal sto
 ## Quick links
 |**Link**|**Description**|
 --|--
-|[Here](https://github.com/fix8mt/uri/blob/main/include/fix8/uri.hpp)| for implementation|
+|[Here](https://github.com/fix8mt/uri/blob/master/include/fix8/uri.hpp)| for implementation|
 |[Examples](https://github.com/fix8mt/uri/examples)| for examples and test cases|
 
 ## Motivation

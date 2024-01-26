@@ -32,7 +32,9 @@
 //-----------------------------------------------------------------------------------------
 #include <iostream>
 #include <vector>
+#include <stdexcept>
 #include <string_view>
+#include <getopt.h>
 #include <fix8/uri.hpp>
 
 //-----------------------------------------------------------------------------------------
@@ -43,18 +45,76 @@ using enum uri::component;
 #include "uriexamples.hpp"
 
 //-----------------------------------------------------------------------------------------
-int main(void)
+int main(int argc, char *argv[])
 {
-	try
+   static constexpr const char *optstr{"t:hlas"};
+   static constexpr const std::array long_options
+   {
+      option{ "help",	no_argument,         nullptr, 'h' },
+      option{ "list",	no_argument,         nullptr, 'l' },
+      option{ "sizes",	no_argument,         nullptr, '2' },
+      option{ "all",		no_argument,         nullptr, 'a' },
+      option{ "test",	required_argument,   nullptr, 't' },
+      option{}
+   };
+
+	for (int val; (val = getopt_long (argc, argv, optstr, long_options.data(), 0)) != -1; )
 	{
-		for (const auto& [src,vec] : tests)
-			std::cout << uri{src} << '\n';
-		std::cout << tests.size() << " test cases\n";
+		try
+		{
+			switch (val)
+			{
+			case ':': case '?':
+				std::cout << '\n';
+				[[fallthrough]];
+			case 'h':
+				std::cout << "Usage: " << argv[0] << " [-" << optstr << "]" << R"(
+ -t [num] test to run
+ -l list tests
+ -s show sizes
+ -a run all tests
+ -h help)" << '\n';
+				break;
+			case 'l':
+				for (int ii{}; ii < tests.size(); ++ii)
+					std::cout << ii << '\t' << tests[ii].first << '\n';
+				break;
+			case 't':
+				if (const auto tnum {std::stoul(optarg)}; tnum >= tests.size())
+					throw std::range_error("invalid test case");
+				else
+					std::cout << uri{tests[tnum].first};
+				break;
+			case 's':
+				std::cout << "uri: " << sizeof(uri) << "\nbasic_uri: " << sizeof(basic_uri) << '\n';
+				break;
+			case 'a':
+				for (const auto& [src,vec] : tests)
+					std::cout << uri{src} << '\n';
+				std::cout << tests.size() << " test cases\n";
+				break;
+			default:
+				break;
+			}
+		}
+		catch (const std::exception& e)
+		{
+			std::cerr << "exception: " << e.what();
+			if (optarg)
+				std::cerr << " (" << static_cast<char>(val) << ':' << optarg << ')';
+			std::cerr << std::endl;
+			return 1;
+		}
 	}
-	catch (const std::exception& e)
-	{
-		std::cerr << "exception: " << e.what() << '\n';
-	}
+   const uri u1{"https://www.example.com:8080/pages/from?country=au"};
+   std::cout << u1 << '\n';
+   std::cout << u1.get_component(uri::authority) << '\n';
+   std::cout << u1.get_component(uri::host) << '\n';
+	if (u1.test(uri::port))
+		std::cout << u1.get_component(uri::port) << '\n';
+   std::cout << u1.get_component(uri::query) << '\n';
+	if (u1.test(uri::fragment))
+		std::cout << u1.get_component(uri::fragment) << '\n';
 	return 0;
 }
 

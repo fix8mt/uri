@@ -33,6 +33,7 @@
 #include <catch2/catch_test_macros.hpp>
 #include <iostream>
 #include <vector>
+#include <algorithm>
 #include <string_view>
 #include <fix8/uri.hpp>
 
@@ -46,7 +47,7 @@ using enum uri::component;
 //-----------------------------------------------------------------------------------------
 TEST_CASE("uri - get component", "[uri]")
 {
-	const uri u1{std::get<0>(tests[0])};
+	const uri u1{tests[0].first};
 	REQUIRE_NOTHROW(u1.get_component(host));
 	REQUIRE(u1.get_component(host) == "www.blah.com");
 	REQUIRE_THROWS(u1.get_component(countof));
@@ -75,7 +76,7 @@ TEST_CASE("uri - uri component validations", "[uri]")
 //-----------------------------------------------------------------------------------------
 TEST_CASE("uri - get named pair", "[uri]")
 {
-	const uri u1{std::get<0>(tests[0])};
+	const uri u1{tests[0].first};
 	REQUIRE_NOTHROW(u1.get_named_pair(host));
 	REQUIRE_THROWS(u1.get_named_pair(countof));
 	const auto [n1,n2] { u1.get_named_pair(host) };
@@ -112,5 +113,13 @@ TEST_CASE("uri - invalid uri", "[uri]")
 	REQUIRE_THROWS(uri("https://www.example.com\r"));
 	REQUIRE_THROWS(uri("https://www. example.com"));
 	REQUIRE_THROWS(uri("https://www.example\tcom"));
+}
+
+//-----------------------------------------------------------------------------------------
+TEST_CASE("uri - limits", "[uri]")
+{
+	char buff[UINT16_MAX+1]{};
+	std::fill(buff, buff + sizeof(buff), 'x');
+	REQUIRE_THROWS(uri(buff));
 }
 

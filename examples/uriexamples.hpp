@@ -30,7 +30,7 @@
 // ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
 // DEALINGS IN THE SOFTWARE.
 //-----------------------------------------------------------------------------------------
-const std::vector<std::tuple<const char *, std::vector<std::tuple<uri::component, const char *>>>> tests
+const std::vector<std::pair<const char *, std::vector<std::pair<uri::component, const char *>>>> tests
 {
 	{ "https://www.blah.com/",
 		{
@@ -61,7 +61,7 @@ const std::vector<std::tuple<const char *, std::vector<std::tuple<uri::component
 		{
 			{ scheme, "https" },
 			{ authority, "dakka@www.blah.com:3000" },
-			{ userinfo, "dakka" },
+			{ user, "dakka" },
 			{ host, "www.blah.com" },
 			{ port, "3000" },
 			{ path, "/" },
@@ -124,12 +124,13 @@ const std::vector<std::tuple<const char *, std::vector<std::tuple<uri::component
 			{ fragment, "test" },
 		}
 	},
-	{ "https://user:pass@example.com/path?search=1",
+	{ "https://user:password@example.com/path?search=1",
 		{
 			{ scheme, "https" },
-			{ authority, "user:pass@example.com" },
+			{ authority, "user:password@example.com" },
 			{ host, "example.com" },
-			{ userinfo, "user:pass" },
+			{ user, "user" },
+			{ password, "password" },
 			{ path, "/path" },
 			{ query, "search=1" },
 		}
@@ -193,7 +194,7 @@ const std::vector<std::tuple<const char *, std::vector<std::tuple<uri::component
 		{
 			{ scheme, "http" },
 			{ authority, "-.~_!$&'()*+,;=:%40:80%2f::::::@example.com" },
-			{ userinfo, "-.~_!$&'()*+,;=:%40:80%2f::::::" },
+			{ user, "-.~_!$&'()*+,;=:%40:80%2f::::::" },
 			{ host, "example.com" },
 			{ path, "" }, // empty path
 		}

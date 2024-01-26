@@ -1,5 +1,5 @@
 <p align="center">
-  <a href="https://www.fix8mt.com"><img src="https://github.com/fix8mt/uri/blob/main/assets/fix8mt_Master_Logo_Green_Trans.png" width="200"></a>
+  <a href="https://www.fix8mt.com"><img src="https://github.com/fix8mt/uri/assets/fix8mt_Master_Logo_Green_Trans.png" width="200"></a>
 </p>
 
 # uri
@@ -68,6 +68,8 @@ int main(int argc, char *argv[])
 </details>
 
 <details><summary><i>output</i></summary>
+</p>
+
 ```bash
 $ ./example1
 source: https://www.example.com:8080/pages/from?country=au

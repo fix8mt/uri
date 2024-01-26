@@ -106,6 +106,7 @@ int main(int argc, char *argv[])
 			return 1;
 		}
 	}
+	/*
    const uri u1{"https://www.example.com:8080/pages/from?country=au"};
    std::cout << u1 << '\n';
    std::cout << u1.get_component(uri::authority) << '\n';
@@ -115,6 +116,9 @@ int main(int argc, char *argv[])
    std::cout << u1.get_component(uri::query) << '\n';
 	if (u1.test(uri::fragment))
 		std::cout << u1.get_component(uri::fragment) << '\n';
+	*/
+   if (const basic_uri u1{ "ws://localhost:9229/f46db715-70df-43ad-a359-7f9949f39868" }; u1.count())
+		std::cout << u1 << '\n';
 	return 0;
 }
 

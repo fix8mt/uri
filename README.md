@@ -90,6 +90,46 @@ $
 </p>
 </details>
 
+## 2. Parse a URI
+This example parses a URI string and prints out all the contained elements. Note the use of `basic_uri`. The lifetime of the `u1` object
+is undefined after the `if` statement is executed. The source string is not stored.
+
+<details><summary><i>source</i></summary>
+<p>
+
+```c++
+#include <iostream>
+#include <fix8/uri.hpp>
+using namespace FIX8;
+
+int main(int argc, char *argv[])
+{
+   if (const basic_uri u1{ "ws://localhost:9229/f46db715-70df-43ad-a359-7f9949f39868" }; u1.count())
+		std::cout << u1 << '\n';
+   return 0;
+}
+```
+
+</p>
+</details>
+
+<details><summary><i>output</i></summary>
+</p>
+
+```bash
+$ ./example2
+source: ws://localhost:9229/f46db715-70df-43ad-a359-7f9949f39868
+scheme: ws
+authority:      localhost:9229
+host:   localhost
+port:   9229
+path:   /f46db715-70df-43ad-a359-7f9949f39868
+$
+```
+
+</p>
+</details>
+
 # API
 ## ctor
 ```c++
@@ -102,7 +142,7 @@ constexpr uri() = default;                                           (4)
 1. Construct a `basic_uri` from a `std::string_view`. This base class does not store the string. The source string must not go out of scope to use this object.
 1. Construct an empty `basic_uri`. It can be populated using `assign()`.
 1. Construct a `uri` from a `std::string`. The supplied string is moved or copied and stored by the object.
-1. Construct an empty `uri`. It can be populated using `assign()`.
+1. Construct an empty `uri`. It can be populated using `replace()`.
 
 All of `uri` is within the namespace **`FIX8`**.
 

@@ -220,6 +220,7 @@ Replace the current uri with the given string. The storage is updated with a cop
 constexpr std::string_view get_component(component what) const;
 ```
 Return a `std::string_view` of the specified component or empty if componment not found. Throws a `std::out_of_range` if not a legal component.
+
 Note that the component `user` is the equivalent of the RFC 3986 `userinfo` where no password was found. If a password is present, then `user` and
 `password` are populated.
 

@@ -145,7 +145,7 @@ cmake ..
 make -j4
 make test (or ctest)
 ```
-# 3. Using in your application
+# 2. Using in your application
 In `CMakeLists.txt` set your include path to:
 ```cmake
 include_directories([uri directory]/include)

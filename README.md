@@ -169,6 +169,9 @@ this class is the most efficient way to do so.
 The derived class `uri` stores the source string and then builds a `basic_uri` using that string as its reference.
 The supplied string is moved or copied and stored by the object. If your application needs the uri to hold and persist the source uri, this class is suitable.
 
+```c++
+enum component : uri_len_t { scheme, authority, user, password, host, port, path, query, fragment, countof };
+```
 Components are named by a public enum called `component`.
 
 ## ctor
@@ -216,13 +219,15 @@ Replace the current uri with the given string. The storage is updated with a cop
 ```c++
 constexpr std::string_view get_component(component what) const;
 ```
-Return a `std::string_view` of the specified component or empty if componment not found. Throws a `std::exception` if not a legal component.
+Return a `std::string_view` of the specified component or empty if componment not found. Throws a `std::out_of_range` if not a legal component.
+Note that the component `user` is the equivalent of the RFC 3986 `userinfo` where no password was found. If a password is present, then `user` and
+`password` are populated.
 
 ## `get_name`
 ```c++
 static constexpr std::string_view get_name(component what);
 ```
-Return a `std::string_view` of the specified component name. Throws a `std::exception` if not a legal component.
+Return a `std::string_view` of the specified component name. Throws a `std::out_of_range` if not a legal component.
 
 ## `get_source`
 ```c++
@@ -235,7 +240,7 @@ Return a `std::string_view` of the source uri. If not set result will be empty.
 constexpr std::pair<std::string_view, std::string_view> get_named_pair(component what) const;
 ```
 Return a `std::pair` of `std::string_view` for the specified component. The `first` will be the component name, `second` the component value. Suitable
-for populating a JSON field. Throws a `std::exception` if not a legal component.
+for populating a JSON field. Throws a `std::out_of_range` if not a legal component.
 
 ## `count`
 ```c++
@@ -261,3 +266,15 @@ constexpr const std::string& get_buffer() const;
 ```
 Return a `const std::string&` to the stored buffer. Only available from `uri`.
 
+# Discussion
+## Non-validating
+This class is non-validating. The source URI is expected to be normalised or at least parsable. Validation is out of scope for this implementation.
+We decided against validating for a few reasons:
+1. Performance - validating is expensive; most URIs are generally parsable
+1. Complex - validation rules are complicated; for most use cases, simple rejection for gross rule violation is sufficient
+See [URL Standard](https://url.spec.whatwg.org/) for complete validation rules.
+
+## Sanity checking
+This class will perform basic sanity checks on the source URI and throws `std::exception` on failure. These are:
+1. Length - source must not exceed `UINT16_MAX`
+1. Illegal chars - source must not contain any whitespace characters

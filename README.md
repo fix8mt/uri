@@ -218,7 +218,7 @@ Replace the current uri reference with the given reference. No storage is alloca
 ```c++
 constexpr std::string replace(std::string&& src);
 ```
-Replace the current uri with the given string. The storage is updated with a copy of the string. The old string is returned.
+Replace the current uri with the given string. The storage is updated with a move (or copy) of the string. The old string is returned.
 
 ## `get_component`
 ```c++
@@ -256,7 +256,7 @@ Return the count of components in the uri.
 
 ## `parse`
 ```c++
-constexpr int parse() const;
+constexpr int parse();
 ```
 Parse the source string into components. Return the count of components found. Will reset a uri if already parsed. Thows a `std::exception` if parsing fails.
 

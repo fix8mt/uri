@@ -74,6 +74,7 @@ private:
 	uri_len_t _present{};
 	constexpr void set(component what) noexcept { _present |= (1 << what); }
 	static constexpr const std::array component_names { "scheme", "authority", "user", "password", "host", "port", "path", "query", "fragment", };
+	static constexpr bool is_ipv6(std::string_view what) noexcept { return what.front() == '[' && what.back() == ']'; }
 public:
 	constexpr basic_uri(std::string_view src) : _source(src) { parse(); }
 	constexpr basic_uri() = default;
@@ -104,7 +105,6 @@ public:
 			return std::make_pair(component_names[what], _source.substr(_ranges[what].first, _ranges[what].second));
 		throw(std::out_of_range("invalid component index"));
 	}
-	static constexpr bool is_ipv6(std::string_view what) noexcept { return what.front() == '[' && what.back() == ']'; }
 	constexpr int count() const noexcept { return std::popcount(_present); } // upgrade to std::bitset when constexpr in c++23
 	constexpr bool test(component what) const noexcept { return _present & (1 << what); }
 

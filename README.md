@@ -114,10 +114,10 @@ All of `uri` is within the namespace **`FIX8`**.
 
 Destroy the `uri` or `basic_uri`. The `uri` object will release the stored string.
 
-# 2. uri operations
+# uri operations
 ## `test`
 ```c++
-constexpr bool uri::test(uri::component what);
+constexpr bool uri::test(uri::component what) const;
 ```
 Return `true` if the specified component is present in the uri.
 
@@ -132,4 +132,53 @@ Replace the current uri reference with the given reference. No storage is alloca
 constexpr std::string replace(std::string&& src);
 ```
 Replace the current uri with the given string. The storage is updated with a copy of the string. The old string is returned.
+
+## `get_component`
+```c++
+constexpr std::string_view get_component(component what) const;
+```
+Return a `std::string_view` of the specified component. Throws a `std::excepption` if not a legal component.
+
+## `get_name`
+```c++
+static constexpr std::string_view get_name(component what);
+```
+Return a `std::string_view` of the specified component name. Throws a `std::excepption` if not a legal component.
+
+## `get_source`
+```c++
+constexpr std::string_view get_source() const;
+```
+Return a `std::string_view` of the source uri. If not set result will be empty.
+
+## `get_named_pair`
+```c++
+constexpr std::pair<std::string_view, std::string_view> get_named_pair(component what) const;
+```
+Return a `std::pair` of `std::string_view` for the specified component. The `first` will be the component name, `second` the component value. Suitable
+for populating a JSON fiel. Throws a `std::excepption` if not a legal component.
+
+## `count`
+```c++
+constexpr int count() const;
+```
+Return the count of components in the uri.
+
+## `parse`
+```c++
+constexpr int parse() const;
+```
+Parse the source string into components. Return the count of components found. Will reset a uri if already parsed.
+
+## `operator<<`
+```c++
+friend std::ostream& operator<<(std::ostream& os, const basic_uri& what);
+```
+Print the uri object to the specified stream. The soure and individual components are printed.
+
+## `get_buffer`
+```c++
+constexpr const std::string& get_buffer() const;
+```
+Return a `const std::string&` to the stored buffer. Only available from `uri`.
 

@@ -105,7 +105,7 @@ using namespace FIX8;
 int main(int argc, char *argv[])
 {
    if (const basic_uri u1{ "ws://localhost:9229/f46db715-70df-43ad-a359-7f9949f39868" }; u1.count())
-		std::cout << u1 << '\n';
+      std::cout << u1 << '\n';
    return 0;
 }
 ```
@@ -139,9 +139,9 @@ constexpr uri(std::string&& src);                                    (3)
 constexpr uri() = default;                                           (4)
 ```
 
-1. Construct a `basic_uri` from a `std::string_view`. This base class does not store the string. The source string must not go out of scope to use this object.
+1. Construct a `basic_uri` from a `std::string_view`. This base class does not store the string. The source string must not go out of scope to use this object. Thows a `std::exception` if parsing fails.
 1. Construct an empty `basic_uri`. It can be populated using `assign()`.
-1. Construct a `uri` from a `std::string`. The supplied string is moved or copied and stored by the object.
+1. Construct a `uri` from a `std::string`. The supplied string is moved or copied and stored by the object. Thows a `std::exception` if parsing fails.
 1. Construct an empty `uri`. It can be populated using `replace()`.
 
 All of `uri` is within the namespace **`FIX8`**.
@@ -154,7 +154,6 @@ All of `uri` is within the namespace **`FIX8`**.
 
 Destroy the `uri` or `basic_uri`. The `uri` object will release the stored string.
 
-# uri operations
 ## `test`
 ```c++
 constexpr bool uri::test(uri::component what) const;
@@ -196,7 +195,7 @@ Return a `std::string_view` of the source uri. If not set result will be empty.
 constexpr std::pair<std::string_view, std::string_view> get_named_pair(component what) const;
 ```
 Return a `std::pair` of `std::string_view` for the specified component. The `first` will be the component name, `second` the component value. Suitable
-for populating a JSON fiel. Throws a `std::excepption` if not a legal component.
+for populating a JSON field. Throws a `std::excepption` if not a legal component.
 
 ## `count`
 ```c++
@@ -208,7 +207,7 @@ Return the count of components in the uri.
 ```c++
 constexpr int parse() const;
 ```
-Parse the source string into components. Return the count of components found. Will reset a uri if already parsed.
+Parse the source string into components. Return the count of components found. Will reset a uri if already parsed. Thows a `std::exception` if parsing fails.
 
 ## `operator<<`
 ```c++

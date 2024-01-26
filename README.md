@@ -163,14 +163,16 @@ using namespace FIX8;
 ```
 
 # API
+## Class heirachy
 The base class `basic_uri` performs the bulk of the work, holding a `std::string_view` of the source uri string. If you wish to manage the scope of the source uri yourself then
 this class is the most efficient way to do so.
 
-The derived class `uri` stores the source string and then builds a `basic_uri` using that string as its reference.
-The supplied string is moved or copied and stored by the object. If your application needs the uri to hold and persist the source uri, this class is suitable.
+The derived class `uri` stores the source string and then builds a `basic_uri` using that string as its reference. `uri` derives from `basic_uri` and a private storage class
+`uri_storage`. The supplied string is moved or copied and stored by the object. If your application needs the uri to hold and persist the source uri, this class is suitable.
 
 ![class diagram](https://github.com/fix8mt/uri/blob/master/assets/classdiag.png)
 
+## Component enum
 ```c++
 enum component : uri_len_t { scheme, authority, user, password, host, port, path, query, fragment, countof };
 ```

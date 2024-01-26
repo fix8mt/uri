@@ -134,7 +134,7 @@ $
 This implementation is header only. Apart from standard C++20 includes there are no external dependencies needed in your application.
 [Catch2](https://github.com/catchorg/Catch2.git) is used for the built-in unit tests.
 
-# 1. Obtaining the source, building the examples
+## 1. Obtaining the source, building the examples
 To clone and default build all the examples, including the unit tests.
 ```bash
 git clone git@github.com:fix8mt/uri.git
@@ -145,7 +145,7 @@ cmake ..
 make -j4
 make test (or ctest)
 ```
-# 2. Using in your application
+## 2. Using in your application
 In `CMakeLists.txt` set your include path to:
 ```cmake
 include_directories([uri directory]/include)

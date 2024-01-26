@@ -14,7 +14,7 @@ This is a lightweight URI parser implementation featuring zero-copy, minimal sto
 |**Link**|**Description**|
 --|--
 |[Here](https://github.com/fix8mt/uri/blob/master/include/fix8/uri.hpp)| for implementation|
-|[Examples](https://github.com/fix8mt/uri/examples)| for examples and test cases|
+|[Examples](https://github.com/fix8mt/uri/blob/master/examples)| for examples and test cases|
 
 ## Motivation
 - header-only
@@ -89,4 +89,47 @@ $
 
 </p>
 </details>
+
+# API
+## ctor
+```c++
+constexpr basic_uri(std::string_view src);                           (1)
+constexpr basic_uri() = default;                                     (2)
+constexpr uri(std::string&& src);                                    (3)
+constexpr uri() = default;                                           (4)
+```
+
+1. Construct a `basic_uri` from a `std::string_view`. This base class does not store the string. The source string must not go out of scope to use this object.
+1. Construct an empty `basic_uri`. It can be populated using `assign()`.
+1. Construct a `uri` from a `std::string`. The supplied string is moved or copied and stored by the object.
+1. Construct an empty `uri`. It can be populated using `assign()`.
+
+All of `uri` is within the namespace **`FIX8`**.
+
+## dtor
+```c++
+~basic_uri();
+~uri();
+```
+
+Destroy the `uri` or `basic_uri`. The `uri` object will release the stored string.
+
+# 2. uri operations
+## `test`
+```c++
+constexpr bool uri::test(uri::component what);
+```
+Return `true` if the specified component is present in the uri.
+
+## `assign`
+```c++
+constexpr int assign(std::string_view src);
+```
+Replace the current uri reference with the given reference. No storage is allocated. Return the number of components found.
+
+## `replace`
+```c++
+constexpr std::string replace(std::string&& src);
+```
+Replace the current uri with the given string. The storage is updated with a copy of the string. The old string is returned.
 

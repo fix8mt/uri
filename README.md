@@ -277,7 +277,7 @@ Return a `const std::string&` to the stored buffer. Only available from `uri`.
 This class is non-validating. The source URI is expected to be normalised or at least parsable. Validation is out of scope for this implementation.
 We decided against validating for a few reasons:
 1. Performance - validating is expensive; most URIs are generally parsable
-1. Complex - validation rules are complicated; for most use cases, simple rejection for gross rule violation is sufficient
+1. Complex - validation rules are complicated; for most use cases, simple rejection for gross rule violation is sufficient.
 See [URL Standard](https://url.spec.whatwg.org/) for complete validation rules.
 
 ## Sanity checking

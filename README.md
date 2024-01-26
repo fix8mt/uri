@@ -30,6 +30,7 @@ This is a lightweight URI parser implementation featuring zero-copy, minimal sto
 - single _header-only_
 - base class is zero-copy, using `std::string_view`
 - derived class moves (or copies) source string once
+- all methods `constexpr`; no virtual methods
 - extracts all components `scheme`, `authority`, `user`, `password`, `host`, `port`, `path`, `query`, `fragment`
 - query components, return as `std::string_view`
 - fast, very lightweight, predictive non brut force parser

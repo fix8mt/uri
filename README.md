@@ -184,13 +184,13 @@ Replace the current uri with the given string. The storage is updated with a cop
 ```c++
 constexpr std::string_view get_component(component what) const;
 ```
-Return a `std::string_view` of the specified component. Throws a `std::excepption` if not a legal component.
+Return a `std::string_view` of the specified component or empty if componment not found. Throws a `std::exception` if not a legal component.
 
 ## `get_name`
 ```c++
 static constexpr std::string_view get_name(component what);
 ```
-Return a `std::string_view` of the specified component name. Throws a `std::excepption` if not a legal component.
+Return a `std::string_view` of the specified component name. Throws a `std::exception` if not a legal component.
 
 ## `get_source`
 ```c++
@@ -203,7 +203,7 @@ Return a `std::string_view` of the source uri. If not set result will be empty.
 constexpr std::pair<std::string_view, std::string_view> get_named_pair(component what) const;
 ```
 Return a `std::pair` of `std::string_view` for the specified component. The `first` will be the component name, `second` the component value. Suitable
-for populating a JSON field. Throws a `std::excepption` if not a legal component.
+for populating a JSON field. Throws a `std::exception` if not a legal component.
 
 ## `count`
 ```c++
@@ -221,7 +221,7 @@ Parse the source string into components. Return the count of components found. W
 ```c++
 friend std::ostream& operator<<(std::ostream& os, const basic_uri& what);
 ```
-Print the uri object to the specified stream. The soure and individual components are printed.
+Print the uri object to the specified stream. The source and individual components are printed.
 
 ## `get_buffer`
 ```c++

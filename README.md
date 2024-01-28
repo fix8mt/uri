@@ -73,13 +73,13 @@ int main(int argc, char *argv[])
 
 ```bash
 $ ./example1
-source: https://www.example.com:8080/pages/from?country=au
-scheme: https
-authority:      www.example.com:8080
-host:   www.example.com
-port:   8080
-path:   /pages/from
-query:  country=au
+source      https://www.example.com:8080/pages/from?country=au
+scheme      https
+authority   www.example.com:8080
+host        www.example.com
+port        8080
+path        /pages/from
+query       country=au
 
 www.example.com:8080
 www.example.com
@@ -119,12 +119,12 @@ int main(int argc, char *argv[])
 
 ```bash
 $ ./example2
-source: ws://localhost:9229/f46db715-70df-43ad-a359-7f9949f39868
-scheme: ws
-authority:      localhost:9229
-host:   localhost
-port:   9229
-path:   /f46db715-70df-43ad-a359-7f9949f39868
+source      ws://localhost:9229/f46db715-70df-43ad-a359-7f9949f39868
+scheme      ws
+authority   localhost:9229
+host        localhost
+port        9229
+path        /f46db715-70df-43ad-a359-7f9949f39868
 $
 ```
 
@@ -177,19 +177,22 @@ The derived class `uri` stores the source string and then builds a `basic_uri` u
 ```c++
 enum component : uri_len_t { scheme, authority, user, password, host, port, path, query, fragment, countof };
 ```
-Components are named by a public enum called `component`.
+Components are named by a public enum called `component`.  Note that the component `user` is the equivalent of the [RFC 3986](https://datatracker.ietf.org/doc/html/rfc3986)
+`userinfo` where no password was found.  If a password is present, then `user` and `password` are populated.
+
 
 ## ctor
 ```c++
 constexpr basic_uri(std::string_view src);                           (1)
 constexpr basic_uri() = default;                                     (2)
-constexpr uri(std::string&& src);                                    (3)
+constexpr uri(std::string src, bool decode=true);                    (3)
 constexpr uri() = default;                                           (4)
 ```
 
 1. Construct a `basic_uri` from a `std::string_view`. This base class does not store the string. The source string must not go out of scope to use this object. Thows a `std::exception` if parsing fails.
 1. Construct an empty `basic_uri`. It can be populated using `assign()`.
-1. Construct a `uri` from a `std::string`. The supplied string is moved or copied and stored by the object. Thows a `std::exception` if parsing fails.
+1. Construct a `uri` from a `std::string`. By default, the source string is hex decoded before parsing. Optionally pass `false` to prevent hex decoding.
+The supplied string is moved or copied and stored by the object. Thows a `std::exception` if parsing fails.
 1. Construct an empty `uri`. It can be populated using `replace()`.
 
 All of `uri` is within the namespace **`FIX8`**.
@@ -225,9 +228,6 @@ Replace the current uri with the given string. The storage is updated with a mov
 constexpr std::string_view get_component(component what) const;
 ```
 Return a `std::string_view` of the specified component or empty if componment not found. Throws a `std::out_of_range` if not a legal component.
-
-Note that the component `user` is the equivalent of the RFC 3986 `userinfo` where no password was found. If a password is present, then `user` and
-`password` are populated.
 
 ## `get_name`
 ```c++
@@ -271,6 +271,38 @@ Print the uri object to the specified stream. The source and individual componen
 constexpr const std::string& get_buffer() const;
 ```
 Return a `const std::string&` to the stored buffer. Only available from `uri`.
+
+## `decode_query`
+```c++
+constexpr std::vector<std::pair<std::string_view,std::string_view>> decode_query() const;
+```
+Returns a `std::vector` of pairs of `std::string_view` of the query component if present. Returns an empty vector if
+no query was found. The query is assumed to be in the form:
+```
+&tag=value[&tag=value...]
+```
+If no value is present, just the tag will be populated with an empty value.
+
+## `decode_hex`
+```c++
+static constexpr std::string decode_hex(std::string_view src);
+```
+Decode the any hex values present in the supplied string. Hex values are only recognised if
+they are in the form `%XX` where X is a hex digit `[0-9][a-fA-F]`. Return in a new string.
+
+## `has_hex`
+```c++
+static constexpr bool has_hex(std::string_view src);
+```
+Return true if any hex values are present in the supplied string. Hex values are only recognised if
+they are in the form `%XX` where X is a hex digit `[0-9][a-fA-F]`.
+
+## `find_hex`
+```c++
+static constexpr std::string_view::size_type find_hex(std::string_view src);
+```
+Return the position of the first hex value if any hex values are present in the supplied string. Hex values are only recognised if
+they are in the form `%XX` where X is a hex digit `[0-9][a-fA-F]`. If not found returns `std::string_view::npos`.
 
 # Discussion
 ## Non-validating

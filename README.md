@@ -246,15 +246,9 @@ Return a `std::string_view` of the specified component or empty if component not
 
 ## `operator[component]`
 ```c++
-constexpr std::string_view operator[](component what) const;
+constexpr const range_pair& operator[](component idx) const;
 ```
-Return a `std::string_view` of the specified component or empty if component not found. Throws a `std::out_of_range` if not a legal component.
-
-## `operator[int]`
-```c++
-constexpr const range_pair& operator[](int idx) const;
-```
-Return a `const range_pair&` (`std::pair<uri_len_t, uri_len_t>`) of the specified component at the index given in the ranges table. This provides direct
+Return a `const range_pair&` which is a `const std::pair<uri_len_t, uri_len_t>&` to the specified component at the index given in the ranges table. This provides direct
 access to the offset and length of the specifed component. This is _not_ range checked.
 
 ## `get_name`

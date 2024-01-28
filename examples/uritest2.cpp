@@ -139,6 +139,7 @@ TEST_CASE("uri - hex decode", "[uri]")
 	REQUIRE(!uri::has_hex(src1));
 	REQUIRE(!uri::has_hex(src2));
 	auto result { uri::decode_hex(src) };
+	REQUIRE(!uri::has_hex(result));
 	uri u1{result};
 	REQUIRE(u1.get_source() == src1);
 	uri u2(std::string(src), false);
@@ -148,7 +149,7 @@ TEST_CASE("uri - hex decode", "[uri]")
 //-----------------------------------------------------------------------------------------
 TEST_CASE("uri - query decode", "[uri]")
 {
-	static const std::vector<std::pair<std::string_view,std::string_view>> tbl
+	static const query_result tbl
 	{
 		{ "payload1", "true" }, { "payload2", "false" }, { "test", "1" }, { "benchmark", "3" }, { "foo", "38.38.011.293" },
 		{ "bar", "1234834910480" }, { "test", "19299" }, { "3992", "" }, { "key", "f5c65e1e98fe07e648249ad41e1cfdb0" },

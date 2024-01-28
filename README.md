@@ -227,7 +227,7 @@ Replace the current uri with the given string. The storage is updated with a mov
 ```c++
 constexpr std::string_view get_component(component what) const;
 ```
-Return a `std::string_view` of the specified component or empty if componment not found. Throws a `std::out_of_range` if not a legal component.
+Return a `std::string_view` of the specified component or empty if component not found. Throws a `std::out_of_range` if not a legal component.
 
 ## `get_name`
 ```c++
@@ -239,7 +239,7 @@ Return a `std::string_view` of the specified component name. Throws a `std::out_
 ```c++
 constexpr std::string_view get_source() const;
 ```
-Return a `std::string_view` of the source uri. If not set result will be empty.
+Return a `std::string_view` of the source uri. If not set return value will be empty.
 
 ## `get_named_pair`
 ```c++

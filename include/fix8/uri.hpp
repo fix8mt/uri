@@ -61,6 +61,10 @@
 namespace FIX8 {
 
 //-----------------------------------------------------------------------------------------
+using query_pair = std::pair<std::string_view, std::string_view>;
+using query_result = std::vector<query_pair>;
+
+//-----------------------------------------------------------------------------------------
 class basic_uri
 {
 public:
@@ -92,7 +96,7 @@ public:
 			return test(what) ? _source.substr(_ranges[what].first, _ranges[what].second) : std::string_view();
 		throw(std::out_of_range("invalid component index"));
 	}
-	constexpr std::pair<std::string_view, std::string_view> get_named_pair(component what) const
+	constexpr query_pair get_named_pair(component what) const
 	{
 		if (what < countof)
 			return test(what) ? std::make_pair(component_names[what], _source.substr(_ranges[what].first, _ranges[what].second))
@@ -190,9 +194,9 @@ public:
 		}
 		return count();
 	}
-	constexpr std::vector<std::pair<std::string_view,std::string_view>> decode_query() const
+	constexpr query_result decode_query() const
 	{
-		constexpr auto decpair([](std::string_view src)->std::pair<std::string_view,std::string_view>
+		constexpr auto decpair([](std::string_view src)->query_pair
 		{
 			if (auto fnd { src.find_first_of('=') }; fnd != std::string::npos)
 				return {src.substr(0, fnd), src.substr(fnd + 1)};
@@ -200,7 +204,7 @@ public:
 				return {src, ""};
 			return {};
 		});
-		std::vector<std::pair<std::string_view,std::string_view>> result;
+		query_result result;
 		if (std::string_view src{get_component(query)}; !src.empty())
 		{
 			for (std::string::size_type pos{};;)

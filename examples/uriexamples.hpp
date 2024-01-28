@@ -144,8 +144,8 @@ const std::vector<std::pair<const char *, std::vector<std::pair<uri::component, 
 	{ "https://%E4%BD%A0/foo",
 		{
 			{ scheme, "https" },
-			{ authority, "%E4%BD%A0" },
-			{ host, "%E4%BD%A0" },
+			{ authority, "你" },
+			{ host, "你" },
 			{ path, "/foo" },
 		}
 	},
@@ -193,10 +193,10 @@ const std::vector<std::pair<const char *, std::vector<std::pair<uri::component, 
 	{ "http://-.~_!$&'()*+,;=:%40:80%2f::::::@example.com",
 		{
 			{ scheme, "http" },
-			{ authority, "-.~_!$&'()*+,;=:%40:80%2f::::::@example.com" },
-			{ user, "-.~_!$&'()*+,;=:%40:80%2f::::::" },
-			{ host, "example.com" },
-			{ path, "" }, // empty path
+			{ authority, "-.~_!$&'()*+,;=:@:80" },
+			{ user, "-.~_!$&'()*+,;=:" },
+			{ port, "80" },
+			{ path, "/::::::@example.com" },
 		}
 	},
 	{ "http://foo.com/blah_blah_(wikipedia)_(again)",
@@ -238,6 +238,61 @@ const std::vector<std::pair<const char *, std::vector<std::pair<uri::component, 
 			{ authority, "➡.ws" },
 			{ host, "➡.ws" },
 			{ path, "/䨹" },
+		}
+	},
+	{ "epgm://127.0.0.1;224.0.0.0:11042",
+		{
+			{ scheme, "epgm" },
+			{ authority, "127.0.0.1;224.0.0.0:11042" },
+			{ host, "127.0.0.1;224.0.0.0" },
+			{ port, "11042" },
+			{ path, "" }, // empty path
+		}
+	},
+	{ "https://!$%25:)(*&^@www.netmeister.org/blog/urls.html",
+		{
+			{ scheme, "https" },
+			{ authority, "!$%:)(*&^@www.netmeister.org" },
+			{ host, "www.netmeister.org" },
+			{ user, "!$%" },
+			{ password, ")(*&^" },
+			{ path, "/blog/urls.html" },
+		}
+	},
+	{ "https://www.netmeister.org/t/h/e/s/e/../../../../../d/i/r/e/c/t/o/"
+		"r/i/e/s/../../../../../../../../../../../d/o/../../n/o/t/../../../e/x/i/s/t/../../../../../blog/urls.html",
+		{
+			{ scheme, "https" },
+			{ authority, "www.netmeister.org" },
+			{ host, "www.netmeister.org" },
+			{ path, "/t/h/e/s/e/../../../../../d/i/r/e/c/t/o/r/i/e/s/../../../../../../../../../../../d/o/../../n/o/t/"
+				"../../../e/x/i/s/t/../../../../../blog/urls.html" },
+		}
+	},
+	{ "https://www.blah.com:/test",
+		{
+			{ scheme, "https" },
+			{ authority, "www.blah.com:" },
+			{ host, "www.blah.com" },
+			{ path, "/test" },
+		}
+	},
+	{ "https://www.netmeister.org/%62%6C%6F%67/%75%72%6C%73.%68%74%6D%6C?!@#$%25=+_)(*&^#top%3C",
+		{
+			{ scheme, "https" },
+			{ authority, "www.netmeister.org" },
+			{ host, "www.netmeister.org" },
+			{ path, "/blog/urls.html" },
+			{ query, "!@" },
+			{ fragment, "$%=+_)(*&^#top<" },
+		}
+	},
+	{ "https://en.wikipedia.org/wiki/C%2B%2B20",
+		{
+			{ scheme, "https" },
+			{ authority, "en.wikipedia.org" },
+			{ host, "en.wikipedia.org" },
+			{ path, "/wiki/C++20" },
 		}
 	},
 };

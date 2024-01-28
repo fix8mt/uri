@@ -50,8 +50,6 @@
 #include <iomanip>
 #include <type_traits>
 #include <array>
-#include <algorithm>
-#include <cstring>
 #include <string>
 #include <string_view>
 #include <stdexcept>
@@ -73,6 +71,7 @@ private:
 	std::array<std::pair<uri_len_t, uri_len_t>, component::countof> _ranges;
 	uri_len_t _present{};
 	constexpr void set(component what) noexcept { _present |= (1 << what); }
+	constexpr void clear(component what) noexcept { _present &= ~(1 << what); }
 	static constexpr const std::array component_names { "scheme", "authority", "user", "password", "host", "port", "path", "query", "fragment", };
 	static constexpr bool is_ipv6(std::string_view what) noexcept { return what.front() == '[' && what.back() == ']'; }
 public:
@@ -90,19 +89,14 @@ public:
 	constexpr std::string_view get_component(component what) const
 	{
 		if (what < countof)
-			return _source.substr(_ranges[what].first, _ranges[what].second);
-		throw(std::out_of_range("invalid component index"));
-	}
-	static constexpr std::string_view get_name(component what)
-	{
-		if (what < countof)
-			return component_names[what];
+			return test(what) ? _source.substr(_ranges[what].first, _ranges[what].second) : std::string_view();
 		throw(std::out_of_range("invalid component index"));
 	}
 	constexpr std::pair<std::string_view, std::string_view> get_named_pair(component what) const
 	{
 		if (what < countof)
-			return std::make_pair(component_names[what], _source.substr(_ranges[what].first, _ranges[what].second));
+			return test(what) ? std::make_pair(component_names[what], _source.substr(_ranges[what].first, _ranges[what].second))
+									: std::make_pair(std::string_view(), std::string_view());
 		throw(std::out_of_range("invalid component index"));
 	}
 	constexpr int count() const noexcept { return std::popcount(_present); } // upgrade to std::bitset when constexpr in c++23
@@ -130,7 +124,7 @@ public:
 				pth = _source.size();
 			_ranges[authority] = std::make_pair(auth, pth - auth);
 			set(authority);
-			if (auto usr {_source.find_first_of('@', auth)}; usr != std::string_view::npos)
+			if (const auto usr {_source.find_first_of('@', auth)}; usr != std::string_view::npos && usr < pth)
 			{
 				if (const auto pw {_source.find_first_of(':', auth)}; pw != std::string_view::npos && pw < usr
 					&& _source.find_first_of(':', pw + 1) == std::string_view::npos) // no nested ':' before '@'
@@ -151,15 +145,21 @@ public:
 				&& !is_ipv6(get_component(authority)))
 			{
 				++prt;
-				_ranges[port] = std::make_pair(prt, _source.size() - prt);
-				set(port);
+				if (_source.size() - prt > 0)
+				{
+					_ranges[port] = std::make_pair(prt, _source.size() - prt);
+					set(port);
+				}
 			}
 		}
 		if (pth != std::string_view::npos)
 		{
 			if (test(port))
 			{
-				_ranges[port].second = pth - _ranges[port].first;
+				if (pth - _ranges[port].first == 0) // remove empty port
+					clear(port);
+				else
+					_ranges[port].second = pth - _ranges[port].first;
 				_ranges[host] = std::make_pair(hst, _ranges[port].first - 1 - hst);
 			}
 			else
@@ -174,16 +174,14 @@ public:
 			_ranges[path] = std::make_pair(pos, _source.size() - pos);
 			set(path);
 		}
-		const auto qur {_source.find_first_of('?', pos)};
-		if (qur != std::string_view::npos)
+		if (const auto qur {_source.find_first_of('?', pos)}; qur != std::string_view::npos)
 		{
 			if (test(path))
 				_ranges[path].second = qur - _ranges[path].first;
 			_ranges[query] = std::make_pair(qur + 1, _source.size() - qur);
 			set(query);
 		}
-		const auto fra {_source.find_first_of('#', pos)};
-		if (fra != std::string_view::npos)
+		if (const auto fra {_source.find_first_of('#', pos)}; fra != std::string_view::npos)
 		{
 			if (test(query))
 				_ranges[query].second = fra - _ranges[query].first;
@@ -192,22 +190,75 @@ public:
 		}
 		return count();
 	}
+	constexpr std::vector<std::pair<std::string_view,std::string_view>> decode_query() const
+	{
+		constexpr auto decpair([](std::string_view src)->std::pair<std::string_view,std::string_view>
+		{
+			if (auto fnd { src.find_first_of('=') }; fnd != std::string::npos)
+				return {src.substr(0, fnd), src.substr(fnd + 1)};
+			else if (src.size())
+				return {src, ""};
+			return {};
+		});
+		std::vector<std::pair<std::string_view,std::string_view>> result;
+		if (std::string_view src{get_component(query)}; !src.empty())
+		{
+			for (std::string::size_type pos{};;)
+			{
+				if (auto fnd { src.find_first_of('&', pos) }; fnd != std::string::npos)
+				{
+					result.emplace_back(decpair(src.substr(pos, fnd - pos)));
+					pos = fnd + 1;
+					continue;
+				}
+				if (pos < src.size())
+					result.emplace_back(decpair(src.substr(pos, src.size() - pos)));
+				break;
+			}
+		}
+		return result;
+	}
+
+	static constexpr std::string_view::size_type find_hex(std::string_view src) noexcept
+	{
+		for (std::string_view::size_type fnd{}; ((fnd = src.find_first_of('%', fnd))) != std::string_view::npos; fnd += 3)
+			if (fnd + 2 < src.size() && std::isxdigit(src[fnd + 1]) && std::isxdigit(src[fnd + 2]))
+				return fnd;
+		return std::string_view::npos;
+	}
+	static constexpr bool has_hex(std::string_view src) noexcept { return find_hex(src) != std::string_view::npos; }
+	static constexpr std::string decode_hex(std::string_view src)
+	{
+		std::string result{src};
+		for (std::string_view::size_type fnd; ((fnd = find_hex(result))) != std::string_view::npos; )
+			result.replace(fnd, 3, 1, ((result[fnd + 1] & 0xf) + (result[fnd + 1] >> 6) * 9) << 4
+				| ((result[fnd + 2] & 0xf) + (result[fnd + 2] >> 6) * 9));
+		return result;
+	}
+	static constexpr std::string_view get_name(component what)
+	{
+		if (what < countof)
+			return component_names[what];
+		throw(std::out_of_range("invalid component index"));
+	}
 
 	friend std::ostream& operator<<(std::ostream& os, const basic_uri& what)
 	{
-		os << "source:\t" << what._source << '\n';
+		os << std::setw(12) << std::left << "source" << what._source << '\n';
 		for (component ii{}; ii != countof; ii = component(ii + 1))
 			if (what.test(ii))
-				os << what.get_name(ii) << ":\t" << (what.get_component(ii).size() ? what.get_component(ii) : "(empty)") << '\n';
+				os << std::setw(12) << std::left << what.get_name(ii)
+					<< (what.get_component(ii).size() ? what.get_component(ii) : "(empty)") << '\n';
 		return os;
 	}
 };
 
 //-----------------------------------------------------------------------------------------
-struct uri_storage
+class uri_storage
 {
+protected:
 	std::string _buffer;
-	constexpr uri_storage(std::string src) : _buffer(std::move(src)) {}
+	constexpr uri_storage(std::string src) noexcept : _buffer(std::move(src)) {}
 	constexpr uri_storage() = delete;
 	~uri_storage() = default;
 };
@@ -216,13 +267,14 @@ struct uri_storage
 class uri : private uri_storage, public basic_uri
 {
 public:
-	constexpr uri(std::string&& src) : uri_storage(src), basic_uri(_buffer) {}
+	constexpr uri(std::string src, bool decode=true)
+		: uri_storage(decode && uri::has_hex(src) ? uri::decode_hex(src) : std::move(src)), basic_uri(_buffer) {}
 	constexpr uri() = default;
 	~uri() = default;
 
-	constexpr std::string replace(std::string&& src)
+	constexpr std::string replace(std::string src)
 	{
-		auto rbuf { std::exchange(_buffer, src) };
+		auto rbuf { std::exchange(_buffer, std::move(src)) };
 		assign(_buffer);
 		return rbuf;
 	}

@@ -287,22 +287,22 @@ If no value is present, just the tag will be populated with an empty value.
 ```c++
 static constexpr std::string decode_hex(std::string_view src);
 ```
-Decode the any hex values present in the supplied string. Hex values are only recognised if
-they are in the form `%XX` where X is a hex digit `[0-9][a-fA-F]`. Return in a new string.
+Decode any hex values present in the supplied string. Hex values are only recognised if
+they are in the form `%XX` where X is a hex digit `[0-9a-fA-F]`. Return in a new string.
 
 ## `has_hex`
 ```c++
 static constexpr bool has_hex(std::string_view src);
 ```
 Return true if any hex values are present in the supplied string. Hex values are only recognised if
-they are in the form `%XX` where X is a hex digit `[0-9][a-fA-F]`.
+they are in the form `%XX` where X is a hex digit `[0-9a-fA-F]`.
 
 ## `find_hex`
 ```c++
 static constexpr std::string_view::size_type find_hex(std::string_view src);
 ```
-Return the position of the first hex value if any hex values are present in the supplied string. Hex values are only recognised if
-they are in the form `%XX` where X is a hex digit `[0-9][a-fA-F]`. If not found returns `std::string_view::npos`.
+Return the position of the first hex value (if any) in the supplied string. Hex values are only recognised if
+they are in the form `%XX` where X is a hex digit `[0-9a-fA-F]`. If not found returns `std::string_view::npos`.
 
 # Discussion
 ## Non-validating

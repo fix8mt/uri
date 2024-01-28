@@ -47,13 +47,14 @@ using enum uri::component;
 //-----------------------------------------------------------------------------------------
 int main(int argc, char *argv[])
 {
-   static constexpr const char *optstr{"t:hlas"};
+   static constexpr const char *optstr{"t:hlasx"};
    static constexpr const std::array long_options
    {
       option{ "help",	no_argument,         nullptr, 'h' },
       option{ "list",	no_argument,         nullptr, 'l' },
       option{ "sizes",	no_argument,         nullptr, '2' },
       option{ "all",		no_argument,         nullptr, 'a' },
+      option{ "extra",	no_argument,         nullptr, 'x' },
       option{ "test",	required_argument,   nullptr, 't' },
       option{}
    };
@@ -72,6 +73,7 @@ int main(int argc, char *argv[])
  -t [num] test to run
  -l list tests
  -s show sizes
+ -x extra sizes
  -a run all tests
  -h help)" << '\n';
 				break;
@@ -87,6 +89,22 @@ int main(int argc, char *argv[])
 				break;
 			case 's':
 				std::cout << "uri: " << sizeof(uri) << "\nbasic_uri: " << sizeof(basic_uri) << '\n';
+				break;
+			case 'x':
+				{
+					/*
+					uri u1{"https://www.example.com:8080/pages%2a/from%2b?country=au%2c&state=nsw&%2dcity=sydney&zone=au&noval%2d"};
+					std::cout << std::boolalpha << uri::has_hex(u1.get_source()) << '\n';
+					std::cout << u1.replace(uri::decode_hex(u1.get_source())) << '\n';
+					std::cout << std::boolalpha << uri::has_hex(u1.get_source()) << '\n';
+					std::cout << u1 << '\n';
+					auto result { u1.decode_query()};
+					for (const auto& pp : result)
+						std::cout << pp.first << " => " << pp.second << '\n';
+						*/
+					uri u1{ "https://www.netmeister.org/%62%6C%6F%67/%75%72%6C%73.%68%74%6D%6C?!@#$%25=+_)(*&^#top%3C"};
+					std::cout << u1;
+				}
 				break;
 			case 'a':
 				for (const auto& [src,vec] : tests)
@@ -106,19 +124,6 @@ int main(int argc, char *argv[])
 			return 1;
 		}
 	}
-	/*
-   const uri u1{"https://www.example.com:8080/pages/from?country=au"};
-   std::cout << u1 << '\n';
-   std::cout << u1.get_component(uri::authority) << '\n';
-   std::cout << u1.get_component(uri::host) << '\n';
-	if (u1.test(uri::port))
-		std::cout << u1.get_component(uri::port) << '\n';
-   std::cout << u1.get_component(uri::query) << '\n';
-	if (u1.test(uri::fragment))
-		std::cout << u1.get_component(uri::fragment) << '\n';
-	*/
-   if (const basic_uri u1{ "ws://localhost:9229/f46db715-70df-43ad-a359-7f9949f39868" }; u1.count())
-		std::cout << u1 << '\n';
 	return 0;
 }
 

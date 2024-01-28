@@ -45,6 +45,8 @@ using enum uri::component;
 #include "uriexamples.hpp"
 
 //-----------------------------------------------------------------------------------------
+// run as: ctest --output-on-failure
+//-----------------------------------------------------------------------------------------
 TEST_CASE("uri - get component", "[uri]")
 {
 	const uri u1{tests[0].first};
@@ -64,12 +66,16 @@ TEST_CASE("uri - get name", "[uri]")
 //-----------------------------------------------------------------------------------------
 TEST_CASE("uri - uri component validations", "[uri]")
 {
-	for (const auto& [src,vec] : tests)
+	for (int ii{}; const auto& [src,vec] : tests)
 	{
+		INFO("uri: " << ii++);
 		const uri u1{src};
 		REQUIRE (u1.count() == vec.size());
 		for (const auto& [comp,str] : vec)
+		{
+			INFO("component: " << comp);
 			REQUIRE (u1.get_component(comp) == str);
+		}
 	}
 }
 
@@ -121,5 +127,37 @@ TEST_CASE("uri - limits", "[uri]")
 	char buff[UINT16_MAX+1]{};
 	std::fill(buff, buff + sizeof(buff), 'x');
 	REQUIRE_THROWS(uri(buff));
+}
+
+//-----------------------------------------------------------------------------------------
+TEST_CASE("uri - hex decode", "[uri]")
+{
+	std::string_view src { "https://www.netmeister.org/%62%6C%6F%67/%75%72%6C%73.%68%74%6D%6C?!@#$%25=+_)(*&^#top%3C" },
+		src1 { "https://www.netmeister.org/blog/urls.html?!@#$%=+_)(*&^#top<" },
+		src2 { "https://www.netmeister.org/path#top%3" };
+	REQUIRE(uri::has_hex(src));
+	REQUIRE(!uri::has_hex(src1));
+	REQUIRE(!uri::has_hex(src2));
+	auto result { uri::decode_hex(src) };
+	uri u1{result};
+	REQUIRE(u1.get_source() == src1);
+	uri u2(std::string(src), false);
+	REQUIRE(uri::has_hex(u2.get_source()));
+}
+
+//-----------------------------------------------------------------------------------------
+TEST_CASE("uri - query decode", "[uri]")
+{
+	static const std::vector<std::pair<std::string_view,std::string_view>> tbl
+	{
+		{ "payload1", "true" }, { "payload2", "false" }, { "test", "1" }, { "benchmark", "3" }, { "foo", "38.38.011.293" },
+		{ "bar", "1234834910480" }, { "test", "19299" }, { "3992", "" }, { "key", "f5c65e1e98fe07e648249ad41e1cfdb0" },
+	};
+	const uri u1{tests[9].first};
+	auto result{u1.decode_query()};
+	REQUIRE(tbl == result);
+	const uri u2{tests[8].first};
+	auto result1{u2.decode_query()};
+	REQUIRE(result1.empty());
 }
 

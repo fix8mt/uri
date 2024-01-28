@@ -189,10 +189,10 @@ constexpr uri(std::string src, bool decode=true);                    (3)
 constexpr uri() = default;                                           (4)
 ```
 
-1. Construct a `basic_uri` from a `std::string_view`. This base class does not store the string. The source string must not go out of scope to use this object. Thows a `std::exception` if parsing fails.
+1. Construct a `basic_uri` from a `std::string_view`. This base class does not store the string. The source string must not go out of scope to use this object. Throws a `std::exception` if parsing fails.
 1. Construct an empty `basic_uri`. It can be populated using `assign()`.
 1. Construct a `uri` from a `std::string`. By default, the source string is hex decoded before parsing. Optionally pass `false` to prevent hex decoding.
-The supplied string is moved or copied and stored by the object. Thows a `std::exception` if parsing fails.
+The supplied string is moved or copied and stored by the object. Throws a `std::exception` if parsing fails.
 1. Construct an empty `uri`. It can be populated using `replace()`.
 
 All of `uri` is within the namespace **`FIX8`**.
@@ -258,7 +258,7 @@ Return the count of components in the uri.
 ```c++
 constexpr int parse();
 ```
-Parse the source string into components. Return the count of components found. Will reset a uri if already parsed. Thows a `std::exception` if parsing fails.
+Parse the source string into components. Return the count of components found. Will reset a uri if already parsed. Throws a `std::exception` if parsing fails.
 
 ## `operator<<`
 ```c++

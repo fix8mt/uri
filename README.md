@@ -58,13 +58,13 @@ int main(int argc, char *argv[])
 
    std::cout << u1 << '\n';
 
-	std::cout << u1.get_component(uri::authority) << '\n'
-      << u1.get_component(uri::host) << '\n';
-   if (u1.test(uri::port))
-      std::cout << u1.get_component(uri::port) << '\n';
-   std::cout << u1.get_component(uri::query) << '\n';
-   if (u1.test(uri::fragment))
-      std::cout << u1.get_component(uri::fragment) << '\n';
+   std::cout << u1.get_component(uri::authority) << '\n'
+      << u1.get_component(uri::host) << '\n'
+      << u1.get_component(uri::port) << '\n'
+      << u1.get_component(uri::query) << '\n'
+      << u1.get_component(uri::fragment) << '\n';
+   if (u1.test(uri::user))
+      std::cout << u1.get_component(uri::user) << '\n';
    return 0;
 }
 ```
@@ -132,7 +132,7 @@ int main(int argc, char *argv[])
 <details><summary><i>output</i></summary>
 </p>
 
-```bash
+```CSV
 $ ./example2
 source      ws://localhost:9229/f46db715-70df-43ad-a359-7f9949f39868
 scheme      ws

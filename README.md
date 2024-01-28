@@ -55,8 +55,10 @@ int main(int argc, char *argv[])
    const uri u1 {"http://nodejs.org:89/docs/latest/api/foo/bar/qua/13949281/0f28b/5d49/b3020/url.html"
       "?payload1=true&payload2=false&test=1&benchmark=3&foo=38.38.011.293"
       "&bar=1234834910480&test=19299&3992&key=f5c65e1e98fe07e648249ad41e1cfdb0#test"};
-   std::cout << u1 << '\n'
-      << u1.get_component(uri::authority) << '\n'
+
+   std::cout << u1 << '\n';
+
+	std::cout << u1.get_component(uri::authority) << '\n'
       << u1.get_component(uri::host) << '\n';
    if (u1.test(uri::port))
       std::cout << u1.get_component(uri::port) << '\n';
@@ -73,7 +75,7 @@ int main(int argc, char *argv[])
 <details><summary><i>output</i></summary>
 </p>
 
-```bash
+```CSV
 $ ./example1
 source      http://nodejs.org:89/docs/latest/api/foo/bar/qua/13949281/0f28b/5d49/b3020/url.html?payload1=true&payload2=false&test=1&benchmark=3&foo=38.38.011.293&bar=1234834910480&test=19299&3992&key=f5c65e1e98fe07e648249ad41e1cfdb0#test
 scheme      http

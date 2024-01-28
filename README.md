@@ -229,6 +229,19 @@ constexpr std::string_view get_component(component what) const;
 ```
 Return a `std::string_view` of the specified component or empty if component not found. Throws a `std::out_of_range` if not a legal component.
 
+## `operator[component]`
+```c++
+constexpr std::string_view operator[](component what) const;
+```
+Return a `std::string_view` of the specified component or empty if component not found. Throws a `std::out_of_range` if not a legal component.
+
+## `operator[int]`
+```c++
+constexpr const range_pair& operator[](int idx) const;
+```
+Return a `const range_pair&` (`std::pair<uri_len_t, uri_len_t>`) of the specified component at the index given in the ranges table. This provides direct
+access to the offset and length of the specifed component. This is _not_ range checked.
+
 ## `get_name`
 ```c++
 static constexpr std::string_view get_name(component what);
@@ -264,7 +277,7 @@ Parse the source string into components. Return the count of components found. W
 ```c++
 friend std::ostream& operator<<(std::ostream& os, const basic_uri& what);
 ```
-Print the uri object to the specified stream. The source and individual components are printed.
+Print the uri object to the specified stream. The source and individual components are printed. If a query is present, each of tag value pairs are also printed.
 
 ## `get_buffer`
 ```c++
@@ -274,10 +287,10 @@ Return a `const std::string&` to the stored buffer. Only available from `uri`.
 
 ## `decode_query`
 ```c++
-constexpr std::vector<std::pair<std::string_view,std::string_view>> decode_query() const;
+constexpr std::vector<std::pair<std::string_view,std::string_view>> decode_query(char val_sep='&') const;
 ```
-Returns a `std::vector` of pairs of `std::string_view` of the query component if present. Returns an empty vector if
-no query was found. The query is assumed to be in the form:
+Returns a `std::vector` of pairs of `std::string_view` of the query component if present.  You can optionally override the value separator character - some
+queries use `;`. Returns an empty vector if no query was found. The query is assumed to be in the form:
 ```
 &tag=value[&tag=value...]
 ```

@@ -100,10 +100,22 @@ int main(int argc, char *argv[])
 					std::cout << u1 << '\n';
 					auto result { u1.decode_query()};
 					for (const auto& pp : result)
-						std::cout << pp.first << " => " << pp.second << '\n';
-						*/
+					std::cout << pp.first << " => " << pp.second << '\n';
 					uri u1{ "https://www.netmeister.org/%62%6C%6F%67/%75%72%6C%73.%68%74%6D%6C?!@#$%25=+_)(*&^#top%3C"};
 					std::cout << u1;
+
+					const uri u1 {"http://nodejs.org:89/docs/latest/api/foo/bar/qua/13949281/0f28b/5d49/b3020/url.html"
+					"?payload1=true&payload2=false&test=1&benchmark=3&foo=38.38.011.293"
+					"&bar=1234834910480&test=19299&3992&key=f5c65e1e98fe07e648249ad41e1cfdb0#test"};
+					std::cout << u1 << '\n'
+					<< u1.get_component(uri::authority) << '\n'
+					<< u1.get_component(uri::host) << '\n';
+					if (u1.test(uri::port))
+					std::cout << u1.get_component(uri::port) << '\n';
+					std::cout << u1.get_component(uri::query) << '\n';
+					if (u1.test(uri::fragment))
+					std::cout << u1.get_component(uri::fragment) << '\n';
+					*/
 				}
 				break;
 			case 'a':

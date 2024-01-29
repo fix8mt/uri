@@ -61,18 +61,18 @@
 namespace FIX8 {
 
 //-----------------------------------------------------------------------------------------
-using query_pair = std::pair<std::string_view, std::string_view>;
-using query_result = std::vector<query_pair>;
-
-//-----------------------------------------------------------------------------------------
 class basic_uri
 {
 public:
+	using value_pair = std::pair<std::string_view, std::string_view>;
+	using query_result = std::vector<value_pair>;
+	static constexpr const auto uri_max_len {UINT16_MAX};
 	using uri_len_t = std::uint16_t;
+	using range_pair = std::pair<uri_len_t, uri_len_t>; // offset, len
 	enum component : uri_len_t { scheme, authority, user, password, host, port, path, query, fragment, countof };
 private:
 	std::string_view _source;
-	std::array<std::pair<uri_len_t, uri_len_t>, component::countof> _ranges;
+	std::array<range_pair, component::countof> _ranges{};
 	uri_len_t _present{};
 	constexpr void set(component what) noexcept { _present |= (1 << what); }
 	constexpr void clear(component what) noexcept { _present &= ~(1 << what); }
@@ -90,32 +90,34 @@ public:
 		return parse();
 	}
 	constexpr std::string_view get_source() const noexcept { return _source; }
+	constexpr std::string_view get(component what) const noexcept { return _source.substr(_ranges[what].first, _ranges[what].second); }
 	constexpr std::string_view get_component(component what) const
 	{
 		if (what < countof)
-			return test(what) ? _source.substr(_ranges[what].first, _ranges[what].second) : std::string_view();
+			return get(what);
 		throw(std::out_of_range("invalid component index"));
 	}
-	constexpr query_pair get_named_pair(component what) const
+	constexpr const range_pair& operator[](component idx) const noexcept { return _ranges[idx]; }
+	constexpr value_pair get_named_pair(component what) const
 	{
 		if (what < countof)
-			return test(what) ? std::make_pair(component_names[what], _source.substr(_ranges[what].first, _ranges[what].second))
-									: std::make_pair(std::string_view(), std::string_view());
+			return std::make_pair(component_names[what], get(what));
 		throw(std::out_of_range("invalid component index"));
 	}
 	constexpr int count() const noexcept { return std::popcount(_present); } // upgrade to std::bitset when constexpr in c++23
 	constexpr bool test(component what) const noexcept { return _present & (1 << what); }
+	constexpr operator bool() const noexcept { return count(); }
 
 	constexpr int parse()
 	{
 		if (_source.empty())
 			return 0;
-		if (_source.size() > UINT16_MAX)
+		if (_source.size() > uri_max_len)
 			throw(std::out_of_range("uri too long"));
 		if (_source.find_first_of("\t\r\n ") != std::string_view::npos)
 			throw(std::logic_error("invalid uri"));
 		std::string_view::size_type pos{}, hst{}, pth{std::string_view::npos};
-		if (auto sch {_source.find_first_of(':')}; sch != std::string_view::npos)
+		if (const auto sch {_source.find_first_of(':')}; sch != std::string_view::npos)
 		{
 			_ranges[scheme] = std::make_pair(0, sch);
 			set(scheme);
@@ -146,7 +148,7 @@ public:
 				hst = pos = auth;
 
 			if (auto prt { _source.find_first_of(':', pos) }; prt != std::string_view::npos
-				&& !is_ipv6(get_component(authority)))
+				&& !is_ipv6(get(authority)))
 			{
 				++prt;
 				if (_source.size() - prt > 0)
@@ -194,22 +196,25 @@ public:
 		}
 		return count();
 	}
+
+	template<char valuepair='&',char valueequ='='>
 	constexpr query_result decode_query() const
 	{
-		constexpr auto decpair([](std::string_view src)->query_pair
+		constexpr auto decpair([](std::string_view src) noexcept ->value_pair
 		{
-			if (auto fnd { src.find_first_of('=') }; fnd != std::string::npos)
+			if (auto fnd { src.find_first_of(valueequ) }; fnd != std::string::npos)
 				return {src.substr(0, fnd), src.substr(fnd + 1)};
 			else if (src.size())
 				return {src, ""};
 			return {};
 		});
 		query_result result;
-		if (std::string_view src{get_component(query)}; !src.empty())
+		if (test(query))
 		{
+			std::string_view src{get(query)};
 			for (std::string::size_type pos{};;)
 			{
-				if (auto fnd { src.find_first_of('&', pos) }; fnd != std::string::npos)
+				if (auto fnd { src.find_first_of(valuepair, pos) }; fnd != std::string::npos)
 				{
 					result.emplace_back(decpair(src.substr(pos, fnd - pos)));
 					pos = fnd + 1;
@@ -250,9 +255,16 @@ public:
 	{
 		os << std::setw(12) << std::left << "source" << what._source << '\n';
 		for (component ii{}; ii != countof; ii = component(ii + 1))
+		{
 			if (what.test(ii))
+			{
 				os << std::setw(12) << std::left << what.get_name(ii)
-					<< (what.get_component(ii).size() ? what.get_component(ii) : "(empty)") << '\n';
+					<< (what.get(ii).size() ? what.get(ii) : "(empty)") << '\n';
+				if (ii == query)
+					for (auto qresult { what.decode_query() }; const auto [tag,value] : qresult)
+						os << "   " << std::setw(12) << std::left << tag << (value.size() ? value : "(empty)") << '\n';
+			}
+		}
 		return os;
 	}
 };

@@ -52,7 +52,19 @@ TEST_CASE("uri - get component", "[uri]")
 	const uri u1{tests[0].first};
 	REQUIRE_NOTHROW(u1.get_component(host));
 	REQUIRE(u1.get_component(host) == "www.blah.com");
+	REQUIRE(u1.get(host) == "www.blah.com");
+	REQUIRE(u1.get(fragment) == "");
 	REQUIRE_THROWS(u1.get_component(countof));
+}
+
+//-----------------------------------------------------------------------------------------
+TEST_CASE("uri - operators", "[uri]")
+{
+	const uri u1{tests[0].first};
+	REQUIRE(u1);
+	const auto [tag,value] { u1[host] };
+	REQUIRE(tag == 8);
+	REQUIRE(value == 12);
 }
 
 //-----------------------------------------------------------------------------------------
@@ -85,9 +97,9 @@ TEST_CASE("uri - get named pair", "[uri]")
 	const uri u1{tests[0].first};
 	REQUIRE_NOTHROW(u1.get_named_pair(host));
 	REQUIRE_THROWS(u1.get_named_pair(countof));
-	const auto [n1,n2] { u1.get_named_pair(host) };
-	REQUIRE(n1 == "host");
-	REQUIRE(n2 == "www.blah.com");
+	const auto [tag,value] { u1.get_named_pair(host) };
+	REQUIRE(tag == "host");
+	REQUIRE(value == "www.blah.com");
 }
 
 //-----------------------------------------------------------------------------------------
@@ -124,7 +136,7 @@ TEST_CASE("uri - invalid uri", "[uri]")
 //-----------------------------------------------------------------------------------------
 TEST_CASE("uri - limits", "[uri]")
 {
-	char buff[UINT16_MAX+1]{};
+	char buff[uri::uri_max_len+1]{};
 	std::fill(buff, buff + sizeof(buff), 'x');
 	REQUIRE_THROWS(uri(buff));
 }
@@ -149,7 +161,7 @@ TEST_CASE("uri - hex decode", "[uri]")
 //-----------------------------------------------------------------------------------------
 TEST_CASE("uri - query decode", "[uri]")
 {
-	static const query_result tbl
+	static const uri::query_result tbl
 	{
 		{ "payload1", "true" }, { "payload2", "false" }, { "test", "1" }, { "benchmark", "3" }, { "foo", "38.38.011.293" },
 		{ "bar", "1234834910480" }, { "test", "19299" }, { "3992", "" }, { "key", "f5c65e1e98fe07e648249ad41e1cfdb0" },
@@ -160,5 +172,10 @@ TEST_CASE("uri - query decode", "[uri]")
 	const uri u2{tests[8].first};
 	auto result1{u2.decode_query()};
 	REQUIRE(result1.empty());
+
+	const uri u3{ "http://host.com/?payload1:true;payload2:false;test:1;benchmark:3;foo:38.38.011.293"
+		";bar:1234834910480;test:19299;3992;key:f5c65e1e98fe07e648249ad41e1cfdb0#test"};
+	auto result2{u3.decode_query<';',':'>()};
+	REQUIRE(tbl == result2);
 }
 

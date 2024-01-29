@@ -198,7 +198,7 @@ Components are named by a public enum called `component`.  Note that the compone
 
 ### other types
 | Type | Typedef of |Description |
-| :--- | :--- | ---: |
+| --- | --- | --- |
 | `uri_len_t`  | `std::uint16_t` | the integral type used to store offsets and lengths|
 | `value_pair`  | `std::pair<std::string_view, std::string_view>` |used to return tag value pairs|
 | `query_result`  | `std::vector<value_pair>` |used to return a collection of query pairs|
@@ -219,7 +219,7 @@ constexpr uri() = default;                                           (4)
 
 1. Construct a `basic_uri` from a `std::string_view`. This base class does not store the string. The source string must not go out of scope to use this object. Throws a `std::exception` if parsing fails.
 1. Construct an empty `basic_uri`. It can be populated using `assign()`.
-1. Construct a `uri` from a `std::string`. By default, the source string is hex decoded before parsing. Optionally pass `false` to prevent hex decoding.
+1. Construct a `uri` from a `std::string`. By default, the source string is percent decoded before parsing. Optionally pass `false` to prevent percent decoding.
 The supplied string is moved or copied and stored by the object. Throws a `std::exception` if parsing fails.
 1. Construct an empty `uri`. It can be populated using `replace()`.
 

@@ -188,13 +188,22 @@ The derived class `uri` stores the source string and then builds a `basic_uri` u
 
 ![class diagram](https://github.com/fix8mt/uri/blob/master/assets/classdiag.png)
 
-## Component enum
+## Types
+### component
 ```c++
 enum component : uri_len_t { scheme, authority, user, password, host, port, path, query, fragment, countof };
 ```
 Components are named by a public enum called `component`.  Note that the component `user` is the equivalent of the [RFC 3986](https://datatracker.ietf.org/doc/html/rfc3986)
 `userinfo` where no password was found.  If a password is present, then `user` and `password` are populated.
 
+### other types
+| Type | Description |
+| ------------- | ------------- |
+| `value_pair`  | `std::pair<std::string_view, std::string_view>` used to return tag value pairs|
+| `query_result`  | `std::vector<value_pair>` used to a collection of query pairs|
+| `uri_max_len`  | the maximumm length of a supplied uri|
+| `uri_len_t`  | the integral type used to store offsets and lengths|
+| `range_pair`  | `std::pair<uri_len_t, uri_len_t>` used to store offset and length |
 
 ## ctor
 ```c++
@@ -364,5 +373,5 @@ index when using these.
 
 ## Sanity checking
 This class will perform basic sanity checks on the source URI and throws `std::exception` on failure. These are:
-1. Length - source must not exceed `UINT16_MAX`
+1. Length - source must not exceed `uri_max_len` (`UINT16_MAX`)
 1. Illegal chars - source must not contain any whitespace characters

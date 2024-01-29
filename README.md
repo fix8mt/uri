@@ -303,7 +303,7 @@ Return the count of components in the uri.
 ```c++
 constexpr operator bool() const;
 ```
-Return the true if there are any components in the uri.
+Return true if there are any components in the uri.
 
 ## `parse`
 ```c++

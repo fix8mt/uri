@@ -200,7 +200,7 @@ Components are named by a public enum called `component`.  Note that the compone
 | Type | Typedef of |Description |
 | --- | --- | --- |
 | `uri_len_t`  | `std::uint16_t` | the integral type used to store offsets and lengths|
-| `value_pair`  | `std::pair<std::string_view, std::string_view>` |used to return tag value pairs|
+| `value_pair`  | `std::pair<std::string_view,std::string_view>` |used to return tag value pairs|
 | `query_result`  | `std::vector<value_pair>` |used to return a collection of query pairs|
 | `range_pair`  | `std::pair<uri_len_t, uri_len_t>` |used to store offset and length |
 

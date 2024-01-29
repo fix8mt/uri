@@ -199,10 +199,10 @@ Components are named by a public enum called `component`.  Note that the compone
 ### other types
 | Type | Description |
 | ------------- | ------------- |
-| `value_pair`  | `std::pair<std::string_view, std::string_view>` used to return tag value pairs|
-| `query_result`  | `std::vector<value_pair>` used to a collection of query pairs|
-| `uri_max_len`  | the maximumm length of a supplied uri|
+| `uri_max_len`  | the maximum length of a supplied uri|
 | `uri_len_t`  | the integral type used to store offsets and lengths|
+| `value_pair`  | `std::pair<std::string_view, std::string_view>` used to return tag value pairs|
+| `query_result`  | `std::vector<value_pair>` used to return a collection of query pairs|
 | `range_pair`  | `std::pair<uri_len_t, uri_len_t>` used to store offset and length |
 
 ## ctor

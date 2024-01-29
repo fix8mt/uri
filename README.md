@@ -120,7 +120,7 @@ using namespace FIX8;
 
 int main(int argc, char *argv[])
 {
-   if (const basic_uri u1{ "ws://localhost:9229/f46db715-70df-43ad-a359-7f9949f39868" }; u1.count())
+   if (const basic_uri u1{ "ws://localhost:9229/f46db715-70df-43ad-a359-7f9949f39868" }; u1)
       std::cout << u1 << '\n';
    return 0;
 }
@@ -186,6 +186,10 @@ this class is the most efficient way to do so.
 The derived class `uri` stores the source string and then builds a `basic_uri` using that string as its reference. `uri` derives from `basic_uri` and a private storage class
 `uri_storage`. The supplied string is moved or copied and stored by the object. If your application needs the uri to hold and persist the source uri, this class is suitable.
 
+<picture>
+  <source media="(prefers-color-scheme: dark)" srcset="https://github.com/fix8mt/uri/blob/master/assets/classdiag.png">
+</picture>
+
 ![class diagram](https://github.com/fix8mt/uri/blob/master/assets/classdiag.png)
 
 ## Component enum
@@ -249,7 +253,7 @@ Return a `std::string_view` of the specified component or empty if component not
 constexpr const range_pair& operator[](component idx) const;
 ```
 Return a `const range_pair&` which is a `const std::pair<uri_len_t, uri_len_t>&` to the specified component at the index given in the ranges table. This provides direct
-access to the offset and length of the specifed component. This is _not_ range checked.
+access to the offset and length of the specifed component and is used to create a `std::string_view`. This is _not_ range checked.
 
 ## `get_name`
 ```c++
@@ -275,6 +279,12 @@ for populating a JSON field. Throws a `std::out_of_range` if not a legal compone
 constexpr int count() const;
 ```
 Return the count of components in the uri.
+
+## `operator bool`
+```c++
+constexpr operator bool() const;
+```
+Return the true if there are any components in the uri.
 
 ## `parse`
 ```c++

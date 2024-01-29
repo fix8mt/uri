@@ -345,21 +345,21 @@ If no value is present, just the tag will be populated with an empty value.
 static constexpr std::string decode_hex(std::string_view src);
 ```
 Decode any hex values present in the supplied string. Hex values are only recognised if
-they are in the form `%XX` where X is a hex digit `[0-9a-fA-F]`. Return in a new string.
+they are in the form `%XX` where X is a hex digit (octet) `[0-9a-fA-F]`. Return in a new string.
 
 ## `has_hex`
 ```c++
 static constexpr bool has_hex(std::string_view src);
 ```
 Return true if any hex values are present in the supplied string. Hex values are only recognised if
-they are in the form `%XX` where X is a hex digit `[0-9a-fA-F]`.
+they are in the form `%XX` where X is a hex digit (octet) `[0-9a-fA-F]`.
 
 ## `find_hex`
 ```c++
 static constexpr std::string_view::size_type find_hex(std::string_view src);
 ```
 Return the position of the first hex value (if any) in the supplied string. Hex values are only recognised if
-they are in the form `%XX` where X is a hex digit `[0-9a-fA-F]`. If not found returns `std::string_view::npos`.
+they are in the form `%XX` where X is a hex digit (octet) `[0-9a-fA-F]`. If not found returns `std::string_view::npos`.
 
 # Discussion
 ## Non-validating
@@ -371,7 +371,7 @@ See [URL Standard](https://url.spec.whatwg.org/) for complete validation rules.
 
 ## Low level access
 There are two methods that provide unchecked direct access to the `range` table and `component`. You must ensure that you don't pass an invalid component
-index when using these. Making changes to the range object with `operator[]` can have serious consequences. Make sure you know what you're doing!
+index when using these. Making changes to the range object with `operator[]` can have serious consequences. Use carefully!
 1. `constexpr std::string_view get(component what) const;`
 1. `constexpr range_pair& operator[](component idx)`;
 

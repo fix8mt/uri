@@ -244,6 +244,14 @@ constexpr std::string_view get_component(component what) const;
 ```
 Return a `std::string_view` of the specified component or empty if component not found. Throws a `std::out_of_range` if not a legal component.
 
+## `get`
+```c++
+constexpr std::string_view get(component what) const;
+```
+Return a `std::string_view` of the specified component.
+> [!WARNING]
+> This is _not_ range checked.
+
 ## `operator[component]`
 ```c++
 constexpr const range_pair& operator[](component idx) const;
@@ -304,12 +312,18 @@ Return a `const std::string&` to the stored buffer. Only available from `uri`.
 
 ## `decode_query`
 ```c++
-constexpr std::vector<std::pair<std::string_view,std::string_view>> decode_query(char val_sep='&') const;
+template<char separator='&',char tagequ='='>
+constexpr std::vector<std::pair<std::string_view,std::string_view>> decode_query() const;
 ```
-Returns a `std::vector` of pairs of `std::string_view` of the query component if present.  You can optionally override the value separator character - some
-queries use `;`. Returns an empty vector if no query was found. The query is assumed to be in the form:
+Returns a `std::vector` of pairs of `std::string_view` of the query component if present.  You can optionally override the value pair separator character using
+the first non-type template parameter - some queries use `;`. You can also optionally override the value equality separator character using the second non-type
+template parameter - some queries use `:`. Returns an empty vector if no query was found. The query is assumed to be in the form:
 ```
 &tag=value[&tag=value...]
+```
+Or if you override, say
+```
+;tag:value[;tag:value...]
 ```
 If no value is present, just the tag will be populated with an empty value.
 

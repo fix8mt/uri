@@ -267,9 +267,9 @@ Return a `std::string_view` of the specified component.
 
 ## `operator[component]`
 ```c++
-constexpr const range_pair& operator[](component idx) const;
+constexpr range_pair& operator[](component idx);
 ```
-Return a `const range_pair&` which is a `const std::pair<uri_len_t, uri_len_t>&` to the specified component at the index given in the ranges table. This provides direct
+Return a `range_pair&` which is a `std::pair<uri_len_t, uri_len_t>&` to the specified component at the index given in the ranges table. This provides direct
 access to the offset and length of the specifed component and is used to create a `std::string_view`.
 > [!WARNING]
 > This is _not_ range checked.
@@ -371,9 +371,9 @@ See [URL Standard](https://url.spec.whatwg.org/) for complete validation rules.
 
 ## Low level access
 There are two methods that provide unchecked direct access to the `range` table and `component`. You must ensure that you don't pass an invalid component
-index when using these.
+index when using these. Making changes to the range object with `operator[]` can have serious consequences. Make sure you know what you're doing!
 1. `constexpr std::string_view get(component what) const;`
-1. `constexpr const range_pair& operator[](component idx) const`;
+1. `constexpr range_pair& operator[](component idx)`;
 
 ## Sanity checking
 This class will perform basic sanity checks on the source URI and throws `std::exception` on failure. These are:

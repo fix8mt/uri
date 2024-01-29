@@ -356,6 +356,12 @@ We decided against validating for a few reasons:
 1. Complex - validation rules are complicated; for most use cases, simple rejection for gross rule violation is sufficient.
 See [URL Standard](https://url.spec.whatwg.org/) for complete validation rules.
 
+## Low level access
+There are two methods that provide unchecked direct access to the `range` table and `component`. You must ensure that you don't pass an invalid component
+index when using these.
+1. `constexpr std::string_view get(component what) const;`
+1. `constexpr const range_pair& operator[](component idx) const`;
+
 ## Sanity checking
 This class will perform basic sanity checks on the source URI and throws `std::exception` on failure. These are:
 1. Length - source must not exceed `UINT16_MAX`

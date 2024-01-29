@@ -15,6 +15,10 @@ This is a lightweight URI parser implementation featuring zero-copy, minimal sto
 --|--
 |[Here](https://github.com/fix8mt/uri/blob/master/include/fix8/uri.hpp)| for implementation|
 |[Examples](https://github.com/fix8mt/uri/blob/master/examples)| for examples and test cases|
+|[Building](https://github.com/fix8mt/uri#building)| building instructions |
+|[API](https://github.com/fix8mt/uri#api)| API reference |
+|[Types](https://github.com/fix8mt/uri#types)| Types reference |
+|[Discussion](https://github.com/fix8mt/uri#discussion)| Additional details|
 
 ## Motivation
 - header-only
@@ -197,7 +201,7 @@ Components are named by a public enum called `component`.  Note that the compone
 `userinfo` where no password was found.  If a password is present, then `user` and `password` are populated.
 
 ### other types
-| Type | Alias of |Description |
+| Type | Typedef of |Description |
 | :--- | :--- | ---: |
 | `uri_len_t`  | `std::uint16_t` | the integral type used to store offsets and lengths|
 | `value_pair`  | `std::pair<std::string_view, std::string_view>` |used to return tag value pairs|

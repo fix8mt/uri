@@ -272,7 +272,7 @@ constexpr range_pair& operator[](component idx);
 Return a `range_pair&` which is a `std::pair<uri_len_t, uri_len_t>&` to the specified component at the index given in the ranges table. This provides direct
 access to the offset and length of the specifed component and is used to create a `std::string_view`.
 > [!WARNING]
-> This is _not_ range checked.
+> This is _not_ range checked. Allows for modification of the `string_view` range. Use carefully.
 
 ## `get_name`
 ```c++

@@ -33,9 +33,9 @@ This is a lightweight URI parser implementation featuring zero-copy, minimal sto
 - all methods `constexpr`; no virtual methods
 - extracts all components `scheme`, `authority`, `user`, `password`, `host`, `port`, `path`, `query`, `fragment`
 - query components, return as `std::string_view`
-- fast, very lightweight, predictive non brut force parser
+- fast, very lightweight, predictive non brute force parser
 - small memory footprint - base class is only 56 bytes
-- built-in unit testcases with exhaustive test URI cases
+- built-in unit test cases with exhaustive test URI cases
 - support for [**RFC 3986**](https://datatracker.ietf.org/doc/html/rfc3986)
 
 # Examples
@@ -179,7 +179,7 @@ using namespace FIX8;
 ```
 
 # API
-## Class heirachy
+## Class hierarchy
 The base class `basic_uri` performs the bulk of the work, holding a `std::string_view` of the source uri string. If you wish to manage the scope of the source uri yourself then
 this class is the most efficient way to do so.
 
@@ -266,7 +266,7 @@ Return a `std::string_view` of the specified component.
 constexpr const range_pair& operator[](component idx) const;
 ```
 Return a `const range_pair&` which is a `std::pair<uri_len_t, uri_len_t>&` to the specified component at the index given in the ranges table. This provides read-only
-access to the offset and length of the specifed component and is used to create a `std::string_view`.
+access to the offset and length of the specified component and is used to create a `std::string_view`.
 > [!WARNING]
 > This is _not_ range checked.
 
@@ -381,7 +381,7 @@ Replace the current uri with the given string. The storage is updated with a mov
 constexpr range_pair& operator[](component idx);
 ```
 Return a `range_pair&` which is a `std::pair<uri_len_t, uri_len_t>&` to the specified component at the index given in the ranges table. This provides direct
-access to the offset and length of the specifed component and is used to create a `std::string_view`.
+access to the offset and length of the specified component and is used to create a `std::string_view`.
 > [!WARNING]
 > This is _not_ range checked. Allows for modification of the `string_view` range. Use carefully.
 
@@ -446,7 +446,7 @@ const std::vector<std::pair<const char *, std::vector<std::pair<uri::component, 
 </details>
 
 ## `uritest2`
-This application is run by defaultg if you run `make test` or `ctest`. When running using `ctest` use the following command:
+This application is run by default if you run `make test` or `ctest`. When running using `ctest` use the following command:
 
 ```bash
 $ ctest --output-on-failure

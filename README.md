@@ -234,7 +234,7 @@ All of `uri` is within the namespace **`FIX8`**.
 
 Destroy the `uri` or `basic_uri`. The `uri` object will release the stored string.
 
-## accessors
+## Accessors
 ### `test`
 ```c++
 constexpr bool uri::test(uri::component what) const;
@@ -351,7 +351,7 @@ constexpr const std::string& get_buffer() const;
 ```
 Return a `const std::string&` to the stored buffer. Only available from `uri`.
 
-## mutators
+## Mutators
 ### `set`
 ```c++
 constexpr void uri::set(uri::component what);

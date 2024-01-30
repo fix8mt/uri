@@ -397,44 +397,44 @@ You can add your own test cases to `uriexamples.hpp` - the structure is easy eno
 ```c++
 const std::vector<std::pair<const char *, std::vector<std::pair<uri::component, const char *>>>> tests
 {
-	{ "https://www.blah.com/",
-		{
-			{ scheme, "https" },
-			{ authority, "www.blah.com" },
-			{ host, "www.blah.com" },
-			{ path, "/" },
-		}
-	},
-	{ "https://www.blah.com",
-		{
-			{ scheme, "https" },
-			{ authority, "www.blah.com" },
-			{ host, "www.blah.com" },
-			{ path, "" }, // empty path
-		}
-	},
-	{ "https://www.blah.com:3000/test",
-		{
-			{ scheme, "https" },
-			{ authority, "www.blah.com:3000" },
-			{ host, "www.blah.com" },
-			{ port, "3000" },
-			{ path, "/test" },
-		}
-	},
-	{ "https://dakka@www.blah.com:3000/",
-		{
-			{ scheme, "https" },
-			{ authority, "dakka@www.blah.com:3000" },
-			{ user, "dakka" },
-			{ host, "www.blah.com" },
-			{ port, "3000" },
-			{ path, "/" },
-		}
-	},
-	.
-	.
-	.
+   { "https://www.blah.com/",
+      {
+         { scheme, "https" },
+         { authority, "www.blah.com" },
+         { host, "www.blah.com" },
+         { path, "/" },
+      }
+   },
+   { "https://www.blah.com",
+      {
+         { scheme, "https" },
+         { authority, "www.blah.com" },
+         { host, "www.blah.com" },
+         { path, "" }, // empty path
+      }
+   },
+   { "https://www.blah.com:3000/test",
+      {
+         { scheme, "https" },
+         { authority, "www.blah.com:3000" },
+         { host, "www.blah.com" },
+         { port, "3000" },
+         { path, "/test" },
+      }
+   },
+   { "https://dakka@www.blah.com:3000/",
+      {
+         { scheme, "https" },
+         { authority, "dakka@www.blah.com:3000" },
+         { user, "dakka" },
+         { host, "www.blah.com" },
+         { port, "3000" },
+         { path, "/" },
+      }
+   },
+.
+.
+.
 ```
 
 </p>

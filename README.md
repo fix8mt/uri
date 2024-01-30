@@ -202,7 +202,7 @@ Components are named by a public enum called `component`.  Note that the compone
 | `uri_len_t`  | `std::uint16_t` | the integral type used to store offsets and lengths|
 | `value_pair`  | `std::pair<std::string_view,std::string_view>` |used to return tag value pairs|
 | `query_result`  | `std::vector<value_pair>` |used to return a collection of query pairs|
-| `range_pair`  | `std::pair<uri_len_t, uri_len_t>` |used to store offset and length |
+| `range_pair`  | `std::pair<uri_len_t,uri_len_t>` |used to store offset and length |
 
 ### consts
 | Const | Description |
@@ -239,6 +239,18 @@ constexpr bool uri::test(uri::component what) const;
 ```
 Return `true` if the specified component is present in the uri.
 
+## `set`
+```c++
+constexpr void uri::set(uri::component what);
+```
+Set the component bit as present in the uri. Use carefully.
+
+## `clear`
+```c++
+constexpr void uri::clear(uri::component what);
+```
+Clear the component bit in the uri. Use carefully.
+
 ## `assign`
 ```c++
 constexpr int assign(std::string_view src);
@@ -257,6 +269,12 @@ constexpr std::string_view get_component(component what) const;
 ```
 Return a `std::string_view` of the specified component or empty if component not found. Throws a `std::out_of_range` if not a legal component.
 
+## `get_present`
+```c++
+constexpr uri_len_t get_present() const;
+```
+Return the present bitset as `uri_len_t`.
+
 ## `get`
 ```c++
 constexpr std::string_view get(component what) const;
@@ -264,6 +282,13 @@ constexpr std::string_view get(component what) const;
 Return a `std::string_view` of the specified component.
 > [!WARNING]
 > This is _not_ range checked.
+
+## `const operator[component]`
+```c++
+constexpr const range_pair& operator[](component idx) const;
+```
+Return a `const range_pair&` which is a `std::pair<uri_len_t, uri_len_t>&` to the specified component at the index given in the ranges table. This provides read-only
+access to the offset and length of the specifed component and is used to create a `std::string_view`.
 
 ## `operator[component]`
 ```c++
@@ -360,6 +385,21 @@ static constexpr std::string_view::size_type find_hex(std::string_view src);
 ```
 Return the position of the first hex value (if any) in the supplied string. Hex values are only recognised if
 they are in the form `%XX` where X is a hex digit (octet) `[0-9a-fA-F]`. If not found returns `std::string_view::npos`.
+
+# Testing
+## Test cases
+The header file `uriexamples.hpp` contains a data structure holding test cases used by the Catch2 unit test `uritest2` and by the CLI test app `uritest`.
+You can add your own test cases to `uriexamples.hpp` - the structure is easy enough to follow.
+
+## `uritest2`
+This application is run by defaultg if you run `make test` or `ctest`. When running using `ctest` use the following command:
+
+```bash
+$ ctest --output-on-failure
+```
+
+## `uritest`
+This is a simple CLI test app which allows you to run individual or all tests from `uriexamples.hpp`, or test a uri passed from the command line.
 
 # Discussion
 ## Non-validating

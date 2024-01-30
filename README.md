@@ -209,7 +209,8 @@ Components are named by a public enum called `component`.  Note that the compone
 | ------------- | ------------- |
 | `uri_max_len`  | the maximum length of a supplied uri|
 
-## ctor
+## Construction and destruction
+### ctor
 ```c++
 constexpr basic_uri(std::string_view src);                           (1)
 constexpr basic_uri() = default;                                     (2)
@@ -225,7 +226,7 @@ The supplied string is moved or copied and stored by the object. Throws a `std::
 
 All of `uri` is within the namespace **`FIX8`**.
 
-## dtor
+### dtor
 ```c++
 ~basic_uri();
 ~uri();

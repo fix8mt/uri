@@ -237,9 +237,9 @@ Destroy the `uri` or `basic_uri`. The `uri` object will release the stored strin
 ## Accessors
 ### `test`
 ```c++
-constexpr bool uri::test(uri::component what) const;
+constexpr bool uri::test(uri::component what=countof) const;
 ```
-Return `true` if the specified component is present in the uri.
+Return `true` if the specified component is present in the uri. With no parameter (default) returns `true` if any component is present.
 
 ### `get_component`
 ```c++
@@ -333,12 +333,6 @@ constexpr int count() const;
 ```
 Return the count of components in the uri.
 
-### `operator bool`
-```c++
-constexpr operator bool() const;
-```
-Return true if there are any components in the uri.
-
 ### `operator<<`
 ```c++
 friend std::ostream& operator<<(std::ostream& os, const basic_uri& what);
@@ -356,13 +350,13 @@ Return a `const std::string&` to the stored buffer. Only available from `uri`.
 ```c++
 constexpr void uri::set(uri::component what);
 ```
-Set the component bit as present in the uri. Use carefully.
+Set the specified component bit as present in the uri. Use carefully.
 
 ### `clear`
 ```c++
-constexpr void uri::clear(uri::component what);
+constexpr void uri::clear(uri::component what=countof);
 ```
-Clear the component bit in the uri. Use carefully.
+Clear the specified component bit in the uri. By default clears all bits. Use carefully.
 
 ### `assign`
 ```c++

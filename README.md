@@ -233,49 +233,26 @@ All of `uri` is within the namespace **`FIX8`**.
 
 Destroy the `uri` or `basic_uri`. The `uri` object will release the stored string.
 
-## `test`
+## accessors
+### `test`
 ```c++
 constexpr bool uri::test(uri::component what) const;
 ```
 Return `true` if the specified component is present in the uri.
 
-## `set`
-```c++
-constexpr void uri::set(uri::component what);
-```
-Set the component bit as present in the uri. Use carefully.
-
-## `clear`
-```c++
-constexpr void uri::clear(uri::component what);
-```
-Clear the component bit in the uri. Use carefully.
-
-## `assign`
-```c++
-constexpr int assign(std::string_view src);
-```
-Replace the current uri reference with the given reference. No storage is allocated. Return the number of components found.
-
-## `replace`
-```c++
-constexpr std::string replace(std::string&& src);
-```
-Replace the current uri with the given string. The storage is updated with a move (or copy) of the string. The old string is returned.
-
-## `get_component`
+### `get_component`
 ```c++
 constexpr std::string_view get_component(component what) const;
 ```
 Return a `std::string_view` of the specified component or empty if component not found. Throws a `std::out_of_range` if not a legal component.
 
-## `get_present`
+### `get_present`
 ```c++
 constexpr uri_len_t get_present() const;
 ```
 Return the present bitset as `uri_len_t`.
 
-## `get`
+### `get`
 ```c++
 constexpr std::string_view get(component what) const;
 ```
@@ -283,72 +260,16 @@ Return a `std::string_view` of the specified component.
 > [!WARNING]
 > This is _not_ range checked.
 
-## `const operator[component]`
+### `const operator[component]`
 ```c++
 constexpr const range_pair& operator[](component idx) const;
 ```
 Return a `const range_pair&` which is a `std::pair<uri_len_t, uri_len_t>&` to the specified component at the index given in the ranges table. This provides read-only
 access to the offset and length of the specifed component and is used to create a `std::string_view`.
-
-## `operator[component]`
-```c++
-constexpr range_pair& operator[](component idx);
-```
-Return a `range_pair&` which is a `std::pair<uri_len_t, uri_len_t>&` to the specified component at the index given in the ranges table. This provides direct
-access to the offset and length of the specifed component and is used to create a `std::string_view`.
 > [!WARNING]
-> This is _not_ range checked. Allows for modification of the `string_view` range. Use carefully.
+> This is _not_ range checked.
 
-## `get_name`
-```c++
-static constexpr std::string_view get_name(component what);
-```
-Return a `std::string_view` of the specified component name. Throws a `std::out_of_range` if not a legal component.
-
-## `get_source`
-```c++
-constexpr std::string_view get_source() const;
-```
-Return a `std::string_view` of the source uri. If not set return value will be empty.
-
-## `get_named_pair`
-```c++
-constexpr std::pair<std::string_view, std::string_view> get_named_pair(component what) const;
-```
-Return a `std::pair` of `std::string_view` for the specified component. The `first` will be the component name, `second` the component value. Suitable
-for populating a JSON field. Throws a `std::out_of_range` if not a legal component.
-
-## `count`
-```c++
-constexpr int count() const;
-```
-Return the count of components in the uri.
-
-## `operator bool`
-```c++
-constexpr operator bool() const;
-```
-Return true if there are any components in the uri.
-
-## `parse`
-```c++
-constexpr int parse();
-```
-Parse the source string into components. Return the count of components found. Will reset a uri if already parsed. Throws a `std::exception` if parsing fails.
-
-## `operator<<`
-```c++
-friend std::ostream& operator<<(std::ostream& os, const basic_uri& what);
-```
-Print the uri object to the specified stream. The source and individual components are printed. If a query is present, each of tag value pairs are also printed.
-
-## `get_buffer`
-```c++
-constexpr const std::string& get_buffer() const;
-```
-Return a `const std::string&` to the stored buffer. Only available from `uri`.
-
-## `decode_query`
+### `decode_query`
 ```c++
 template<char separator='&',char tagequ='='>
 constexpr std::vector<std::pair<std::string_view,std::string_view>> decode_query() const;
@@ -365,26 +286,109 @@ Or if you override, say
 ```
 If no value is present, just the tag will be populated with an empty value.
 
-## `decode_hex`
+### `decode_hex`
 ```c++
 static constexpr std::string decode_hex(std::string_view src);
 ```
 Decode any hex values present in the supplied string. Hex values are only recognised if
 they are in the form `%XX` where X is a hex digit (octet) `[0-9a-fA-F]`. Return in a new string.
 
-## `has_hex`
+### `has_hex`
 ```c++
 static constexpr bool has_hex(std::string_view src);
 ```
 Return true if any hex values are present in the supplied string. Hex values are only recognised if
 they are in the form `%XX` where X is a hex digit (octet) `[0-9a-fA-F]`.
 
-## `find_hex`
+### `find_hex`
 ```c++
 static constexpr std::string_view::size_type find_hex(std::string_view src);
 ```
 Return the position of the first hex value (if any) in the supplied string. Hex values are only recognised if
 they are in the form `%XX` where X is a hex digit (octet) `[0-9a-fA-F]`. If not found returns `std::string_view::npos`.
+
+### `get_name`
+```c++
+static constexpr std::string_view get_name(component what);
+```
+Return a `std::string_view` of the specified component name. Throws a `std::out_of_range` if not a legal component.
+
+### `get_source`
+```c++
+constexpr std::string_view get_source() const;
+```
+Return a `std::string_view` of the source uri. If not set return value will be empty.
+
+### `get_named_pair`
+```c++
+constexpr std::pair<std::string_view, std::string_view> get_named_pair(component what) const;
+```
+Return a `std::pair` of `std::string_view` for the specified component. The `first` will be the component name, `second` the component value. Suitable
+for populating a JSON field. Throws a `std::out_of_range` if not a legal component.
+
+### `count`
+```c++
+constexpr int count() const;
+```
+Return the count of components in the uri.
+
+### `operator bool`
+```c++
+constexpr operator bool() const;
+```
+Return true if there are any components in the uri.
+
+### `operator<<`
+```c++
+friend std::ostream& operator<<(std::ostream& os, const basic_uri& what);
+```
+Print the uri object to the specified stream. The source and individual components are printed. If a query is present, each of tag value pairs are also printed.
+
+### `get_buffer`
+```c++
+constexpr const std::string& get_buffer() const;
+```
+Return a `const std::string&` to the stored buffer. Only available from `uri`.
+
+## mutators
+### `set`
+```c++
+constexpr void uri::set(uri::component what);
+```
+Set the component bit as present in the uri. Use carefully.
+
+### `clear`
+```c++
+constexpr void uri::clear(uri::component what);
+```
+Clear the component bit in the uri. Use carefully.
+
+### `assign`
+```c++
+constexpr int assign(std::string_view src);
+```
+Replace the current uri reference with the given reference. No storage is allocated. Return the number of components found.
+
+### `replace`
+```c++
+constexpr std::string replace(std::string&& src);
+```
+Replace the current uri with the given string. The storage is updated with a move (or copy) of the string. The old string is returned.
+
+## `operator[component]`
+```c++
+constexpr range_pair& operator[](component idx);
+```
+Return a `range_pair&` which is a `std::pair<uri_len_t, uri_len_t>&` to the specified component at the index given in the ranges table. This provides direct
+access to the offset and length of the specifed component and is used to create a `std::string_view`.
+> [!WARNING]
+> This is _not_ range checked. Allows for modification of the `string_view` range. Use carefully.
+
+## `parse`
+```c++
+constexpr int parse();
+```
+Parse the source string into components. Return the count of components found. Will reset a uri if already parsed. Throws a `std::exception` if parsing fails.
 
 # Testing
 ## Test cases
@@ -486,7 +490,6 @@ password: 13 8
 host: 22 11
 path: 33 5
 query: 39 9
-$
 $
 ```
 

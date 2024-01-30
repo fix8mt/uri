@@ -450,6 +450,49 @@ $ ctest --output-on-failure
 ## `uritest`
 This is a simple CLI test app which allows you to run individual or all tests from `uriexamples.hpp`, or test a uri passed from the command line.
 
+```bash
+$ ./uritest -h
+Usage: ./uritest [uri...] [-t:d:hlas]
+ -a run all tests
+ -d [uri] parse uri from CLI, show debug output
+ -h help
+ -l list tests
+ -s show sizes
+ -t [num] test to run
+$
+```
+
+You can run adhoc tests from the CLI as follows:
+<details><summary><i>output</i></summary>
+</p>
+
+```CSV
+$ ./uritest -d "https://user:password@example.com/path?search=1"
+source      https://user:password@example.com/path?search=1
+scheme      https
+authority   user:password@example.com
+user        user
+password    password
+host        example.com
+path        /path
+query       search=1
+   search      1
+
+011011111
+scheme: 0 5
+authority: 8 25
+user: 8 4
+password: 13 8
+host: 22 11
+path: 33 5
+query: 39 9
+$
+$
+```
+
+</p>
+</details>
+
 # Discussion
 ## Non-validating
 This class is non-validating. The source URI is expected to be normalised or at least parsable. Validation is out of scope for this implementation.

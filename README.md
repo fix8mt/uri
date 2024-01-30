@@ -437,6 +437,9 @@ const std::vector<std::pair<const char *, std::vector<std::pair<uri::component, 
 	.
 ```
 
+</p>
+</details>
+
 ## `uritest2`
 This application is run by defaultg if you run `make test` or `ctest`. When running using `ctest` use the following command:
 

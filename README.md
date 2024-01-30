@@ -273,7 +273,7 @@ access to the offset and length of the specified component and is used to create
 ### `decode_query`
 ```c++
 template<char separator='&',char tagequ='='>
-constexpr std::vector<std::pair<std::string_view,std::string_view>> decode_query() const;
+constexpr query_result decode_query() const;
 ```
 Returns a `std::vector` of pairs of `std::string_view` of the query component if present.  You can optionally override the value pair separator character using
 the first non-type template parameter - some queries use `;`. You can also optionally override the value equality separator character using the second non-type
@@ -322,7 +322,7 @@ Return a `std::string_view` of the source uri. If not set return value will be e
 
 ### `get_named_pair`
 ```c++
-constexpr std::pair<std::string_view, std::string_view> get_named_pair(component what) const;
+constexpr value_pair get_named_pair(component what) const;
 ```
 Return a `std::pair` of `std::string_view` for the specified component. The `first` will be the component name, `second` the component value. Suitable
 for populating a JSON field. Throws a `std::out_of_range` if not a legal component.

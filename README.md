@@ -391,6 +391,52 @@ they are in the form `%XX` where X is a hex digit (octet) `[0-9a-fA-F]`. If not 
 The header file `uriexamples.hpp` contains a data structure holding test cases used by the Catch2 unit test `uritest2` and by the CLI test app `uritest`.
 You can add your own test cases to `uriexamples.hpp` - the structure is easy enough to follow.
 
+<details><summary><i>sample</i></summary>
+<p>
+
+```c++
+const std::vector<std::pair<const char *, std::vector<std::pair<uri::component, const char *>>>> tests
+{
+	{ "https://www.blah.com/",
+		{
+			{ scheme, "https" },
+			{ authority, "www.blah.com" },
+			{ host, "www.blah.com" },
+			{ path, "/" },
+		}
+	},
+	{ "https://www.blah.com",
+		{
+			{ scheme, "https" },
+			{ authority, "www.blah.com" },
+			{ host, "www.blah.com" },
+			{ path, "" }, // empty path
+		}
+	},
+	{ "https://www.blah.com:3000/test",
+		{
+			{ scheme, "https" },
+			{ authority, "www.blah.com:3000" },
+			{ host, "www.blah.com" },
+			{ port, "3000" },
+			{ path, "/test" },
+		}
+	},
+	{ "https://dakka@www.blah.com:3000/",
+		{
+			{ scheme, "https" },
+			{ authority, "dakka@www.blah.com:3000" },
+			{ user, "dakka" },
+			{ host, "www.blah.com" },
+			{ port, "3000" },
+			{ path, "/" },
+		}
+	},
+	.
+	.
+	.
+```
+
 ## `uritest2`
 This application is run by defaultg if you run `make test` or `ctest`. When running using `ctest` use the following command:
 

@@ -58,7 +58,7 @@ public:
 	static constexpr const auto uri_max_len {UINT16_MAX};
 	using uri_len_t = std::uint16_t;
 	using range_pair = std::pair<uri_len_t, uri_len_t>; // offset, len
-	enum component : uri_len_t { scheme, authority, user, password, host, port, path, query, fragment, countof };
+	enum component { scheme, authority, user, password, host, port, path, query, fragment, countof };
 private:
 	std::string_view _source;
 	std::array<range_pair, component::countof> _ranges{};

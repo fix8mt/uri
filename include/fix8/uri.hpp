@@ -282,7 +282,7 @@ class uri_storage
 protected:
 	std::string _buffer;
 	constexpr uri_storage(std::string src) noexcept : _buffer(std::move(src)) {}
-	constexpr uri_storage() = delete;
+	constexpr uri_storage() = default;
 	~uri_storage() = default;
 };
 

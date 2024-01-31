@@ -177,7 +177,7 @@ in your application. Everything in this class is within the namespace `FIX8`, so
 ```c++
 using namespace FIX8;
 ```
-It's C++20, so you also add (watch out for namespace conflicts though):
+It's C++20, so you also add:
 ```c++
 using enum uri::component;
 ```

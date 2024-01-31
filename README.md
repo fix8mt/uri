@@ -191,7 +191,7 @@ The derived class `uri` stores the source string and then builds a `basic_uri` u
 ## Types
 ### component
 ```c++
-enum component : uri_len_t { scheme, authority, user, password, host, port, path, query, fragment, countof };
+enum component { scheme, authority, user, password, host, port, path, query, fragment, countof };
 ```
 Components are named by a public enum called `component`.  Note that the component `user` is the equivalent of the [RFC 3986](https://datatracker.ietf.org/doc/html/rfc3986)
 `userinfo` where no password was found.  If a password is present, then `user` and `password` are populated.
@@ -218,9 +218,9 @@ constexpr uri(std::string src, bool decode=true);                    (3)
 constexpr uri() = default;                                           (4)
 ```
 
-1. Construct a `basic_uri` from a `std::string_view`. This base class does not store the string. The source string must not go out of scope to use this object. Throws a `std::exception` if parsing fails.
+1. Construct a `basic_uri` from a `std::string_view`. This base class does not store the string. Calls `parse()`. The source string must not go out of scope to use this object. Throws a `std::exception` if parsing fails.
 1. Construct an empty `basic_uri`. It can be populated using `assign()`.
-1. Construct a `uri` from a `std::string`. By default, the source string is percent decoded before parsing. Optionally pass `false` to prevent percent decoding.
+1. Construct a `uri` from a `std::string`. By default, the source string is percent decoded before parsing. Calls `parse()`. Optionally pass `false` to prevent percent decoding.
 The supplied string is moved or copied and stored by the object. Throws a `std::exception` if parsing fails.
 1. Construct an empty `uri`. It can be populated using `replace()`.
 
@@ -251,7 +251,7 @@ Return a `std::string_view` of the specified component or empty if component not
 ```c++
 constexpr uri_len_t get_present() const;
 ```
-Return the present bitset as `uri_len_t`.
+Return the present bitset as `uri_len_t` which has bits set corresponding to the component's enum position.
 
 ### `get`
 ```c++
@@ -337,7 +337,7 @@ Return the count of components in the uri.
 ```c++
 friend std::ostream& operator<<(std::ostream& os, const basic_uri& what);
 ```
-Print the uri object to the specified stream. The source and individual components are printed. If a query is present, each of tag value pairs are also printed.
+Print the uri object to the specified stream. The source and individual components are printed. If a query is present, each tag value pair is also printed.
 
 ### `get_buffer`
 ```c++

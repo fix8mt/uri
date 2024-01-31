@@ -34,6 +34,7 @@
 #include <vector>
 #include <stdexcept>
 #include <string_view>
+#include <bitset>
 #include <getopt.h>
 #include <fix8/uri.hpp>
 
@@ -47,21 +48,22 @@ using enum uri::component;
 //-----------------------------------------------------------------------------------------
 int main(int argc, char *argv[])
 {
-   static constexpr const char *optstr{"t:hlasx"};
+   static constexpr const char *optstr{"t:d:hlas"};
    static constexpr const std::array long_options
    {
-      option{ "help",	no_argument,         nullptr, 'h' },
-      option{ "list",	no_argument,         nullptr, 'l' },
-      option{ "sizes",	no_argument,         nullptr, '2' },
-      option{ "all",		no_argument,         nullptr, 'a' },
-      option{ "extra",	no_argument,         nullptr, 'x' },
-      option{ "test",	required_argument,   nullptr, 't' },
+      option{ "help",	no_argument,			nullptr, 'h' },
+      option{ "list",	no_argument,			nullptr, 'l' },
+      option{ "sizes",	no_argument,			nullptr, '2' },
+      option{ "all",		no_argument,			nullptr, 'a' },
+      option{ "dump",	required_argument,	nullptr, 'd' },
+      option{ "test",	required_argument,	nullptr, 't' },
       option{}
    };
 
-	for (int val; (val = getopt_long (argc, argv, optstr, long_options.data(), 0)) != -1; )
+	int val;
+	try
 	{
-		try
+		for (; (val = getopt_long (argc, argv, optstr, long_options.data(), 0)) != -1; )
 		{
 			switch (val)
 			{
@@ -69,17 +71,17 @@ int main(int argc, char *argv[])
 				std::cout << '\n';
 				[[fallthrough]];
 			case 'h':
-				std::cout << "Usage: " << argv[0] << " [-" << optstr << "]" << R"(
- -t [num] test to run
+				std::cout << "Usage: " << argv[0] << " [uri...] [-" << optstr << "]" << R"(
+ -a run all tests
+ -d [uri] parse uri from CLI, show debug output
+ -h help
  -l list tests
  -s show sizes
- -x extra sizes
- -a run all tests
- -h help)" << '\n';
-				break;
+ -t [num] test to run)" << '\n';
+				return 1;
 			case 'l':
-				for (int ii{}; ii < tests.size(); ++ii)
-					std::cout << ii << '\t' << tests[ii].first << '\n';
+				for (int ii{}; const auto& [src,vec] : tests)
+					std::cout << ii++ << '\t' << src << '\n';
 				break;
 			case 't':
 				if (const auto tnum {std::stoul(optarg)}; tnum >= tests.size())
@@ -87,54 +89,43 @@ int main(int argc, char *argv[])
 				else
 					std::cout << uri{tests[tnum].first};
 				break;
+			case 'd':
+				{
+					const uri u1{optarg};
+					std::cout << u1 << '\n' << std::bitset<uri::countof>(u1.get_present()) << " ("
+						<< std::hex << std::showbase << u1.get_present() << std::dec << std::noshowbase << ")\n";
+					for (uri::component ii{}; ii != uri::countof; ii = uri::component(ii + 1))
+					{
+						if (u1.test(ii))
+						{
+							const auto [pos,len] { u1[ii] };
+							std::cout << uri::get_name(ii) << ' ' << pos << " (" << len << ")\n";
+						}
+					}
+				}
+				break;
 			case 's':
 				std::cout << "uri: " << sizeof(uri) << "\nbasic_uri: " << sizeof(basic_uri) << '\n';
 				break;
-			case 'x':
-				{
-					/*
-					uri u1{"https://www.example.com:8080/pages%2a/from%2b?country=au%2c&state=nsw&%2dcity=sydney&zone=au&noval%2d"};
-					std::cout << std::boolalpha << uri::has_hex(u1.get_source()) << '\n';
-					std::cout << u1.replace(uri::decode_hex(u1.get_source())) << '\n';
-					std::cout << std::boolalpha << uri::has_hex(u1.get_source()) << '\n';
-					std::cout << u1 << '\n';
-					auto result { u1.decode_query()};
-					for (const auto& pp : result)
-					std::cout << pp.first << " => " << pp.second << '\n';
-					uri u1{ "https://www.netmeister.org/%62%6C%6F%67/%75%72%6C%73.%68%74%6D%6C?!@#$%25=+_)(*&^#top%3C"};
-					std::cout << u1;
-
-					const uri u1 {"http://nodejs.org:89/docs/latest/api/foo/bar/qua/13949281/0f28b/5d49/b3020/url.html"
-					"?payload1=true&payload2=false&test=1&benchmark=3&foo=38.38.011.293"
-					"&bar=1234834910480&test=19299&3992&key=f5c65e1e98fe07e648249ad41e1cfdb0#test"};
-					std::cout << u1 << '\n'
-					<< u1.get_component(uri::authority) << '\n'
-					<< u1.get_component(uri::host) << '\n';
-					if (u1.test(uri::port))
-					std::cout << u1.get_component(uri::port) << '\n';
-					std::cout << u1.get_component(uri::query) << '\n';
-					if (u1.test(uri::fragment))
-					std::cout << u1.get_component(uri::fragment) << '\n';
-					*/
-				}
-				break;
 			case 'a':
-				for (const auto& [src,vec] : tests)
-					std::cout << uri{src} << '\n';
+				for (int ii{}; const auto& [src,vec] : tests)
+					std::cout << ii++ << '\n' << uri{src} << '\n';
 				std::cout << tests.size() << " test cases\n";
 				break;
 			default:
 				break;
 			}
 		}
-		catch (const std::exception& e)
-		{
-			std::cerr << "exception: " << e.what();
-			if (optarg)
-				std::cerr << " (" << static_cast<char>(val) << ':' << optarg << ')';
-			std::cerr << std::endl;
-			return 1;
-		}
+		while(optind < argc)
+			std::cout << uri{argv[optind++]} << '\n';
+	}
+	catch (const std::exception& e)
+	{
+		std::cerr << "exception: " << e.what();
+		if (optarg)
+			std::cerr << " (-" << static_cast<char>(val) << ' ' << optarg << ')';
+		std::cerr << std::endl;
+		return 1;
 	}
 	return 0;
 }

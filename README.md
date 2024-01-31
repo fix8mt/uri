@@ -348,9 +348,9 @@ Return a `const std::string&` to the stored buffer. Only available from `uri`.
 ## Mutators
 ### `set`
 ```c++
-constexpr void uri::set(uri::component what);
+constexpr void uri::set(uri::component what=countof);
 ```
-Set the specified component bit as present in the uri. Use carefully.
+Set the specified component bit as present in the uri. By default sets all bits. Use carefully.
 
 ### `clear`
 ```c++
@@ -466,27 +466,31 @@ You can run adhoc tests from the CLI as follows:
 </p>
 
 ```CSV
-$ ./uritest -d "https://user:password@example.com/path?search=1&key=val&when=now"
-source      https://user:password@example.com/path?search=1&key=val&when=now
+$ ./uritest -d "https://user:password@example.com:3000/path?search=1&key=val&when=now#frag"
+source      https://user:password@example.com:3000/path?search=1&key=val&when=now#frag
 scheme      https
-authority   user:password@example.com
+authority   user:password@example.com:3000
 user        user
 password    password
 host        example.com
+port        3000
 path        /path
 query       search=1&key=val&when=now
    search      1
    key         val
    when        now
+fragment    frag
 
-011011111 (223)
-scheme: 0 5
-authority: 8 25
-user: 8 4
-password: 13 8
-host: 22 11
-path: 33 5
-query: 39 26
+111111111 (511)
+scheme 0 (5)
+authority 8 (30)
+user 8 (4)
+password 13 (8)
+host 22 (11)
+port 34 (4)
+path 38 (5)
+query 44 (25)
+fragment 70 (5)
 $
 ```
 

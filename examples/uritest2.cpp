@@ -60,11 +60,22 @@ TEST_CASE("uri - get component", "[uri]")
 //-----------------------------------------------------------------------------------------
 TEST_CASE("uri - operators", "[uri]")
 {
-	const uri u1{tests[0].first};
-	REQUIRE(u1);
+	uri u1{tests[0].first};
+	REQUIRE(u1.test());
 	const auto [tag,value] { u1[host] };
 	REQUIRE(tag == 8);
 	REQUIRE(value == 12);
+}
+
+//-----------------------------------------------------------------------------------------
+TEST_CASE("uri - bitset", "[uri]")
+{
+	uri u1{tests[0].first};
+	REQUIRE(u1.get_present() == 0b001010011);
+	u1.clear();
+	REQUIRE(u1.get_present() == 0);
+	u1.set(uri::countof);
+	REQUIRE(u1.get_present() == 0b111111111);
 }
 
 //-----------------------------------------------------------------------------------------
@@ -80,7 +91,7 @@ TEST_CASE("uri - uri component validations", "[uri]")
 {
 	for (int ii{}; const auto& [src,vec] : tests)
 	{
-		INFO("uri: " << ii++);
+		INFO("uri: " << ii++ << ' ' << src);
 		const uri u1{src};
 		REQUIRE (u1.count() == vec.size());
 		for (const auto& [comp,str] : vec)

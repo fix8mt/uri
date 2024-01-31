@@ -1,15 +1,4 @@
 //-----------------------------------------------------------------------------------------
-/*
-░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░
-░        ░░░░░░░░░░░░░░░░░░░░░░░░░░░   ░░░░░░░   ░
-▒   ▒▒▒▒▒▒▒▒  ▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒  ▒▒▒▒▒  ▒   ▒▒▒    ▒▒▒▒▒   ▒▒▒▒
-▒   ▒▒▒▒▒▒▒▒▒▒▒   ▒▒▒   ▒▒   ▒▒   ▒▒   ▒   ▒ ▒   ▒▒▒▒▒   ▒▒▒▒
-▓       ▓▓▓   ▓▓▓  ▓   ▓▓   ▓▓▓▓▓  ▓   ▓▓   ▓▓   ▓▓▓▓▓   ▓▓▓▓
-▓   ▓▓▓▓▓▓▓   ▓▓▓▓  ▓▓▓▓▓▓▓   ▓  ▓▓▓   ▓▓▓  ▓▓   ▓▓▓▓▓   ▓▓▓▓
-▓   ▓▓▓▓▓▓▓   ▓▓  ▓▓   ▓▓   ▓▓▓▓   ▓   ▓▓▓▓▓▓▓   ▓▓▓▓▓   ▓▓▓▓
-█   ███████   █   ███   ███     ████   ███████   █████   ████
-█████████████████████████████████████████████████████████████
-*/
 //
 // uri (header only)
 // Copyright (C) 2024 Fix8 Market Technologies Pty Ltd
@@ -74,10 +63,7 @@ private:
 	std::string_view _source;
 	std::array<range_pair, component::countof> _ranges{};
 	uri_len_t _present{};
-	constexpr void set(component what) noexcept { _present |= (1 << what); }
-	constexpr void clear(component what) noexcept { _present &= ~(1 << what); }
 	static constexpr const std::array component_names { "scheme", "authority", "user", "password", "host", "port", "path", "query", "fragment", };
-	static constexpr bool is_ipv6(std::string_view what) noexcept { return what.front() == '[' && what.back() == ']'; }
 public:
 	constexpr basic_uri(std::string_view src) : _source(src) { parse(); }
 	constexpr basic_uri() = default;
@@ -97,7 +83,17 @@ public:
 			return get(what);
 		throw(std::out_of_range("invalid component index"));
 	}
+
+	/*! Provides const direct access to the offset and length of the specifed component and is used to create a `std::string_view`.
+	  	\param idx index into table
+		\return a `const range_pair&` which is a `std::pair<uri_len_t, uri_len_t>&` to the specified component at the index given in the ranges table. */
 	constexpr const range_pair& operator[](component idx) const noexcept { return _ranges[idx]; }
+
+	/*! Provides direct access to the offset and length of the specifed component and is used to create a `std::string_view`. USE CAREFULLY.
+	  	\param idx index into table
+		\return a `range_pair&` which is a `std::pair<uri_len_t, uri_len_t>&` to the specified component at the index given in the ranges table. */
+	constexpr range_pair& operator[](component idx) noexcept { return _ranges[idx]; }
+
 	constexpr value_pair get_named_pair(component what) const
 	{
 		if (what < countof)
@@ -105,8 +101,10 @@ public:
 		throw(std::out_of_range("invalid component index"));
 	}
 	constexpr int count() const noexcept { return std::popcount(_present); } // upgrade to std::bitset when constexpr in c++23
-	constexpr bool test(component what) const noexcept { return _present & (1 << what); }
-	constexpr operator bool() const noexcept { return count(); }
+	constexpr uri_len_t get_present() const noexcept { return _present; }
+	constexpr void set(component what=countof) noexcept { what == countof ? _present = (1 << countof) - 1 : _present |= (1 << what); }
+	constexpr void clear(component what=countof) noexcept { what == countof ? _present = 0 : _present &= ~(1 << what); }
+	constexpr bool test(component what=countof) const noexcept { return what == countof ? _present : _present & (1 << what); }
 
 	constexpr int parse()
 	{
@@ -123,7 +121,7 @@ public:
 			set(scheme);
 			pos = sch + 1;
 		}
-		if (auto auth {_source.find_first_of("//", pos)}; auth != std::string_view::npos)
+		if (auto auth {_source.find("//", pos)}; auth != std::string_view::npos)
 		{
 			auth += 2;
 			if ((pth = _source.find_first_of('/', auth)) == std::string_view::npos) // unterminated path
@@ -132,12 +130,14 @@ public:
 			set(authority);
 			if (const auto usr {_source.find_first_of('@', auth)}; usr != std::string_view::npos && usr < pth)
 			{
-				if (const auto pw {_source.find_first_of(':', auth)}; pw != std::string_view::npos && pw < usr
-					&& _source.find_first_of(':', pw + 1) == std::string_view::npos) // no nested ':' before '@'
+				if (const auto pw {_source.find_first_of(':', auth)}; pw != std::string_view::npos && pw < usr) // no nested ':' before '@'
 				{
 					_ranges[user] = std::make_pair(auth, pw - auth);
-					_ranges[password] = std::make_pair(pw + 1, usr - pw - 1);
-					set(password);
+					if (usr - pw - 1 > 0)
+					{
+						_ranges[password] = std::make_pair(pw + 1, usr - pw - 1);
+						set(password);
+					}
 				}
 				else
 					_ranges[user] = std::make_pair(auth, usr - auth);
@@ -147,14 +147,16 @@ public:
 			else
 				hst = pos = auth;
 
-			if (auto prt { _source.find_first_of(':', pos) }; prt != std::string_view::npos
-				&& !is_ipv6(get(authority)))
+			if (auto prt { _source.find_first_of(':', pos) }; prt != std::string_view::npos)
 			{
-				++prt;
-				if (_source.size() - prt > 0)
+				if (auto autstr {get(authority)}; autstr.front() != '[' && autstr.back() != ']')
 				{
-					_ranges[port] = std::make_pair(prt, _source.size() - prt);
-					set(port);
+					++prt;
+					if (_source.size() - prt > 0)
+					{
+						_ranges[port] = std::make_pair(prt, _source.size() - prt);
+						set(port);
+					}
 				}
 			}
 		}
@@ -177,8 +179,13 @@ public:
 		}
 		if (pth == std::string_view::npos)
 		{
-			_ranges[path] = std::make_pair(pos, _source.size() - pos);
 			set(path);
+			if ((pth = _source.find_first_of('/', pos)) != std::string_view::npos)
+				_ranges[path] = std::make_pair(pth, _source.size() - pth);
+			else if (test(scheme))
+				_ranges[path] = std::make_pair(pos, _source.size() - pos);
+			else
+				clear(path);
 		}
 		if (const auto qur {_source.find_first_of('?', pos)}; qur != std::string_view::npos)
 		{
@@ -240,8 +247,8 @@ public:
 	{
 		std::string result{src};
 		for (std::string_view::size_type fnd; ((fnd = find_hex(result))) != std::string_view::npos; )
-			result.replace(fnd, 3, 1, ((result[fnd + 1] & 0xf) + (result[fnd + 1] >> 6) * 9) << 4
-				| ((result[fnd + 2] & 0xf) + (result[fnd + 2] >> 6) * 9));
+			result.replace(fnd, 3, 1, ((result[fnd + 1] & 0xF) + (result[fnd + 1] >> 6) * 9) << 4
+				| ((result[fnd + 2] & 0xF) + (result[fnd + 2] >> 6) * 9));
 		return result;
 	}
 	static constexpr std::string_view get_name(component what)

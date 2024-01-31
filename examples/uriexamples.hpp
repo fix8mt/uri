@@ -194,7 +194,7 @@ const std::vector<std::pair<const char *, std::vector<std::pair<uri::component, 
 		{
 			{ scheme, "http" },
 			{ authority, "-.~_!$&'()*+,;=:@:80" },
-			{ user, "-.~_!$&'()*+,;=:" },
+			{ user, "-.~_!$&'()*+,;=" },
 			{ port, "80" },
 			{ path, "/::::::@example.com" },
 		}
@@ -293,6 +293,15 @@ const std::vector<std::pair<const char *, std::vector<std::pair<uri::component, 
 			{ authority, "en.wikipedia.org" },
 			{ host, "en.wikipedia.org" },
 			{ path, "/wiki/C++20" },
+		}
+	},
+	{ "www.hello.com/",
+		{
+			{ path, "/" },
+		}
+	},
+	{ "www.hello.com",
+		{
 		}
 	},
 };

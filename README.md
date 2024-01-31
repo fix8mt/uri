@@ -177,6 +177,10 @@ in your application. Everything in this class is within the namespace `FIX8`, so
 ```c++
 using namespace FIX8;
 ```
+It's C++20, so you also add (watch out for namespace conflicts though):
+```c++
+using enum uri::component;
+```
 
 # API
 ## Class hierarchy
@@ -387,7 +391,7 @@ Parse the source string into components. Return the count of components found. W
 
 # Testing
 ## Test cases
-The header file `uriexamples.hpp` contains a data structure holding test cases used by the Catch2 unit test `uritest2` and by the CLI test app `uritest`.
+The header file `uriexamples.hpp` contains a data structure holding test cases used by the Catch2 unit test app `uritest2` and by the CLI test app `uritest`.
 You can add your own test cases to `uriexamples.hpp` - the structure is easy enough to follow.
 
 <details><summary><i>sample</i></summary>

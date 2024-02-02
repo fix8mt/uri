@@ -33,6 +33,7 @@ This is a lightweight URI parser implementation featuring zero-copy, minimal sto
 - all methods `constexpr`; no virtual methods
 - extracts all components `scheme`, `authority`, `user`, `password`, `host`, `port`, `path`, `query`, `fragment`
 - query components returned as `std::string_view`
+- query decode and search - no copying, results point to uri source
 - fast, very lightweight, predictive non brute force parser
 - small memory footprint - base class object is only 56 bytes
 - built-in unit test cases with exhaustive test URI cases
@@ -63,8 +64,10 @@ int main(int argc, char *argv[])
       << u1.get_component(uri::port) << '\n'
       << u1.get_component(uri::query) << '\n'
       << u1.get_component(uri::fragment) << '\n';
-   if (u1.test(uri::user))
+   if (u1.test(uri::user)) // should be no user
       std::cout << u1.get_component(uri::user) << '\n';
+	auto result{u1.decode_query(true)}; // sort result
+	std::cout << uri::find_query("key", result) << '\n';
    return 0;
 }
 ```
@@ -100,6 +103,7 @@ nodejs.org
 89
 payload1=true&payload2=false&test=1&benchmark=3&foo=38.38.011.293&bar=1234834910480&test=19299&3992&key=f5c65e1e98fe07e648249ad41e1cfdb0
 test
+f5c65e1e98fe07e648249ad41e1cfdb0
 $
 ```
 
@@ -266,7 +270,7 @@ Return a `std::string_view` of the specified component.
 constexpr const range_pair& operator[](component idx) const;
 ```
 Return a `const range_pair&` which is a `std::pair<uri_len_t, uri_len_t>&` to the specified component at the index given in the ranges table. This provides read-only
-access to the offset and length of the specified component and is used to create a `std::string_view`.
+access to the offset and length of the specified component and is used to create a `std::string_view`. No copying, results point to uri source.
 > [!WARNING]
 > This is _not_ range checked.
 
@@ -277,7 +281,7 @@ constexpr query_result decode_query(bool sort=false) const;
 ```
 Returns a `std::vector` of pairs of `std::string_view` of the query component if present.  You can optionally override the value pair separator character using
 the first non-type template parameter - some queries use `;`. You can also optionally override the value equality separator character using the second non-type
-template parameter - some queries use `:`. Pass `true` to optionally sort the `query_result` lexographically by the key.
+template parameter (some queries use `:`). Pass `true` to optionally sort the `query_result` lexographically by the key. No copying, results point to uri source.
 Returns an empty vector if no query was found. The query is assumed to be in the form:
 ```
 &tag=value[&tag=value...]
@@ -293,7 +297,7 @@ If no value is present, just the tag will be populated with an empty value.
 static constexpr std::string_view find_query (std::string_view what, const query_result& from);
 ```
 Find the specified query key and return its value from the given `query_result`. `query_result` must be sorted by key, as returned by
-passing `true` to `decode_query`. If key not found return empty `std::string_view`.
+passing `true` to `decode_query`. If key not found return empty `std::string_view`. No copying, results point to uri source.
 
 ### `decode_hex`
 ```c++
@@ -333,7 +337,7 @@ Return a `std::string_view` of the source uri. If not set return value will be e
 constexpr value_pair get_named_pair(component what) const;
 ```
 Return a `std::pair` of `std::string_view` for the specified component. The `first` will be the component name, `second` the component value. Suitable
-for populating a JSON field. Throws a `std::out_of_range` if not a legal component.
+for populating a JSON field. Throws a `std::out_of_range` if not a legal component. No copying, results point to uri source.
 
 ### `count`
 ```c++

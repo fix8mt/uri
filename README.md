@@ -66,8 +66,8 @@ int main(int argc, char *argv[])
       << u1.get_component(uri::fragment) << '\n';
    if (u1.test(uri::user)) // should be no user
       std::cout << u1.get_component(uri::user) << '\n';
-	auto result{u1.decode_query(true)}; // sort result
-	std::cout << uri::find_query("key", result) << '\n';
+   auto result{u1.decode_query(true)}; // sort result
+   std::cout << uri::find_query("key", result) << '\n';
    return 0;
 }
 ```

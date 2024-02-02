@@ -32,9 +32,9 @@ This is a lightweight URI parser implementation featuring zero-copy, minimal sto
 - derived class moves (or copies) source string once
 - all methods `constexpr`; no virtual methods
 - extracts all components `scheme`, `authority`, `user`, `password`, `host`, `port`, `path`, `query`, `fragment`
-- query components, return as `std::string_view`
+- query components returned as `std::string_view`
 - fast, very lightweight, predictive non brute force parser
-- small memory footprint - base class is only 56 bytes
+- small memory footprint - base class object is only 56 bytes
 - built-in unit test cases with exhaustive test URI cases
 - support for [**RFC 3986**](https://datatracker.ietf.org/doc/html/rfc3986)
 
@@ -273,11 +273,12 @@ access to the offset and length of the specified component and is used to create
 ### `decode_query`
 ```c++
 template<char separator='&',char tagequ='='>
-constexpr query_result decode_query() const;
+constexpr query_result decode_query(bool sort=false) const;
 ```
 Returns a `std::vector` of pairs of `std::string_view` of the query component if present.  You can optionally override the value pair separator character using
 the first non-type template parameter - some queries use `;`. You can also optionally override the value equality separator character using the second non-type
-template parameter - some queries use `:`. Returns an empty vector if no query was found. The query is assumed to be in the form:
+template parameter - some queries use `:`. Pass `true` to optionally sort the `query_result` lexographically by the key.
+Returns an empty vector if no query was found. The query is assumed to be in the form:
 ```
 &tag=value[&tag=value...]
 ```
@@ -286,6 +287,13 @@ Or if you override, say
 ;tag:value[;tag:value...]
 ```
 If no value is present, just the tag will be populated with an empty value.
+
+### `find_query`
+```c++
+static constexpr std::string_view find_query (std::string_view what, const query_result& from);
+```
+Find the specified query key and return its value from the given `query_result`. `query_result` must be sorted by key, as returned by
+passing `true` to `decode_query`. If key not found return empty `std::string_view`.
 
 ### `decode_hex`
 ```c++

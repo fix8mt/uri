@@ -67,7 +67,7 @@ int main(int argc, char *argv[])
    if (u1.test(uri::user)) // should be no user
       std::cout << u1.get_component(uri::user) << '\n';
    auto result{u1.decode_query(true)}; // sort result
-   std::cout << "key=" << uri::find_query("key", result) << '\n';
+   std::cout << "key = " << uri::find_query("key", result) << '\n';
    return 0;
 }
 ```
@@ -103,7 +103,7 @@ nodejs.org
 89
 payload1=true&payload2=false&test=1&benchmark=3&foo=38.38.011.293&bar=1234834910480&test=19299&3992&key=f5c65e1e98fe07e648249ad41e1cfdb0
 test
-f5c65e1e98fe07e648249ad41e1cfdb0
+key = f5c65e1e98fe07e648249ad41e1cfdb0
 $
 ```
 

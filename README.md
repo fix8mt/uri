@@ -208,8 +208,7 @@ Components are named by a public enum called `component`.  Note that the compone
 | `query_result`  | `std::vector<value_pair>` |used to return a collection of query pairs|
 | `range_pair`  | `std::pair<uri_len_t,uri_len_t>` |used to store offset and length |
 | `comp_pair` | `std::pair<component, std::string_view>`|used by `factory` to pass individual `component` pairs|
-| `value_list` | `std::vector<std::string_view>`|used by `factory`,`edit` and `make_source` to pass individual `component` values,
-																 each position in the vector corresponds to the component index|
+| `value_list` | `std::vector<std::string_view>`|used by `factory`,`edit` and `make_source` to pass individual `component` values, each position in the vector corresponds to the component index|
 
 ### consts
 | Const | Description |

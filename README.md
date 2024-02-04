@@ -31,11 +31,11 @@ This is a lightweight URI parser implementation featuring zero-copy, minimal sto
 - base class is zero-copy, using `std::string_view`
 - derived class moves (or copies) source string once
 - all methods `constexpr`; no virtual methods
-- extracts all components `scheme`, `authority`, `user`, `password`, `host`, `port`, `path`, `query`, `fragment`
+- extracts all components `scheme`, `authority`, `userinfo`, `user`, `password`, `host`, `port`, `path`, `query`, `fragment`
 - query components returned as `std::string_view`
 - query decode and search - no copying, results point to uri source
 - fast, very lightweight, predictive non brute force parser
-- small memory footprint - base class object is only 56 bytes
+- small memory footprint - base class object is only 64 bytes
 - built-in unit test cases with exhaustive test URI cases
 - support for [**RFC 3986**](https://datatracker.ietf.org/doc/html/rfc3986)
 
@@ -195,10 +195,10 @@ The derived class `uri` stores the source string and then builds a `basic_uri` u
 ## Types
 ### component
 ```c++
-enum component { scheme, authority, user, password, host, port, path, query, fragment, countof };
+enum component { scheme, authority, userinfo, user, password, host, port, path, query, fragment, countof };
 ```
-Components are named by a public enum called `component`.  Note that the component `user` is the equivalent of the [RFC 3986](https://datatracker.ietf.org/doc/html/rfc3986)
-`userinfo` where no password was found.  If a password is present, then `user` and `password` are populated.
+Components are named by a public enum called `component`.  Note that the component `user` and `password` are populated if present and
+`userinfo` will also be populated.
 
 ### other types
 | Type | Typedef of |Description |
@@ -207,6 +207,9 @@ Components are named by a public enum called `component`.  Note that the compone
 | `value_pair`  | `std::pair<std::string_view,std::string_view>` |used to return tag value pairs|
 | `query_result`  | `std::vector<value_pair>` |used to return a collection of query pairs|
 | `range_pair`  | `std::pair<uri_len_t,uri_len_t>` |used to store offset and length |
+| `comp_pair` | `std::pair<component, std::string_view>`|used by `factory` to pass individual `component` pairs|
+| `value_list` | `std::vector<std::string_view>`|used by `factory`,`edit` and `make_source` to pass individual `component` values,
+																 each position in the vector corresponds to the component index|
 
 ### consts
 | Const | Description |
@@ -396,6 +399,13 @@ access to the offset and length of the specified component and is used to create
 constexpr int parse();
 ```
 Parse the source string into components. Return the count of components found. Will reset a uri if already parsed. Throws a `std::exception` if parsing fails.
+
+## Generation and editing
+### `factory`
+```c++
+static constexpr uri factory(std::initializer_list<comp_pair> from);
+```
+Create a `uri` from the supplied components. The `initializer_list` contains a 1..n `comp_pair` objects. The following constraints apply:
 
 # Testing
 ## Test cases

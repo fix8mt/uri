@@ -226,7 +226,7 @@ constexpr uri() = default;                                           (5)
 ```
 
 1. Construct a `basic_uri` from a `std::string_view`. This base class does not store the string. Calls `parse()`. The source string must not go out of scope to use this object. Throws a `std::exception` if parsing fails.
-1. Construct a `basic_uri` that has the corresponding bitset passed in `bits`. No components are present. It is used to permit the object to be used as a bitset.
+1. Construct a `basic_uri` that has the corresponding bitset passed in `bits`. No components are present. It is used so the object can be used as a bitset.
 1. Construct an empty `basic_uri`. It can be populated using `assign()`.
 1. Construct a `uri` from a `std::string`. By default, the source string is percent decoded before parsing. Calls `parse()`. Optionally pass `false` to prevent percent decoding.
 The supplied string is moved or copied and stored by the object. Throws a `std::exception` if parsing fails.

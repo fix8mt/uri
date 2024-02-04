@@ -219,7 +219,7 @@ Components are named by a public enum called `component`.  Note that the compone
 ### ctor
 ```c++
 constexpr basic_uri(std::string_view src);                           (1)
-constexpr basic_uri(uri_len_t bits);                                 (2)
+constexpr basic_uri(int bits);                                       (2)
 constexpr basic_uri() = default;                                     (3)
 constexpr uri(std::string src, bool decode=true);                    (4)
 constexpr uri() = default;                                           (5)

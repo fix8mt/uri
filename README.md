@@ -110,9 +110,8 @@ $
 </p>
 </details>
 
-## 2. Parse a URI
-This example parses a URI string and prints out all the contained elements. Note the use of `basic_uri`. The lifetime of the `u1` object
-is undefined after the `if` statement is executed. The source string is not stored.
+## 2. Use the factory
+Create a URI from the supplied initializer list. Print out the result.
 
 <details><summary><i>source</i></summary>
 <p>
@@ -124,8 +123,8 @@ using namespace FIX8;
 
 int main(int argc, char *argv[])
 {
-   if (const basic_uri u1{ "ws://localhost:9229/f46db715-70df-43ad-a359-7f9949f39868" }; u1)
-      std::cout << u1 << '\n';
+   const auto u1 { uri::factory({{scheme, "https"}, {user, "dakka"}, {host, "www.blah.com"}, {port, "3000"}, {path, "/"}}) };
+   std::cout << u1 << '\n';
    return 0;
 }
 ```
@@ -138,12 +137,63 @@ int main(int argc, char *argv[])
 
 ```CSV
 $ ./example2
-source      ws://localhost:9229/f46db715-70df-43ad-a359-7f9949f39868
-scheme      ws
-authority   localhost:9229
-host        localhost
-port        9229
-path        /f46db715-70df-43ad-a359-7f9949f39868
+source      https://dakka@www.blah.com:3000/
+scheme      https
+authority   dakka@www.blah.com:3000
+userinfo    dakka
+user        dakka
+host        www.blah.com
+port        3000
+path        /
+$
+```
+
+## 3. Edit a URI
+Create a URI from the supplied initializer list then edit it.
+
+<details><summary><i>source</i></summary>
+<p>
+
+```c++
+#include <iostream>
+#include <fix8/uri.hpp>
+using namespace FIX8;
+
+int main(int argc, char *argv[])
+{
+   const auto u1 { uri::factory({{scheme, "https"}, {user, "dakka"}, {host, "www.blah.com"}, {port, "3000"}, {path, "/"}}) };
+   std::cout << u1 << '\n';
+   u1.edit({{port, "80"}, {user, ""}, {path, "/newpath"}});
+   std::cout << '\n' << u1 << '\n';
+   return 0;
+}
+```
+
+</p>
+</details>
+
+<details><summary><i>output</i></summary>
+</p>
+
+```CSV
+$ ./example2
+source      https://dakka@www.blah.com:3000/
+scheme      https
+authority   dakka@www.blah.com:3000
+userinfo    dakka
+user        dakka
+host        www.blah.com
+port        3000
+path        /
+
+source      https://dakka@www.blah.com:80/newpath
+scheme      https
+authority   dakka@www.blah.com:80
+userinfo    dakka
+user        dakka
+host        www.blah.com
+port        80
+path        /newpath
 $
 ```
 
@@ -535,6 +585,6 @@ index when using these. Making changes to the range object with `operator[]` can
 1. `constexpr range_pair& operator[](component idx)`;
 
 ## Sanity checking
-This class will perform basic sanity checks on the source URI and throws `std::exception` on failure. These are:
+This class will perform basic sanity checks on the source URI and refuses to continue parsing. You can test for failure using the `operator bool`. These are:
 1. Length - source must not exceed `uri_max_len` (`UINT16_MAX`)
 1. Illegal chars - source must not contain any whitespace characters

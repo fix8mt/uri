@@ -164,7 +164,7 @@ using namespace FIX8;
 
 int main(int argc, char *argv[])
 {
-   const auto u1 { "dakka@www.blah.com:3000" };
+   const auto u1 { "https://dakka@www.blah.com:3000" };
    std::cout << u1 << '\n';
    u1.edit({{port, "80"}, {user, ""}, {path, "/newpath"}});
    std::cout << '\n' << u1 << '\n';
@@ -180,14 +180,14 @@ int main(int argc, char *argv[])
 
 ```CSV
 $ ./example2
-source      https://dakka@www.blah.com:3000/
+source      https://dakka@www.blah.com:3000
 scheme      https
 authority   dakka@www.blah.com:3000
 userinfo    dakka
 user        dakka
 host        www.blah.com
 port        3000
-path        /
+path        (empty)
 
 source      https://www.blah.com:80/newpath
 scheme      https

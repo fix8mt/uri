@@ -166,7 +166,7 @@ int main(int argc, char *argv[])
 {
    const auto u1 { "dakka@www.blah.com:3000" };
    std::cout << u1 << '\n';
-   u1.edit({{port, "80"}, {path, "/newpath"}});
+   u1.edit({{port, "80"}, {user, ""}, {path, "/newpath"}});
    std::cout << '\n' << u1 << '\n';
    return 0;
 }

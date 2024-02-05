@@ -200,6 +200,9 @@ $
 </p>
 </details>
 
+<details><summary><i>output</i></summary>
+</p>
+
 # Building
 This implementation is header only. Apart from standard C++20 includes there are no external dependencies needed in your application.
 [Catch2](https://github.com/catchorg/Catch2.git) is used for the built-in unit tests.

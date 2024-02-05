@@ -148,6 +148,9 @@ path        /
 $
 ```
 
+</p>
+</details>
+
 ## 3. Edit a URI
 Create a URI from the supplied initializer list then edit it.
 
@@ -199,9 +202,6 @@ $
 
 </p>
 </details>
-
-<details><summary><i>output</i></summary>
-</p>
 
 # Building
 This implementation is header only. Apart from standard C++20 includes there are no external dependencies needed in your application.

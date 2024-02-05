@@ -152,7 +152,7 @@ $
 </details>
 
 ## 3. Edit a URI
-Create a URI from the supplied initializer list then edit it.
+Create a URI and then edit it.
 
 <details><summary><i>source</i></summary>
 <p>

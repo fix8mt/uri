@@ -164,7 +164,7 @@ using namespace FIX8;
 
 int main(int argc, char *argv[])
 {
-   const auto u1 { uri::factory({{scheme, "https"}, {user, "dakka"}, {host, "www.blah.com"}, {port, "3000"}, {path, "/"}}) };
+   const auto u1 { "dakka@www.blah.com:3000" };
    std::cout << u1 << '\n';
    u1.edit({{port, "80"}, {path, "/newpath"}});
    std::cout << '\n' << u1 << '\n';
@@ -189,7 +189,7 @@ host        www.blah.com
 port        3000
 path        /
 
-source      https://dakka@www.blah.com:80/newpath
+source      https://www.blah.com:80/newpath
 scheme      https
 authority   www.blah.com:80
 host        www.blah.com

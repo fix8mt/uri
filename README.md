@@ -166,7 +166,7 @@ int main(int argc, char *argv[])
 {
    const auto u1 { uri::factory({{scheme, "https"}, {user, "dakka"}, {host, "www.blah.com"}, {port, "3000"}, {path, "/"}}) };
    std::cout << u1 << '\n';
-   u1.edit({{port, "80"}, {user, ""}, {path, "/newpath"}});
+   u1.edit({{port, "80"}, {path, "/newpath"}});
    std::cout << '\n' << u1 << '\n';
    return 0;
 }
@@ -191,9 +191,7 @@ path        /
 
 source      https://dakka@www.blah.com:80/newpath
 scheme      https
-authority   dakka@www.blah.com:80
-userinfo    dakka
-user        dakka
+authority   www.blah.com:80
 host        www.blah.com
 port        80
 path        /newpath

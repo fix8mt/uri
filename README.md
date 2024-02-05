@@ -120,6 +120,7 @@ Create a URI from the supplied initializer list. Print out the result.
 #include <iostream>
 #include <fix8/uri.hpp>
 using namespace FIX8;
+using enum uri::component;
 
 int main(int argc, char *argv[])
 {
@@ -161,6 +162,7 @@ Create a URI and then edit it.
 #include <iostream>
 #include <fix8/uri.hpp>
 using namespace FIX8;
+using enum uri::component;
 
 int main(int argc, char *argv[])
 {
@@ -259,7 +261,7 @@ Components are named by a public enum called `component`.  Note that the compone
 | `query_result`  | `std::vector<value_pair>` |used to return a collection of query pairs|
 | `range_pair`  | `std::pair<uri_len_t,uri_len_t>` |used to store offset and length |
 | `comp_pair` | `std::pair<component, std::string_view>`|used by `factory` to pass individual `component` pairs|
-| `value_list` | `std::vector<std::string_view>`|used by `factory`,`edit` and `make_source` to pass individual `component` values, each position in the vector corresponds to the component index|
+| `comp_list` | `std::vector<std::string_view>`|used by `factory`,`edit` and `make_source` to pass individual `component` values, each position in the vector corresponds to the component index|
 
 ### consts
 | Const | Description |
@@ -589,3 +591,13 @@ index when using these. Making changes to the range object with `operator[]` can
 This class will perform basic sanity checks on the source URI and refuses to continue parsing. You can test for failure using the `operator bool`. These are:
 1. Length - source must not exceed `uri_max_len` (`UINT16_MAX`)
 1. Illegal chars - source must not contain any whitespace characters
+
+## Performance
+This class performs well, with minimal latency. Since there is no copying of strings or sub-strings, the decoding functionality in `basic_uri` uses minimal cycles
+- especially for applications that can manage the storage of the source string themselves. The memory footprint of `basic_uri` is 64 bytes and will fit in a cache-line.
+If storage of the source is needed, `uri` performs a single string copy (or move), and aside from that will have the same performance as `basic_uri`.
+
+The `factory` and `edit` have more copying although even these still use `std::string_view` where possible with actual copying of strings or sub-strings occuring
+once at most. Construction
+
+With all methods `constexpr`, no `virtual` methods and header only your compiler should be able to optimise your code most efficiently.

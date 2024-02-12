@@ -287,7 +287,7 @@ The storage class used is a specialisation of `uri_storage` which specifies `0` 
 
 The derived class `uri_static` stores the source string and then builds a `basic_uri` using that string as its reference. `uri_static` derives from `basic_uri` and a private storage class
 `uri_storage`. The supplied string is moved or copied and stored by the object. The class is templated by the non-type parameter `sz` which sets the static size and maximum storage capacity
-for the uri. Storage is allocated once with the object in a `std::array`. No dynamic memory is used. If your application needs the uri to hold and persist the source uri statically, this class is suitable.
+for the uri. `sz` defaults to `1024`. Storage is allocated once with the object in a `std::array`. No dynamic memory is used. If your application needs the uri to hold and persist the source uri statically, this class is suitable.
 
 ![class diagram (static)](https://github.com/fix8mt/uri/blob/master/assets/classstatic.png)
 
@@ -308,7 +308,7 @@ Components are named by a public enum called `component`.  Note that the compone
 | `range_pair`  | `std::pair<uri_len_t,uri_len_t>` |used to store offset and length |
 | `comp_pair` | `std::pair<component, std::string_view>`|used by `factory` to pass individual `component` pairs|
 | `comp_list` | `std::vector<std::string_view>`|used by `factory`,`edit` and `make_source` to pass individual `component` values; each position in the vector corresponds to the component index|
-| `error` | `enum class error : uri_len_t { no_error, too_long, illegal_chars, empty_src, countof };|error types|
+| `error` | `enum class error : uri_len_t { no_error, too_long, illegal_chars, empty_src, countof };`|error types|
 
 ### consts
 | Const | Description |

@@ -80,7 +80,7 @@ int main(int argc, char *argv[])
 
 ```CSV
 $ ./example1
-source      http://nodejs.org:89/docs/latest/api/foo/bar/qua/13949281/0f28b/5d49/b3020/url.html?payload1=true&payload2=false&test=1&benchmark=3&foo=38.38.011.293&bar=1234834910480&test=19299&3992&key=f5c65e1e98fe07e648249ad41e1cfdb0#test
+uri         http://nodejs.org:89/docs/latest/api/foo/bar/qua/13949281/0f28b/5d49/b3020/url.html?payload1=true&payload2=false&test=1&benchmark=3&foo=38.38.011.293&bar=1234834910480&test=19299&3992&key=f5c65e1e98fe07e648249ad41e1cfdb0#test
 scheme      http
 authority   nodejs.org:89
 host        nodejs.org
@@ -138,7 +138,7 @@ int main(int argc, char *argv[])
 
 ```CSV
 $ ./example2
-source      https://dakka@www.blah.com:3000/
+uri         https://dakka@www.blah.com:3000/
 scheme      https
 authority   dakka@www.blah.com:3000
 userinfo    dakka
@@ -182,7 +182,7 @@ int main(int argc, char *argv[])
 
 ```CSV
 $ ./example2
-source      https://dakka@www.blah.com:3000
+uri         https://dakka@www.blah.com:3000
 scheme      https
 authority   dakka@www.blah.com:3000
 userinfo    dakka
@@ -191,7 +191,7 @@ host        www.blah.com
 port        3000
 path        (empty)
 
-source      https://www.blah.com:80/newpath
+uri         https://www.blah.com:80/newpath
 scheme      https
 authority   www.blah.com:80
 host        www.blah.com
@@ -262,6 +262,7 @@ Components are named by a public enum called `component`.  Note that the compone
 | `range_pair`  | `std::pair<uri_len_t,uri_len_t>` |used to store offset and length |
 | `comp_pair` | `std::pair<component, std::string_view>`|used by `factory` to pass individual `component` pairs|
 | `comp_list` | `std::vector<std::string_view>`|used by `factory`,`edit` and `make_source` to pass individual `component` values; each position in the vector corresponds to the component index|
+| `error` | `enum class error : uri_len_t { no_error, too_long, illegal_chars, empty_src, countof };|error types|
 
 ### consts
 | Const | Description |
@@ -278,11 +279,12 @@ constexpr uri(std::string src, bool decode=true);                    (4)
 constexpr uri() = default;                                           (5)
 ```
 
-1. Construct a `basic_uri` from a `std::string_view`. This base class does not store the string. Calls `parse()`. The source string must not go out of scope to use this object. Throws a `std::exception` if parsing fails.
+1. Construct a `basic_uri` from a `std::string_view`. This base class does not store the string. Calls `parse()`. The source string must not go out of scope to use this object. If parsing
+fails, you can check for error using `operator bool` or `count()` and then `get_error()` for more info. Since this method takes a `std::string_view` you can declare objects `constexpr`.
 1. Construct a `basic_uri` that has the corresponding bitset passed in `bits`. No components are present. It is used so the object can be used as a bitset.
 1. Construct an empty `basic_uri`. It can be populated using `assign()`.
 1. Construct a `uri` from a `std::string`. By default, the source string is percent decoded before parsing. Calls `parse()`. Optionally pass `false` to prevent percent decoding.
-The supplied string is moved or copied and stored by the object. Throws a `std::exception` if parsing fails.
+The supplied string is moved or copied and stored by the object. You can check for error using `operator bool` or `count()` and then `get_error()` for more info.
 1. Construct an empty `uri`. It can be populated using `replace()`.
 
 All of `uri` is within the namespace **`FIX8`**.
@@ -321,6 +323,18 @@ constexpr std::string_view get(component what) const;
 Return a `std::string_view` of the specified component.
 > [!WARNING]
 > This is _not_ range checked.
+
+### `operator bool`
+```c++
+constexpr operator bool() const;
+```
+Returns true if parsing was successful, false on fail.
+
+### `get_error`
+```c++
+constexpr error get_error() const;
+```
+Return the last `uri::error` error enum. If no error returns `error::no_error`. Use it to obtain the reason a uri failed to parse.
 
 ### `const operator[component]`
 ```c++
@@ -383,9 +397,9 @@ static constexpr std::string_view get_name(component what);
 ```
 Return a `std::string_view` of the specified component name. Throws a `std::out_of_range` if not a legal component.
 
-### `get_source`
+### `get_uri`
 ```c++
-constexpr std::string_view get_source() const;
+constexpr std::string_view get_uri() const;
 ```
 Return a `std::string_view` of the source uri. If not set return value will be empty.
 
@@ -414,6 +428,13 @@ constexpr const std::string& get_buffer() const;
 ```
 Return a `const std::string&` to the stored buffer. Only available from `uri`.
 
+### `any_authority`
+```c++
+constexpr bool any_authority() const;
+```
+Returns true if any authority components are present. This means any one of `host`, `password`, `port`, `user` or `userinfo`.
+
+
 ## Mutators
 ### `set`
 ```c++
@@ -439,6 +460,12 @@ constexpr std::string replace(std::string&& src);
 ```
 Replace the current uri with the given string. The storage is updated with a move (or copy) of the string. The old string is returned.
 
+### `set_error`
+```c++
+constexpr void set_error(error what);
+```
+Set the last `uri::error` error to the error given. Setting an error is destructive and renders the uri unusable.
+
 ## `operator[component]`
 ```c++
 constexpr range_pair& operator[](component idx);
@@ -452,12 +479,20 @@ access to the offset and length of the specified component and is used to create
 ```c++
 constexpr int parse();
 ```
-Parse the source string into components. Return the count of components found. Will reset a uri if already parsed. Throws a `std::exception` if parsing fails.
+Parse the source string into components. Return the count of components found. Will reset a uri if already parsed. You can check for error using `get_error()` for more info
 
 ## Generation and editing
 ### `factory`
 ```c++
 static constexpr uri factory(std::initializer_list<comp_pair> from);
+```
+Create a `uri` from the supplied components. The `initializer_list` contains a 1..n `comp_pair` objects. The following constraints apply:
+1. If `authority` is supplied then if any of the following components present `host`, `password`, `port`, `user` or `userinfo` then `authority` is ignored;
+1. If `userinfo` is supplied then if any of the following components present `user` or `password` then `userinfo` is ignored;
+
+### `edit`
+```c++
+constexpr int edit(std::initializer_list<comp_pair> from);
 ```
 Create a `uri` from the supplied components. The `initializer_list` contains a 1..n `comp_pair` objects. The following constraints apply:
 
@@ -543,9 +578,10 @@ You can run adhoc tests from the CLI as follows:
 
 ```CSV
 $ ./uritest -d "https://user:password@example.com:3000/path?search=1&key=val&when=now#frag"
-source      https://user:password@example.com:3000/path?search=1&key=val&when=now#frag
+uri         https://user:password@example.com:3000/path?search=1&key=val&when=now#frag
 scheme      https
 authority   user:password@example.com:3000
+userinfo    user:password
 user        user
 password    password
 host        example.com
@@ -557,9 +593,10 @@ query       search=1&key=val&when=now
    when        now
 fragment    frag
 
-111111111 (511)
+1111111111 (0x3ff)
 scheme 0 (5)
 authority 8 (30)
+userinfo 8 (13)
 user 8 (4)
 password 13 (8)
 host 22 (11)
@@ -598,6 +635,6 @@ This class performs well, with minimal latency. Since there is no copying of str
 If storage of the source is needed, `uri` performs a single string copy (or move), and aside from that will have the same performance as `basic_uri`.
 
 The `factory` and `edit` have more copying although even these still use `std::string_view` where possible with actual copying of strings or sub-strings occuring
-once at most. Construction
+once at most.
 
-With all methods `constexpr`, no `virtual` methods and header only your compiler should be able to optimise your code most efficiently.
+With all methods `constexpr` and `noexcept`, no `virtual` methods and header only your compiler should be able to optimise your code most efficiently.

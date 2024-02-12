@@ -244,6 +244,11 @@ The derived class `uri` stores the source string and then builds a `basic_uri` u
 `uri_storage`. The supplied string is moved or copied and stored by the object. If your application needs the uri to hold and persist the source uri, this class is suitable.
 
 ![class diagram](https://github.com/fix8mt/uri/blob/master/assets/classdynamic.png)
+
+The derived class `uri_static` stores the source string and then builds a `basic_uri` using that string as its reference. `uri_static` derives from `basic_uri` and a private storage class
+`uri_storage_static`. The supplied string is moved or copied and stored by the object. The class is templated by the non-type parameter `sz` which sets the static size and maximum storage capacity
+for the uri. Storage is allocated once with the object in a `std::array`. No dynamic memory is used. If your application needs the uri to hold and persist the source uri sttaically, this class is suitable.
+
 ![class diagram (static)](https://github.com/fix8mt/uri/blob/master/assets/classstatic.png)
 
 ## Types

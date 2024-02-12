@@ -110,7 +110,46 @@ $
 </p>
 </details>
 
-## 2. Use the factory
+## 2. Create a static uri
+Create a static URI from the supplied initializer list. Print out the result.
+
+<details><summary><i>source</i></summary>
+<p>
+
+```c++
+#include <iostream>
+#include <fix8/uri.hpp>
+using namespace FIX8;
+using enum uri::component;
+
+int main(int argc, char *argv[])
+{
+   uri_static<256> u1{"mailto:John.Smith@example.com"};
+   std::cout << u1 << '\n';
+   std::cout << "max storage: " << uri_static<256>::max_storage() << '\n';
+   return 0;
+}
+```
+
+</p>
+</details>
+
+<details><summary><i>output</i></summary>
+</p>
+
+```CSV
+$ ./example2
+uri         mailto:John.Smith@example.com
+scheme      mailto
+path        John.Smith@example.com
+max storage: 256
+$
+```
+
+</p>
+</details>
+
+## 3. Use the factory
 Create a URI from the supplied initializer list. Print out the result.
 
 <details><summary><i>source</i></summary>
@@ -137,7 +176,7 @@ int main(int argc, char *argv[])
 </p>
 
 ```CSV
-$ ./example2
+$ ./example3
 uri         https://dakka@www.blah.com:3000/
 scheme      https
 authority   dakka@www.blah.com:3000
@@ -152,7 +191,7 @@ $
 </p>
 </details>
 
-## 3. Edit a URI
+## 4. Edit a URI
 Create a URI and then edit it.
 
 <details><summary><i>source</i></summary>
@@ -181,7 +220,7 @@ int main(int argc, char *argv[])
 </p>
 
 ```CSV
-$ ./example2
+$ ./example4
 uri         https://dakka@www.blah.com:3000
 scheme      https
 authority   dakka@www.blah.com:3000
@@ -247,7 +286,7 @@ The derived class `uri` stores the source string and then builds a `basic_uri` u
 
 The derived class `uri_static` stores the source string and then builds a `basic_uri` using that string as its reference. `uri_static` derives from `basic_uri` and a private storage class
 `uri_storage_static`. The supplied string is moved or copied and stored by the object. The class is templated by the non-type parameter `sz` which sets the static size and maximum storage capacity
-for the uri. Storage is allocated once with the object in a `std::array`. No dynamic memory is used. If your application needs the uri to hold and persist the source uri sttaically, this class is suitable.
+for the uri. Storage is allocated once with the object in a `std::array`. No dynamic memory is used. If your application needs the uri to hold and persist the source uri statically, this class is suitable.
 
 ![class diagram (static)](https://github.com/fix8mt/uri/blob/master/assets/classstatic.png)
 

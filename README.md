@@ -273,11 +273,19 @@ Components are named by a public enum called `component`.  Note that the compone
 ## Construction and destruction
 ### ctor
 ```c++
+class basic_uri;
 constexpr basic_uri(std::string_view src);                           (1)
 constexpr basic_uri(int bits);                                       (2)
 constexpr basic_uri() = default;                                     (3)
+
+class uri;
 constexpr uri(std::string src, bool decode=true);                    (4)
 constexpr uri() = default;                                           (5)
+
+template<size_t sz>
+class uri_static;
+constexpr uri_static(std::string src, bool decode=true);             (6)
+constexpr uri_static() = default;                                    (7)
 ```
 
 1. Construct a `basic_uri` from a `std::string_view`. This base class does not store the string. Calls `parse()`. The source string must not go out of scope to use this object. If parsing
@@ -287,6 +295,9 @@ fails, you can check for error using `operator bool` or `count()` and then `get_
 1. Construct a `uri` from a `std::string`. By default, the source string is percent decoded before parsing. Calls `parse()`. Optionally pass `false` to prevent percent decoding.
 The supplied string is moved or copied and stored by the object. You can check for error using `operator bool` or `count()` and then `get_error()` for more info.
 1. Construct an empty `uri`. It can be populated using `replace()`.
+1. Construct a `uri_static` from a `std::string`. The class is templated by the non-type parameter `sz` which sets the static size and maximum storage capacity
+for the uri. By default, the source string is percent decoded before parsing. Calls `parse()`. Optionally pass `false` to prevent percent decoding.
+1. Construct an empty `uri_static` from a `std::string`. The class is templated by the non-type parameter `sz` which sets the static size and maximum storage capacity for the uri.
 
 All of `uri` is within the namespace **`FIX8`**.
 

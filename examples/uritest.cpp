@@ -40,7 +40,6 @@
 
 //-----------------------------------------------------------------------------------------
 using namespace FIX8;
-using enum uri::component;
 
 //-----------------------------------------------------------------------------------------
 #include "uriexamples.hpp"
@@ -48,17 +47,18 @@ using enum uri::component;
 //-----------------------------------------------------------------------------------------
 int main(int argc, char *argv[])
 {
-   static constexpr const char *optstr{"t:d:hlas"};
-   static constexpr const std::array long_options
-   {
-      option{ "help",	no_argument,			nullptr, 'h' },
-      option{ "list",	no_argument,			nullptr, 'l' },
-      option{ "sizes",	no_argument,			nullptr, '2' },
-      option{ "all",		no_argument,			nullptr, 'a' },
-      option{ "dump",	required_argument,	nullptr, 'd' },
-      option{ "test",	required_argument,	nullptr, 't' },
-      option{}
-   };
+   static constexpr const char *optstr{"t:T:d:hlas"};
+	static constexpr const auto long_options { std::to_array<option>
+   ({
+      { "help",	no_argument,			nullptr, 'h' },
+      { "list",	no_argument,			nullptr, 'l' },
+      { "sizes",	no_argument,			nullptr, '2' },
+      { "all",		no_argument,			nullptr, 'a' },
+      { "dump",	required_argument,	nullptr, 'd' },
+      { "test",	required_argument,	nullptr, 't' },
+      { "stat",	required_argument,	nullptr, 'T' },
+      {}
+	})};
 
 	int val;
 	try
@@ -77,11 +77,18 @@ int main(int argc, char *argv[])
  -h help
  -l list tests
  -s show sizes
+ -T [num] static test to run
  -t [num] test to run)" << '\n';
 				return 1;
 			case 'l':
 				for (int ii{}; const auto& [src,vec] : tests)
 					std::cout << ii++ << '\t' << src << '\n';
+				break;
+			case 'T':
+				if (const auto tnum {std::stoul(optarg)}; tnum >= tests.size())
+					throw std::range_error("invalid test case");
+				else
+					std::cout << uri_static<1024>{tests[tnum].first};
 				break;
 			case 't':
 				if (const auto tnum {std::stoul(optarg)}; tnum >= tests.size())
@@ -92,6 +99,8 @@ int main(int argc, char *argv[])
 			case 'd':
 				{
 					const uri u1{optarg};
+					if (!u1)
+						std::cout << "error: " << static_cast<int>(u1.get_error()) << '\n';
 					std::cout << u1 << '\n' << std::bitset<uri::countof>(u1.get_present()) << " ("
 						<< std::hex << std::showbase << u1.get_present() << std::dec << std::noshowbase << ")\n";
 					for (uri::component ii{}; ii != uri::countof; ii = uri::component(ii + 1))
@@ -106,6 +115,7 @@ int main(int argc, char *argv[])
 				break;
 			case 's':
 				std::cout << "uri: " << sizeof(uri) << "\nbasic_uri: " << sizeof(basic_uri) << '\n';
+				std::cout << "uri_static<1024>: " << sizeof(uri_static<1024>) << '\n';
 				break;
 			case 'a':
 				for (int ii{}; const auto& [src,vec] : tests)

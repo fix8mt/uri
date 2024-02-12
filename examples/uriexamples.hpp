@@ -30,6 +30,7 @@
 // ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
 // DEALINGS IN THE SOFTWARE.
 //-----------------------------------------------------------------------------------------
+using enum uri::component;
 const std::vector<std::pair<const char *, std::vector<std::pair<uri::component, const char *>>>> tests
 {
 	{ "https://www.blah.com/",
@@ -61,6 +62,7 @@ const std::vector<std::pair<const char *, std::vector<std::pair<uri::component, 
 		{
 			{ scheme, "https" },
 			{ authority, "dakka@www.blah.com:3000" },
+			{ userinfo, "dakka" },
 			{ user, "dakka" },
 			{ host, "www.blah.com" },
 			{ port, "3000" },
@@ -129,6 +131,7 @@ const std::vector<std::pair<const char *, std::vector<std::pair<uri::component, 
 			{ scheme, "https" },
 			{ authority, "user:password@example.com" },
 			{ host, "example.com" },
+			{ userinfo, "user:password" },
 			{ user, "user" },
 			{ password, "password" },
 			{ path, "/path" },
@@ -194,6 +197,7 @@ const std::vector<std::pair<const char *, std::vector<std::pair<uri::component, 
 		{
 			{ scheme, "http" },
 			{ authority, "-.~_!$&'()*+,;=:@:80" },
+			{ userinfo, "-.~_!$&'()*+,;=:" },
 			{ user, "-.~_!$&'()*+,;=" },
 			{ port, "80" },
 			{ path, "/::::::@example.com" },
@@ -254,6 +258,7 @@ const std::vector<std::pair<const char *, std::vector<std::pair<uri::component, 
 			{ scheme, "https" },
 			{ authority, "!$%:)(*&^@www.netmeister.org" },
 			{ host, "www.netmeister.org" },
+			{ userinfo, "!$%:)(*&^" },
 			{ user, "!$%" },
 			{ password, ")(*&^" },
 			{ path, "/blog/urls.html" },
@@ -295,6 +300,14 @@ const std::vector<std::pair<const char *, std::vector<std::pair<uri::component, 
 			{ path, "/wiki/C++20" },
 		}
 	},
+	{ "https://www.netmeister.org/%62%63%70/%%4%",
+		{
+			{ scheme, "https" },
+			{ authority, "www.netmeister.org" },
+			{ host, "www.netmeister.org" },
+			{ path, "/bcp/%%4%" },
+		}
+	},
 	{ "www.hello.com/",
 		{
 			{ path, "/" },
@@ -302,6 +315,31 @@ const std::vector<std::pair<const char *, std::vector<std::pair<uri::component, 
 	},
 	{ "www.hello.com",
 		{
+		}
+	},
+	{ "http://host.com/?third=3rd&first=1st&second=2nd",
+		{
+			{ scheme, "http" },
+			{ authority, "host.com" },
+			{ host, "host.com" },
+			{ path, "/" },
+			{ query, "third=3rd&first=1st&second=2nd" },
+		}
+	},
+	{ "magnet:?xt=urn:btih:A388187004472792BA9D4390B79A46FEBD540652"
+		"&dn=Mind%20Conflict%20-%20Temple%20Of%20God%20(2024)&tr=udp%3A%2F%2Ftracker.coppersurfer.tk%3A6969%2Fannounce"
+		"&tr=udp%3A%2F%2Ftracker.openbittorrent.com%3A6969%2Fannounce&tr=udp%3A%2F%2Ftracker.opentrackr.org%3A1337"
+		"&tr=udp%3A%2F%2Fmovies.zsw.ca%3A6969%2Fannounce&tr=udp%3A%2F%2Ftracker.dler.org%3A6969%2Fannounce"
+		"&tr=udp%3A%2F%2Fopentracker.i2p.rocks%3A6969%2Fannounce&tr=udp%3A%2F%2Fopen.stealth.si%3A80%2Fannounce"
+		"&tr=udp%3A%2F%2Ftracker.0x.tf%3A6969%2Fannounce",
+		{
+			{ scheme, "magnet" },
+			{ query,	"xt=urn:btih:A388187004472792BA9D4390B79A46FEBD540652&dn=Mind Conflict - Temple Of God (2024)"
+						"&tr=udp://tracker.coppersurfer.tk:6969/announce"
+						"&tr=udp://tracker.openbittorrent.com:6969/announce&tr=udp://tracker.opentrackr.org:1337"
+						"&tr=udp://movies.zsw.ca:6969/announce&tr=udp://tracker.dler.org:6969/"
+						"announce&tr=udp://opentracker.i2p.rocks:6969/announce&tr=udp://open.stealth."
+						"si:80/announce&tr=udp://tracker.0x.tf:6969/announce" },
 		}
 	},
 };

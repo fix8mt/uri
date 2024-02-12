@@ -39,7 +39,7 @@
 
 //-----------------------------------------------------------------------------------------
 using namespace FIX8;
-using enum uri::component;
+using namespace std::literals;
 
 //-----------------------------------------------------------------------------------------
 #include "uriexamples.hpp"
@@ -47,18 +47,18 @@ using enum uri::component;
 //-----------------------------------------------------------------------------------------
 // run as: ctest --output-on-failure
 //-----------------------------------------------------------------------------------------
-TEST_CASE("uri - get component", "[uri]")
+TEST_CASE("get component")
 {
 	const uri u1{tests[0].first};
 	REQUIRE_NOTHROW(u1.get_component(host));
 	REQUIRE(u1.get_component(host) == "www.blah.com");
 	REQUIRE(u1.get(host) == "www.blah.com");
 	REQUIRE(u1.get(fragment) == "");
-	REQUIRE_THROWS(u1.get_component(countof));
+	REQUIRE(u1.get_component(countof) == "");
 }
 
 //-----------------------------------------------------------------------------------------
-TEST_CASE("uri - operators", "[uri]")
+TEST_CASE("operators")
 {
 	uri u1{tests[0].first};
 	REQUIRE(u1.test());
@@ -68,53 +68,71 @@ TEST_CASE("uri - operators", "[uri]")
 }
 
 //-----------------------------------------------------------------------------------------
-TEST_CASE("uri - bitset", "[uri]")
+TEST_CASE("bitset")
 {
 	uri u1{tests[0].first};
-	REQUIRE(u1.get_present() == 0b001010011);
+	REQUIRE(u1.get_present() == 0b0010100011);
 	u1.clear();
 	REQUIRE(u1.get_present() == 0);
 	u1.set(uri::countof);
-	REQUIRE(u1.get_present() == 0b111111111);
+	REQUIRE(u1.get_present() == 0b1111111111);
+	basic_uri b1{0b1111111111};
+	REQUIRE (b1.get_component(scheme) == "");
+	REQUIRE (b1.get_component(host) == "");
+	b1.clear(scheme);
+	REQUIRE(b1.get_present() == 0b1111111110);
 }
 
 //-----------------------------------------------------------------------------------------
-TEST_CASE("uri - get name", "[uri]")
+TEST_CASE("get name")
 {
 	REQUIRE_NOTHROW(uri::get_name(host));
 	REQUIRE(uri::get_name(host) == "host");
-	REQUIRE_THROWS(uri::get_name(countof));
+	REQUIRE(uri::get_name(countof) == "");
 }
 
 //-----------------------------------------------------------------------------------------
-TEST_CASE("uri - uri component validations", "[uri]")
+void run_test_comp(int id, const auto& ui)
 {
-	for (int ii{}; const auto& [src,vec] : tests)
+	const auto& vec { tests[id].second };
+	INFO("uri: " << id); // << ' ' << uri{u1});
+	REQUIRE (ui.count() == vec.size());
+	for (const auto& [comp,str] : vec)
 	{
-		INFO("uri: " << ii++ << ' ' << src);
-		const uri u1{src};
-		REQUIRE (u1.count() == vec.size());
-		for (const auto& [comp,str] : vec)
-		{
-			INFO("component: " << comp);
-			REQUIRE (u1.get_component(comp) == str);
-		}
+		INFO("component: " << comp);
+		REQUIRE (ui.get_component(comp) == str);
+	}
+}
+
+TEST_CASE("uri component validations")
+{
+	for (int ii{}; ii < tests.size(); ++ii)
+		run_test_comp(ii, uri{tests[ii].first});
+}
+
+TEST_CASE("uri component validations (static)")
+{
+	using stat_uri = uri_static<>;
+	for (int ii{}; ii < tests.size(); ++ii)
+	{
+		REQUIRE(std::string_view(tests[ii].first).size() < stat_uri::max_storage());
+		run_test_comp(ii, stat_uri{tests[ii].first});
 	}
 }
 
 //-----------------------------------------------------------------------------------------
-TEST_CASE("uri - get named pair", "[uri]")
+TEST_CASE("get named pair")
 {
 	const uri u1{tests[0].first};
 	REQUIRE_NOTHROW(u1.get_named_pair(host));
-	REQUIRE_THROWS(u1.get_named_pair(countof));
+	REQUIRE(u1.get_named_pair(countof).second == "");
 	const auto [tag,value] { u1.get_named_pair(host) };
 	REQUIRE(tag == "host");
 	REQUIRE(value == "www.blah.com");
 }
 
 //-----------------------------------------------------------------------------------------
-TEST_CASE("uri - replace", "[uri]")
+TEST_CASE("replace")
 {
 	const auto& [src,vec] { tests[0] };
 	const auto& [src1,vec1] { tests[4] };
@@ -126,34 +144,68 @@ TEST_CASE("uri - replace", "[uri]")
 }
 
 //-----------------------------------------------------------------------------------------
-TEST_CASE("uri - storage", "[uri]")
+TEST_CASE("replace (static)")
+{
+	const auto& [src,vec] { tests[0] };
+	const auto& [src1,vec1] { tests[4] };
+	uri_static<> u1{src};
+	REQUIRE(u1.get_component(host) == "www.blah.com");
+	uri_static<> u2{u1.replace(src1)};
+	REQUIRE(u1.get_component(host) == "example.com");
+	REQUIRE(u2.get_component(host) == "www.blah.com");
+}
+
+//-----------------------------------------------------------------------------------------
+TEST_CASE("storage")
 {
 	const auto& [src,vec] { tests[0] };
 	const uri u1{src};
-	REQUIRE(src == u1.get_source());
-	REQUIRE(u1.get_buffer() == u1.get_source());
-	REQUIRE(u1.get_buffer() == src);
+	REQUIRE(src == u1.get_uri());
+	REQUIRE(u1.buffer() == u1.get_uri());
+	REQUIRE(u1.buffer() == src);
 }
 
 //-----------------------------------------------------------------------------------------
-TEST_CASE("uri - invalid uri", "[uri]")
+TEST_CASE("invalid uri")
 {
-	REQUIRE_THROWS(uri("https://www.example.com\n"));
-	REQUIRE_THROWS(uri("https://www.example.com\r"));
-	REQUIRE_THROWS(uri("https://www. example.com"));
-	REQUIRE_THROWS(uri("https://www.example\tcom"));
+	static constexpr const auto baduris { std::to_array<basic_uri>
+	({
+		"https://www.example.com\n"sv,
+		"https://www.example.com\r"sv,
+		"https://www. example.com"sv,
+		"https://www.example.\tcom"sv,
+		"https://www.example.\vcom"sv,
+		"https://www.example.\fcom"sv,
+	})};
+	for (auto pp : baduris)
+	{
+		REQUIRE(!pp);
+		REQUIRE(pp.get_error() == uri::error::illegal_chars);
+	}
 }
 
 //-----------------------------------------------------------------------------------------
-TEST_CASE("uri - limits", "[uri]")
+TEST_CASE("limits")
 {
 	char buff[uri::uri_max_len+1]{};
 	std::fill(buff, buff + sizeof(buff), 'x');
-	REQUIRE_THROWS(uri(buff));
+	uri u1{buff};
+	REQUIRE(!u1);
+	REQUIRE(u1.get_error() == uri::error::too_long);
+	uri_static<> u2{buff}; // too long
+	REQUIRE(u2.get_uri() == "");
 }
 
 //-----------------------------------------------------------------------------------------
-TEST_CASE("uri - hex decode", "[uri]")
+TEST_CASE("empty")
+{
+	uri u1{""};
+	REQUIRE(!u1);
+	REQUIRE(u1.get_error() == uri::error::empty_src);
+}
+
+//-----------------------------------------------------------------------------------------
+TEST_CASE("hex decode")
 {
 	std::string_view src { "https://www.netmeister.org/%62%6C%6F%67/%75%72%6C%73.%68%74%6D%6C?!@#$%25=+_)(*&^#top%3C" },
 		src1 { "https://www.netmeister.org/blog/urls.html?!@#$%=+_)(*&^#top<" },
@@ -164,29 +216,109 @@ TEST_CASE("uri - hex decode", "[uri]")
 	auto result { uri::decode_hex(src) };
 	REQUIRE(!uri::has_hex(result));
 	uri u1{result};
-	REQUIRE(u1.get_source() == src1);
+	REQUIRE(u1.get_uri() == src1);
 	uri u2(std::string(src), false);
-	REQUIRE(uri::has_hex(u2.get_source()));
+	REQUIRE(uri::has_hex(u2.get_uri()));
+
+	std::string_view src3 { "https://www.netmeister.org/%%62" };
+	REQUIRE(uri::has_hex(src3));
 }
 
 //-----------------------------------------------------------------------------------------
-TEST_CASE("uri - query decode", "[uri]")
+template<typename T>
+void do_decode()
 {
-	static const uri::query_result tbl
+	static const typename T::query_result tbl
 	{
 		{ "payload1", "true" }, { "payload2", "false" }, { "test", "1" }, { "benchmark", "3" }, { "foo", "38.38.011.293" },
 		{ "bar", "1234834910480" }, { "test", "19299" }, { "3992", "" }, { "key", "f5c65e1e98fe07e648249ad41e1cfdb0" },
 	};
-	const uri u1{tests[9].first};
+	const T u1{tests[9].first};
 	auto result{u1.decode_query()};
 	REQUIRE(tbl == result);
-	const uri u2{tests[8].first};
+	const T u2{tests[8].first};
 	auto result1{u2.decode_query()};
 	REQUIRE(result1.empty());
 
-	const uri u3{ "http://host.com/?payload1:true;payload2:false;test:1;benchmark:3;foo:38.38.011.293"
+	const T u3{ "http://host.com/?payload1:true;payload2:false;test:1;benchmark:3;foo:38.38.011.293"
 		";bar:1234834910480;test:19299;3992;key:f5c65e1e98fe07e648249ad41e1cfdb0#test"};
-	auto result2{u3.decode_query<';',':'>()};
+	auto result2{u3.template decode_query<';',':'>()};
 	REQUIRE(tbl == result2);
+}
+
+//-----------------------------------------------------------------------------------------
+TEST_CASE("query decode")
+{
+	do_decode<uri>();
+}
+
+TEST_CASE("query decode (static)")
+{
+	do_decode<uri_static<>>();
+}
+
+//-----------------------------------------------------------------------------------------
+TEST_CASE("query search")
+{
+	static const uri::query_result tbl { { "first", "1st" }, { "second", "2nd" }, { "third", "3rd" } };
+	const uri u1{tests[34].first};
+	auto result{u1.decode_query(true)}; // auto sort - must be sorted to use find
+	auto result1{u1.decode_query()}; // not sorted, sort later
+	uri::sort_query(result1);
+	REQUIRE(tbl == result);
+	REQUIRE(uri::find_query("first", result) == "1st");
+	REQUIRE(uri::find_query("second", result) == "2nd");
+	REQUIRE(uri::find_query("third", result) == "3rd");
+	REQUIRE(uri::find_query("fourth", result) == "");
+	REQUIRE(result == result1);
+}
+
+//-----------------------------------------------------------------------------------------
+template<typename T>
+void do_factory()
+{
+	const auto u1 { T::factory({{scheme, "https"}, {user, "dakka"}, {host, "www.blah.com"}, {port, "3000"}, {path, "/"}}) };
+	run_test_comp(3, u1);
+	const auto u2 { T::factory({{scheme, "file"}, {authority, ""}, {path, "/foo/bar/test/node.js"}}) };
+	run_test_comp(8, u2);
+	const auto u3 { T::factory({{scheme, "mailto"}, {path, "John.Smith@example.com"}}) };
+	run_test_comp(15, u3);
+}
+
+TEST_CASE("factory")
+{
+	do_factory<uri>();
+}
+
+TEST_CASE("factory (static)")
+{
+	do_factory<uri_static<>>();
+}
+
+//-----------------------------------------------------------------------------------------
+template<typename T>
+void do_edit()
+{
+	T u1 { "https://dakka@www.blah.com:3000/" };
+	u1.edit({{port, "80"}, {user, ""}, {path, "/newpath"}});
+	REQUIRE(u1.get_uri() == "https://www.blah.com:80/newpath");
+
+	T u2 { "file:///foo/bar/test/node.js" };
+	u2.edit({{scheme, "mms"}, {fragment, "bookmark1"}});
+	REQUIRE(u2.get_uri() == "mms:///foo/bar/test/node.js#bookmark1");
+
+	T u3 { "https://user:password@example.com/?search=1" };
+	u3.edit({{port, "80"}, {user, "dakka"}, {password, ""}, {path, "/newpath"}});
+	REQUIRE(u3.get_uri() == "https://dakka@example.com:80/newpath?search=1");
+}
+
+TEST_CASE("edit")
+{
+	do_edit<uri>();
+}
+
+TEST_CASE("edit (static)")
+{
+	do_edit<uri_static<>>();
 }
 

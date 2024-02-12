@@ -44,6 +44,9 @@
 #include <stdexcept>
 #include <utility>
 #include <cstdint>
+#include <vector>
+#include <list>
+#include <algorithm>
 #include <bit>
 
 //-----------------------------------------------------------------------------------------
@@ -55,34 +58,34 @@ class basic_uri
 public:
 	using value_pair = std::pair<std::string_view, std::string_view>;
 	using query_result = std::vector<value_pair>;
-	static constexpr const auto uri_max_len {UINT16_MAX};
 	using uri_len_t = std::uint16_t;
 	using range_pair = std::pair<uri_len_t, uri_len_t>; // offset, len
-	enum component { scheme, authority, user, password, host, port, path, query, fragment, countof };
+	enum component { scheme, authority, userinfo, user, password, host, port, path, query, fragment, countof };
+	enum class error : uri_len_t { no_error, too_long, illegal_chars, empty_src, countof };
+	static constexpr const auto uri_max_len {UINT16_MAX};
+	using comp_pair = std::pair<component, std::string_view>;
+	using comp_list = std::vector<std::string_view>;
 private:
 	std::string_view _source;
 	std::array<range_pair, component::countof> _ranges{};
 	uri_len_t _present{};
-	static constexpr const std::array component_names { "scheme", "authority", "user", "password", "host", "port", "path", "query", "fragment", };
+	static constexpr const std::array _component_names { "scheme", "authority", "userinfo", "user", "password", "host", "port", "path", "query", "fragment", };
+	static constexpr bool query_comp(const value_pair& pl, const value_pair& pr) noexcept { return pl.first < pr.first; }
 public:
-	constexpr basic_uri(std::string_view src) : _source(src) { parse(); }
+	constexpr basic_uri(std::string_view src) noexcept : _source(src) { parse(); }
+	constexpr basic_uri(int bits) noexcept : _present(bits) {}
 	constexpr basic_uri() = default;
 	~basic_uri() = default;
 
 	constexpr int assign(std::string_view src)
 	{
 		_source = src;
-		_present = 0;
+		clear();
 		return parse();
 	}
-	constexpr std::string_view get_source() const noexcept { return _source; }
+	constexpr std::string_view get_uri() const noexcept { return _source; }
 	constexpr std::string_view get(component what) const noexcept { return _source.substr(_ranges[what].first, _ranges[what].second); }
-	constexpr std::string_view get_component(component what) const
-	{
-		if (what < countof)
-			return get(what);
-		throw(std::out_of_range("invalid component index"));
-	}
+	constexpr std::string_view get_component(component what) const noexcept { return what < countof ? get(what) : std::string_view(); }
 
 	/*! Provides const direct access to the offset and length of the specifed component and is used to create a `std::string_view`.
 	  	\param idx index into table
@@ -94,54 +97,76 @@ public:
 		\return a `range_pair&` which is a `std::pair<uri_len_t, uri_len_t>&` to the specified component at the index given in the ranges table. */
 	constexpr range_pair& operator[](component idx) noexcept { return _ranges[idx]; }
 
-	constexpr value_pair get_named_pair(component what) const
+	constexpr value_pair get_named_pair(component what) const noexcept
 	{
-		if (what < countof)
-			return std::make_pair(component_names[what], get(what));
-		throw(std::out_of_range("invalid component index"));
+		return what < countof ? value_pair(_component_names[what], get(what)) : value_pair();
 	}
 	constexpr int count() const noexcept { return std::popcount(_present); } // upgrade to std::bitset when constexpr in c++23
 	constexpr uri_len_t get_present() const noexcept { return _present; }
 	constexpr void set(component what=countof) noexcept { what == countof ? _present = (1 << countof) - 1 : _present |= (1 << what); }
 	constexpr void clear(component what=countof) noexcept { what == countof ? _present = 0 : _present &= ~(1 << what); }
+	constexpr bool any_authority() const noexcept { return _present & (1 << host | 1 << password | 1 << port | 1 << user | 1 << userinfo); };
 	constexpr bool test(component what=countof) const noexcept { return what == countof ? _present : _present & (1 << what); }
-
-	constexpr int parse()
+	constexpr operator bool() const noexcept { return count(); }
+	constexpr error get_error() const noexcept { return test() ? error::no_error : static_cast<error>(_ranges[0].first); }
+	constexpr void set_error(error what) noexcept
 	{
-		if (_source.empty())
-			return 0;
-		if (_source.size() > uri_max_len)
-			throw(std::out_of_range("uri too long"));
-		if (_source.find_first_of("\t\r\n ") != std::string_view::npos)
-			throw(std::logic_error("invalid uri"));
+		if (!test())
+			_ranges[0].first = static_cast<uri_len_t>(what);
+	}
+	constexpr int parse() noexcept
+	{
+		using namespace std::literals;
+		while(true)
+		{
+			if (_source.empty())
+				set_error(error::empty_src);
+			else if (_source.size() > uri_max_len)
+				set_error(error::too_long);
+			else if (_source.find_first_of(" \t\n\f\r\v"sv) != std::string_view::npos)
+			{
+				auto qur { _source.find_first_of('?') }, sps { _source.find_first_of(' ') };
+				if (qur != std::string_view::npos && sps != std::string_view::npos && qur < sps)
+					break;
+				set_error(error::illegal_chars);
+			}
+			else
+				break;
+			return 0;	// refuse to parse
+		}
 		std::string_view::size_type pos{}, hst{}, pth{std::string_view::npos};
+		bool scq{};
 		if (const auto sch {_source.find_first_of(':')}; sch != std::string_view::npos)
 		{
-			_ranges[scheme] = std::make_pair(0, sch);
+			_ranges[scheme] = {0, sch};
 			set(scheme);
 			pos = sch + 1;
 		}
-		if (auto auth {_source.find("//", pos)}; auth != std::string_view::npos)
+		if (_source[pos] == '?')	// short circuit query eg. magnet
+			scq = true;
+		else if (auto auth {_source.find("//"sv, pos)}; auth != std::string_view::npos)
 		{
 			auth += 2;
 			if ((pth = _source.find_first_of('/', auth)) == std::string_view::npos) // unterminated path
 				pth = _source.size();
-			_ranges[authority] = std::make_pair(auth, pth - auth);
+			_ranges[authority] = {auth, pth - auth};
 			set(authority);
 			if (const auto usr {_source.find_first_of('@', auth)}; usr != std::string_view::npos && usr < pth)
 			{
 				if (const auto pw {_source.find_first_of(':', auth)}; pw != std::string_view::npos && pw < usr) // no nested ':' before '@'
 				{
-					_ranges[user] = std::make_pair(auth, pw - auth);
+					_ranges[user] = {auth, pw - auth};
 					if (usr - pw - 1 > 0)
 					{
-						_ranges[password] = std::make_pair(pw + 1, usr - pw - 1);
+						_ranges[password] = {pw + 1, usr - pw - 1};
 						set(password);
 					}
 				}
 				else
-					_ranges[user] = std::make_pair(auth, usr - auth);
+					_ranges[user] = {auth, usr - auth};
 				set(user);
+				_ranges[userinfo] = {auth, usr - auth};
+				set(userinfo);
 				hst = pos = usr + 1;
 			}
 			else
@@ -154,7 +179,7 @@ public:
 					++prt;
 					if (_source.size() - prt > 0)
 					{
-						_ranges[port] = std::make_pair(prt, _source.size() - prt);
+						_ranges[port] = {prt, _source.size() - prt};
 						set(port);
 					}
 				}
@@ -168,22 +193,22 @@ public:
 					clear(port);
 				else
 					_ranges[port].second = pth - _ranges[port].first;
-				_ranges[host] = std::make_pair(hst, _ranges[port].first - 1 - hst);
+				_ranges[host] = {hst, _ranges[port].first - 1 - hst};
 			}
 			else
-				_ranges[host] = std::make_pair(hst, pth - hst);
+				_ranges[host] = {hst, pth - hst};
 			if (_ranges[host].second)
 				set(host);
-			_ranges[path] = std::make_pair(pth, _source.size() - pth);
+			_ranges[path] = {pth, _source.size() - pth};
 			set(path);
 		}
-		if (pth == std::string_view::npos)
+		if (pth == std::string_view::npos && !scq)
 		{
 			set(path);
 			if ((pth = _source.find_first_of('/', pos)) != std::string_view::npos)
-				_ranges[path] = std::make_pair(pth, _source.size() - pth);
+				_ranges[path] = {pth, _source.size() - pth};
 			else if (test(scheme))
-				_ranges[path] = std::make_pair(pos, _source.size() - pos);
+				_ranges[path] = {pos, _source.size() - pos};
 			else
 				clear(path);
 		}
@@ -191,25 +216,25 @@ public:
 		{
 			if (test(path))
 				_ranges[path].second = qur - _ranges[path].first;
-			_ranges[query] = std::make_pair(qur + 1, _source.size() - qur);
+			_ranges[query] = {qur + 1, _source.size() - qur};
 			set(query);
 		}
 		if (const auto fra {_source.find_first_of('#', pos)}; fra != std::string_view::npos)
 		{
 			if (test(query))
 				_ranges[query].second = fra - _ranges[query].first;
-			_ranges[fragment] = std::make_pair(fra + 1, _source.size() - fra);
+			_ranges[fragment] = {fra + 1, _source.size() - fra};
 			set(fragment);
 		}
 		return count();
 	}
 
 	template<char valuepair='&',char valueequ='='>
-	constexpr query_result decode_query() const
+	constexpr query_result decode_query(bool sort=false) const
 	{
 		constexpr auto decpair([](std::string_view src) noexcept ->value_pair
 		{
-			if (auto fnd { src.find_first_of(valueequ) }; fnd != std::string::npos)
+			if (auto fnd { src.find_first_of(valueequ) }; fnd != std::string_view::npos)
 				return {src.substr(0, fnd), src.substr(fnd + 1)};
 			else if (src.size())
 				return {src, ""};
@@ -219,9 +244,9 @@ public:
 		if (test(query))
 		{
 			std::string_view src{get(query)};
-			for (std::string::size_type pos{};;)
+			for (std::string_view::size_type pos{};;)
 			{
-				if (auto fnd { src.find_first_of(valuepair, pos) }; fnd != std::string::npos)
+				if (auto fnd { src.find_first_of(valuepair, pos) }; fnd != std::string_view::npos)
 				{
 					result.emplace_back(decpair(src.substr(pos, fnd - pos)));
 					pos = fnd + 1;
@@ -232,14 +257,31 @@ public:
 				break;
 			}
 		}
+		if (sort)
+			sort_query(result);
 		return result;
 	}
 
+	static constexpr void sort_query(query_result& query) noexcept { std::sort(query.begin(), query.end(), query_comp); }
+	static constexpr std::string_view find_query(std::string_view what, const query_result& from) noexcept
+	{
+		auto result { std::equal_range(from.cbegin(), from.cend(), value_pair(what, std::string_view()), query_comp) };
+		return result.first == result.second ? std::string_view() : result.first->second;
+
+	}
 	static constexpr std::string_view::size_type find_hex(std::string_view src) noexcept
 	{
-		for (std::string_view::size_type fnd{}; ((fnd = src.find_first_of('%', fnd))) != std::string_view::npos; fnd += 3)
-			if (fnd + 2 < src.size() && std::isxdigit(src[fnd + 1]) && std::isxdigit(src[fnd + 2]))
-				return fnd;
+		for (std::string_view::size_type fnd{}; ((fnd = src.find_first_of('%', fnd))) != std::string_view::npos; ++fnd)
+		{
+			if (fnd + 2 < src.size())
+			{
+				if (std::isxdigit(static_cast<unsigned char>(src[fnd + 1]))
+				 && std::isxdigit(static_cast<unsigned char>(src[fnd + 2])))
+					return fnd;
+			}
+			else
+				break;
+		}
 		return std::string_view::npos;
 	}
 	static constexpr bool has_hex(std::string_view src) noexcept { return find_hex(src) != std::string_view::npos; }
@@ -251,16 +293,144 @@ public:
 				| ((result[fnd + 2] & 0xF) + (result[fnd + 2] >> 6) * 9));
 		return result;
 	}
-	static constexpr std::string_view get_name(component what)
+	static constexpr std::string_view get_name(component what) noexcept
 	{
-		if (what < countof)
-			return component_names[what];
-		throw(std::out_of_range("invalid component index"));
+		return what < countof ? _component_names[what] : std::string_view();
+	}
+
+	static constexpr std::string make_edit(const auto& what, std::initializer_list<comp_pair> from)
+	{
+		basic_uri ibase;
+		comp_list ilist{countof};
+		for (component ii{}; ii != countof; ii = component(ii + 1))
+		{
+			if (what.test(ii))
+			{
+				ibase.set(ii);
+				ilist[ii] = what.get_component(ii);
+			}
+		}
+		for (const auto& [comp,str] : from)
+		{
+			if (comp < countof)
+			{
+				ibase.set(comp);
+				ilist[comp] = str;
+			}
+		}
+		if (!ibase.test())
+			return 0;
+		if (ibase.any_authority())
+			ibase.clear(authority);
+		if (ibase.test(userinfo) && (ibase.test(user) || ibase.test(password)))
+			ibase.clear(userinfo);
+		return make_uri(ibase, std::move(ilist));
+	}
+
+	static constexpr std::string make_uri(std::initializer_list<comp_pair> from) noexcept
+	{
+		basic_uri ibase;
+		comp_list ilist{countof};
+		for (const auto& [comp,str] : from)
+		{
+			if (comp < countof)
+			{
+				ibase.set(comp);
+				ilist[comp] = str;
+			}
+		}
+		return make_uri(ibase, std::move(ilist));
+	}
+
+	static constexpr std::string make_uri(basic_uri ibase, comp_list ilist) noexcept
+	{
+		if (!ibase.test())
+			return {};
+		using namespace std::literals;
+		basic_uri done;
+		std::string result;
+		for (component ii{}; ii != countof; ii = component(ii + 1))
+		{
+			if (!ibase.test(ii) || done.test(ii))
+				continue;
+			switch(const auto& str{ilist[ii]}; ii)
+			{
+			case scheme:
+				result += str;
+				result += ':';
+				if (ibase.any_authority())
+					result += "//"sv;
+				break;
+			case authority:
+				if (!ibase.any_authority())
+					result += "//"sv;
+				result += str;
+				break;
+			case userinfo:
+				if (ibase.test(authority) || ibase.test(user) || ibase.test(password))
+					continue;
+				result += str;
+				break;
+			case user:
+				if (str.empty() && (ibase.test(authority) || ibase.test(userinfo)))
+					continue;
+				result += str;
+				break;
+			case password:
+				if (ibase.test(authority) || ibase.test(userinfo))
+					continue;
+				if (!str.empty())
+				{
+					result += ':';
+					result += str;
+				}
+				break;
+			case host:
+				if (ibase.test(authority))
+					continue;
+				if ((!ilist[user].empty() || !ilist[password].empty()) && (done.test(user) || done.test(password)))
+					result += '@';
+				result += str;
+				break;
+			case port:
+				if (ibase.test(authority))
+					continue;
+				if (!str.empty())
+				{
+					result += ':';
+					result += str;
+				}
+				break;
+			case path:
+				result += str;
+				break;
+			case query:
+				if (!str.empty())
+				{
+					result += '?';
+					result += str;
+				}
+				break;
+			case fragment:
+				if (!str.empty())
+				{
+					result += '#';
+					result += str;
+				}
+				break;
+			default:
+				continue;
+			}
+			done.set(ii);
+		}
+		return result;
 	}
 
 	friend std::ostream& operator<<(std::ostream& os, const basic_uri& what)
 	{
-		os << std::setw(12) << std::left << "source" << what._source << '\n';
+		if (!what)
+			os << "error: " << static_cast<int>(what.get_error()) << '\n';
+		os << std::setw(12) << std::left << "uri" << what._source << '\n';
 		for (component ii{}; ii != countof; ii = component(ii + 1))
 		{
 			if (what.test(ii))
@@ -279,29 +449,92 @@ public:
 //-----------------------------------------------------------------------------------------
 class uri_storage
 {
-protected:
 	std::string _buffer;
+protected:
 	constexpr uri_storage(std::string src) noexcept : _buffer(std::move(src)) {}
 	constexpr uri_storage() = default;
 	~uri_storage() = default;
+	constexpr std::string swap(std::string src) noexcept { return std::exchange(_buffer, std::move(src)); }
+public:
+	constexpr std::string_view buffer() const noexcept { return _buffer; }
+	static constexpr auto max_storage() noexcept { return basic_uri::uri_max_len; }
 };
 
 //-----------------------------------------------------------------------------------------
-class uri : private uri_storage, public basic_uri
+template<size_t sz>
+class uri_storage_static
+{
+	std::array<char, sz> _buffer;
+	size_t _sz{};
+protected:
+	constexpr uri_storage_static(std::string src) noexcept : _sz(src.size() > sz ? 0 : src.size())
+		{ std::copy_n(src.data(), _sz, _buffer.data()); }
+	constexpr uri_storage_static() = default;
+	~uri_storage_static() = default;
+	constexpr std::string swap(std::string src) noexcept
+	{
+		if (src.size() > sz)
+			return {};
+		std::string old(_buffer.data(), _sz);
+		std::copy_n(src.data(), _sz = src.size(), _buffer.data());
+		return old;
+	}
+public:
+	constexpr std::string_view buffer() const noexcept { return {_buffer.data(), _sz}; }
+	static constexpr auto max_storage() noexcept { return sz; }
+};
+
+//-----------------------------------------------------------------------------------------
+class uri : public uri_storage, public basic_uri
 {
 public:
-	constexpr uri(std::string src, bool decode=true)
-		: uri_storage(decode && uri::has_hex(src) ? uri::decode_hex(src) : std::move(src)), basic_uri(_buffer) {}
+	constexpr uri(std::string src, bool decode=true) noexcept
+		: uri_storage(decode && uri::has_hex(src) ? uri::decode_hex(src) : std::move(src)), basic_uri(buffer()) {}
 	constexpr uri() = default;
 	~uri() = default;
 
 	constexpr std::string replace(std::string src)
 	{
-		auto rbuf { std::exchange(_buffer, std::move(src)) };
-		assign(_buffer);
+		auto rbuf { swap(std::move(src)) };
+		assign(buffer());
 		return rbuf;
 	}
-	constexpr const std::string& get_buffer() const noexcept { return _buffer; }
+	constexpr int edit(std::initializer_list<comp_pair> from)
+	{
+		replace(make_edit(*this, std::move(from)));
+		return count();
+	}
+	static constexpr auto factory(std::initializer_list<comp_pair> from) noexcept
+	{
+		return uri(make_uri(std::move(from)));
+	}
+};
+
+//-----------------------------------------------------------------------------------------
+template<size_t sz=1024>
+class uri_static : public uri_storage_static<sz>, public basic_uri
+{
+public:
+	constexpr uri_static(std::string src, bool decode=true) noexcept
+		: uri_storage_static<sz>(decode && uri::has_hex(src) ? uri::decode_hex(src) : std::move(src)), basic_uri(this->buffer()) {}
+	constexpr uri_static() = default;
+	~uri_static() = default;
+
+	constexpr std::string replace(std::string src)
+	{
+		auto rbuf { this->swap(std::move(src)) };
+		assign(this->buffer());
+		return rbuf;
+	}
+	constexpr int edit(std::initializer_list<comp_pair> from)
+	{
+		replace(make_edit(*this, std::move(from)));
+		return count();
+	}
+	static constexpr auto factory(std::initializer_list<comp_pair> from) noexcept
+	{
+		return uri_static(make_uri(std::move(from)));
+	}
 };
 
 } // FIX8

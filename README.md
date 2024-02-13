@@ -335,7 +335,7 @@ constexpr uri_static() = default;                                    (7)
 
 1. Construct a `basic_uri` from a `std::string_view`. This base class does not store the string. Calls `parse()`. The source string must not go out of scope to use this object. If parsing
 fails, you can check for error using `operator bool` or `count()` and then `get_error()` for more info. Since this method takes a `std::string_view` you can declare objects `constexpr`.
-1. Construct a `basic_uri` that has the corresponding bitset passed in `bits`. No components are present. It is used so the object can be used as a bitset.
+1. Construct a `basic_uri` that has the corresponding bitset passed in `bits`. No components are present. Permits object to be used as a bitset.
 1. Construct an empty `basic_uri`. It can be populated using `assign()`.
 1. Construct a `uri` from a `std::string`. By default, the source string is percent decoded before parsing. Calls `parse()`. Optionally pass `false` to prevent percent decoding.
 The supplied string is moved or copied and stored by the object. You can check for error using `operator bool` or `count()` and then `get_error()` for more info.
@@ -544,14 +544,14 @@ Parse the source string into components. Return the count of components found. W
 static constexpr uri factory(std::initializer_list<comp_pair> from);
 ```
 Create a `uri` from the supplied components. The `initializer_list` contains a 1..n `comp_pair` objects. The following constraints apply:
-1. If `authority` is supplied then if any of the following components present `host`, `password`, `port`, `user` or `userinfo` then `authority` is ignored;
-1. If `userinfo` is supplied then if any of the following components present `user` or `password` then `userinfo` is ignored;
+1. If `authority` is supplied and any of the following components present `host`, `password`, `port`, `user` or `userinfo` then `authority` is ignored;
+1. If `userinfo` is supplied and any of the following components present `user` or `password` then `userinfo` is ignored;
 
 ### `edit`
 ```c++
 constexpr int edit(std::initializer_list<comp_pair> from);
 ```
-Create a `uri` from the supplied components. The `initializer_list` contains a 1..n `comp_pair` objects. The following constraints apply:
+Create a `uri` from the supplied components. The `initializer_list` contains a 1..n `comp_pair` objects. The same constraints as `factory` apply.
 
 # Testing
 ## Test cases

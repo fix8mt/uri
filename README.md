@@ -541,7 +541,9 @@ Parse the source string into components. Return the count of components found. W
 ## Generation and editing
 ### `factory`
 ```c++
-static constexpr uri factory(std::initializer_list<comp_pair> from);
+static constexpr uri::factory(std::initializer_list<comp_pair> from);
+template<size_t sz>
+static constexpr uri_static<sz>::factory(std::initializer_list<comp_pair> from);
 ```
 Create a `uri` from the supplied components. The `initializer_list` contains a 1..n `comp_pair` objects. The following constraints apply:
 1. If `authority` is supplied and any of the following components present `host`, `password`, `port`, `user` or `userinfo` then `authority` is ignored;

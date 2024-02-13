@@ -7,7 +7,7 @@
 ### A lightweight C++20 URI parser
 
 ------------------------------------------------------------------------
-# i. Introduction
+# 1. Introduction
 This is a lightweight URI parser implementation featuring zero-copy, minimal storage and high performance.
 
 ## Quick links
@@ -40,8 +40,8 @@ This is a lightweight URI parser implementation featuring zero-copy, minimal sto
 - built-in unit test cases with exhaustive test URI cases; simple test case addition
 - support for [**RFC 3986**](https://datatracker.ietf.org/doc/html/rfc3986)
 
-# ii. Examples
-## 1. Parse and hold a URI
+# 2. Examples
+## i. Parse and hold a URI
 This example parses a URI string and prints out all the contained elements. Then individual components are queried and printed if present.
 
 <details><summary><i>source</i></summary>
@@ -111,7 +111,7 @@ $
 </p>
 </details>
 
-## 2. Create a static uri
+## ii. Create a static uri
 Create a static URI from the supplied initializer list. Print out the result.
 
 <details><summary><i>source</i></summary>
@@ -149,7 +149,7 @@ $
 </p>
 </details>
 
-## 3. Use the factory
+## iii. Use the factory
 Create a URI from the supplied initializer list. Print out the result.
 
 <details><summary><i>source</i></summary>
@@ -191,7 +191,7 @@ $
 </p>
 </details>
 
-## 4. Edit a URI
+## iv. Edit a URI
 Create a URI and then edit it.
 
 <details><summary><i>source</i></summary>
@@ -242,7 +242,7 @@ $
 </p>
 </details>
 
-# iii. Building
+# 3. Building
 This implementation is header only. Apart from standard C++20 includes there are no external dependencies needed in your application.
 [Catch2](https://github.com/catchorg/Catch2.git) is used for the built-in unit tests.
 
@@ -279,7 +279,7 @@ This is C++20, so you can also add in your local code:
 using enum uri::component;
 ```
 
-# iv. API
+# 4. API
 ## Class hierarchy
 The base class `basic_uri` performs the bulk of the work, holding a `std::string_view` of the source uri string. If you wish to manage the scope of the source uri yourself then
 this class is the most efficient way to do so.
@@ -579,7 +579,7 @@ static constexpr std::string make_edit(const auto& what, std::initializer_list<c
 Construct a `std::string` repesentation of a `uri` from the supplied `uri` (`what`) and components. The returned string is based on the existing `uri` with replacements of the supplied components.
 Components not specified are left unchanged. The `initializer_list` contains a 1..n `comp_pair` objects. The same constraints as `factory` apply.
 
-# v. Testing
+# 5. Testing
 ## Test cases
 The header file `uriexamples.hpp` contains a data structure holding test cases used by the [Catch2](https://github.com/catchorg/Catch2.git) unit test app `uritest2` and by the CLI test app `uritest`.
 You can add your own test cases to `uriexamples.hpp` - the structure is easy enough to follow.
@@ -694,7 +694,7 @@ $
 </p>
 </details>
 
-# vi. Discussion
+# 6. Discussion
 ## Non-validating
 This class is non-validating. The source URI is expected to be normalised or at least parsable. Validation is out of scope for this implementation.
 We decided against validating for a few reasons:

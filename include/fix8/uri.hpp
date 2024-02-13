@@ -515,7 +515,7 @@ public:
 };
 
 //-----------------------------------------------------------------------------------------
-template<size_t sz=1024>
+template<size_t sz>
 class uri_static : public uri_storage<sz>, public basic_uri
 {
 public:

@@ -112,7 +112,7 @@ $
 </details>
 
 ## ii. Create a static uri
-Create a static URI from the supplied initializer list. Print out the result.
+Create a static URI from the supplied initializer list. Print out the result and max storage.
 
 <details><summary><i>source</i></summary>
 <p>
@@ -163,7 +163,8 @@ using enum uri::component;
 
 int main(int argc, char *argv[])
 {
-   const auto u1 { uri::factory({{scheme, "https"}, {user, "dakka"}, {host, "www.blah.com"}, {port, "3000"}, {path, "/"}}) };
+   const auto u1 { uri::factory({{scheme, "https"}, {user, "dakka"},
+		{host, "www.blah.com"}, {port, "3000"}, {path, "/"}}) };
    std::cout << u1 << '\n';
    return 0;
 }
@@ -205,7 +206,7 @@ using enum uri::component;
 
 int main(int argc, char *argv[])
 {
-   const auto u1 { "https://dakka@www.blah.com:3000" };
+   uri u1 { "https://dakka@www.blah.com:3000" };
    std::cout << u1 << '\n';
    u1.edit({{port, "80"}, {user, ""}, {path, "/newpath"}});
    std::cout << '\n' << u1 << '\n';
@@ -430,7 +431,7 @@ If no value is present, just the tag will be populated with an empty value.
 static constexpr std::string_view find_query (std::string_view what, const query_result& from);
 ```
 Find the specified query key and return its value from the given `query_result`. `query_result` must be sorted by key, as returned by
-passing `true` to `decode_query`. If key not found return empty `std::string_view`. No copying, results point to uri source.
+passing `true` to `decode_query`. If not sorted, use `sort_query` first. If key not found return empty `std::string_view`. No copying, results point to uri source.
 
 ### `decode_hex`
 ```c++

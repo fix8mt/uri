@@ -246,7 +246,7 @@ $
 This implementation is header only. Apart from standard C++20 includes there are no external dependencies needed in your application.
 [Catch2](https://github.com/catchorg/Catch2.git) is used for the built-in unit tests.
 
-## 1. Obtaining the source, building the examples
+## i. Obtaining the source, building the examples
 To clone and default build all the examples, including the unit tests.
 ```bash
 git clone git@github.com:fix8mt/uri.git
@@ -257,7 +257,7 @@ cmake ..
 make -j4
 make test (or ctest)
 ```
-## 2. Using in your application
+## ii. Using in your application
 In `CMakeLists.txt` set your include path to:
 ```cmake
 include_directories([uri directory]/include)
@@ -280,7 +280,7 @@ using enum uri::component;
 ```
 
 # 4. API
-## Class hierarchy
+## i. Class hierarchy
 The base class `basic_uri` performs the bulk of the work, holding a `std::string_view` of the source uri string. If you wish to manage the scope of the source uri yourself then
 this class is the most efficient way to do so.
 
@@ -296,7 +296,7 @@ for the uri. `sz` defaults to `1024`. Storage is allocated once with the object 
 
 ![class diagram (static)](https://github.com/fix8mt/uri/blob/master/assets/classstatic.png)
 
-## Types
+## ii. Types
 ### component
 ```c++
 enum component { scheme, authority, userinfo, user, password, host, port, path, query, fragment, countof };
@@ -320,7 +320,7 @@ Components are named by a public enum called `component`.  Note that the compone
 | ------------- | ------------- |
 | `uri_max_len`  | the maximum length of a supplied uri|
 
-## Construction and destruction
+## iii. Construction and destruction
 ### ctor
 ```c++
 class basic_uri;
@@ -359,7 +359,7 @@ All of `uri` is within the namespace **`FIX8`**.
 
 Destroy the `uri` or `basic_uri`. The `uri` object will release the stored string.
 
-## Accessors
+## iv. Accessors
 ### `test`
 ```c++
 constexpr bool uri::test(uri::component what=countof) const;
@@ -497,7 +497,7 @@ constexpr bool any_authority() const;
 Returns true if any authority components are present. This means any one of `host`, `password`, `port`, `user` or `userinfo`.
 
 
-## Mutators
+## v. Mutators
 ### `set`
 ```c++
 constexpr void uri::set(uri::component what=countof);
@@ -549,7 +549,7 @@ static constexpr void sort_query(query_result& query);
 ```
 Sort the supplied query alphanumerically based on the tag in the query value pair.
 
-## Generation and editing
+## v1. Generation and editing
 ### `factory`
 ```c++
 static constexpr uri::factory(std::initializer_list<comp_pair> from);
@@ -695,25 +695,25 @@ $
 </details>
 
 # 6. Discussion
-## Non-validating
+## i. Non-validating
 This class is non-validating. The source URI is expected to be normalised or at least parsable. Validation is out of scope for this implementation.
 We decided against validating for a few reasons:
 1. Performance - validating is expensive; most URIs are generally parsable
 1. Complex - validation rules are complicated; for most use cases, simple rejection for gross rule violation is sufficient.
 See [URL Standard](https://url.spec.whatwg.org/) for complete validation rules.
 
-## Low level access
+## ii. Low level access
 There are two methods that provide unchecked direct access to the `range` table and `component`. You must ensure that you don't pass an invalid component
 index when using these. Making changes to the range object with `operator[]` can have serious consequences. Use carefully!
 1. `constexpr std::string_view get(component what) const;`
 1. `constexpr range_pair& operator[](component idx)`;
 
-## Sanity checking
+## iii. Sanity checking
 This class will perform basic sanity checks on the source URI and refuses to continue parsing. You can test for failure using the `operator bool`. These are:
 1. Length - source must not exceed `uri_max_len` (`UINT16_MAX`)
 1. Illegal chars - source must not contain any whitespace characters
 
-## Performance
+## iv. Performance
 This class performs well, with minimal latency. Since there is no copying of strings or sub-strings, the decoding functionality in `basic_uri` uses minimal cycles
 \- especially for applications that can manage the storage of the source string themselves. The memory footprint of `basic_uri` is 64 bytes and will fit in a cache-line.
 If storage of the source is needed, `uri` performs a single string copy (or move), and aside from that will have the same performance as `basic_uri`.

@@ -538,6 +538,12 @@ constexpr int parse();
 ```
 Parse the source string into components. Return the count of components found. Will reset a uri if already parsed. You can check for error using `get_error()` for more info
 
+## `sort_query`
+```c++
+static constexpr void sort_query(query_result& query);
+```
+Sort the supplied query alphanumerically based on the tag in the query value pair.
+
 ## Generation and editing
 ### `factory`
 ```c++

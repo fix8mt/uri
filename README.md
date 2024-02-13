@@ -150,7 +150,7 @@ $
 </details>
 
 ## iii. Use the factory
-Create a URI from the supplied initializer list. Print out the result.
+Create a URI from an initializer list. Print out the result.
 
 <details><summary><i>source</i></summary>
 <p>
@@ -164,7 +164,7 @@ using enum uri::component;
 int main(int argc, char *argv[])
 {
    const auto u1 { uri::factory({{scheme, "https"}, {user, "dakka"},
-		{host, "www.blah.com"}, {port, "3000"}, {path, "/"}}) };
+      {host, "www.blah.com"}, {port, "3000"}, {path, "/"}}) };
    std::cout << u1 << '\n';
    return 0;
 }

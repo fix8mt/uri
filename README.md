@@ -274,6 +274,11 @@ in your application. Everything in this class is within the namespace `FIX8`, so
 using namespace FIX8;
 ```
 
+This is C++20, so you can also add in your local code:
+```c++
+using enum uri::component;
+```
+
 # iv. API
 ## Class hierarchy
 The base class `basic_uri` performs the bulk of the work, holding a `std::string_view` of the source uri string. If you wish to manage the scope of the source uri yourself then

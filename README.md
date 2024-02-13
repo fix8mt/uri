@@ -719,7 +719,7 @@ This class performs well, with minimal latency. Since there is no copying of str
 If storage of the source is needed, `uri` performs a single string copy (or move), and aside from that will have the same performance as `basic_uri`.
 
 If you need to store the source URI but wish to avoid using dynamic memory, use `uri_static`. This ensures a single allocation for the entire object. For most purposes
-(and excluding edits) a statically stored URI is the most efficient storage option. This is also suitable for storage in other containers. Be aware that the template paramter `sz`
+(and excluding edits) a statically stored URI is the most efficient storage option. This is also suitable for storage in other containers. Be aware that the template parameter `sz`
 must be large enough for any URI you wish to store and of course objects created with different templated sizes will be different types.
 
 The `factory` and `edit` have more copying although even these still use `std::string_view` where possible with actual copying of strings or sub-strings occuring

@@ -205,8 +205,8 @@ TEST_CASE("hex decode")
 	REQUIRE(!uri::has_hex(result));
 	uri u1{result};
 	REQUIRE(u1.get_uri() == src1);
-	uri u2(std::string(src), false);
-	REQUIRE(uri::has_hex(u2.get_uri()));
+	basic_uri u2(src);
+	REQUIRE(basic_uri::has_hex(u2.get_uri()));
 
 	std::string_view src3 { "https://www.netmeister.org/%%62" };
 	REQUIRE(uri::has_hex(src3));

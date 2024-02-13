@@ -492,8 +492,10 @@ public:
 class uri : public uri_storage<0>, public basic_uri
 {
 public:
-	constexpr uri(std::string src, bool decode=true) noexcept
-		: uri_storage(decode && uri::has_hex(src) ? uri::decode_hex(src) : std::move(src)), basic_uri(buffer()) {}
+	constexpr uri(std::string src) noexcept
+		: uri_storage(uri::has_hex(src) ? uri::decode_hex(src) : std::move(src)), basic_uri(buffer()) {}
+	constexpr uri(std::string_view src) noexcept : uri(std::string(src)) {}
+	constexpr uri(const char *src) noexcept : uri(std::string(src)) {}
 	constexpr uri() = default;
 	~uri() = default;
 
@@ -515,12 +517,14 @@ public:
 };
 
 //-----------------------------------------------------------------------------------------
-template<size_t sz>
+template<size_t sz=1024>
 class uri_static : public uri_storage<sz>, public basic_uri
 {
 public:
-	constexpr uri_static(std::string src, bool decode=true) noexcept
-		: uri_storage<sz>(decode && uri::has_hex(src) ? uri::decode_hex(src) : std::move(src)), basic_uri(this->buffer()) {}
+	constexpr uri_static(std::string src) noexcept
+		: uri_storage<sz>(uri::has_hex(src) ? uri::decode_hex(src) : std::move(src)), basic_uri(this->buffer()) {}
+	constexpr uri_static(std::string_view src) noexcept : uri_static(std::string(src)) {}
+	constexpr uri_static(const char *src) noexcept : uri_static(std::string(src)) {}
 	constexpr uri_static() = default;
 	~uri_static() = default;
 

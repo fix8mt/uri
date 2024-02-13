@@ -551,7 +551,20 @@ Create a `uri` from the supplied components. The `initializer_list` contains a 1
 ```c++
 constexpr int edit(std::initializer_list<comp_pair> from);
 ```
-Create a `uri` from the supplied components. The `initializer_list` contains a 1..n `comp_pair` objects. The same constraints as `factory` apply.
+Modify an existing `uri` by replacing existing components with the supplied components. Components not specified are left unchanged. The `initializer_list` contains a 1..n `comp_pair` objects. The same constraints as `factory` apply.
+
+### `make_uri`
+```c++
+static constexpr std::string make_uri(std::initializer_list<comp_pair> from);
+```
+Construct a `std::string` repesentation of a `uri` from the supplied components. The `initializer_list` contains a 1..n `comp_pair` objects. The same constraints as `factory` apply.
+
+### `make_edit`
+```c++
+static constexpr std::string make_edit(const auto& what, std::initializer_list<comp_pair> from);
+```
+Construct a `std::string` repesentation of a `uri` from the supplied `uri` (`what`) and components. The returned string is based on the existing `uri` with replacements of the supplied components.
+Components not specified are left unchanged. The `initializer_list` contains a 1..n `comp_pair` objects. The same constraints as `factory` apply.
 
 # Testing
 ## Test cases

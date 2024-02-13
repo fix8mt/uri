@@ -36,7 +36,8 @@ This is a lightweight URI parser implementation featuring zero-copy, minimal sto
 - query decode and search - no copying, results point to uri source
 - fast, very lightweight, predictive non brute force parser
 - small memory footprint - base class object is only 64 bytes
-- built-in unit test cases with exhaustive test URI cases
+- support for static or dynamic uri storage
+- built-in unit test cases with exhaustive test URI cases; simple test case addition
 - support for [**RFC 3986**](https://datatracker.ietf.org/doc/html/rfc3986)
 
 # Examples
@@ -120,7 +121,6 @@ Create a static URI from the supplied initializer list. Print out the result.
 #include <iostream>
 #include <fix8/uri.hpp>
 using namespace FIX8;
-using enum uri::component;
 
 int main(int argc, char *argv[])
 {
@@ -365,7 +365,7 @@ Return `true` if the specified component is present in the uri. With no paramete
 ```c++
 constexpr std::string_view get_component(component what) const;
 ```
-Return a `std::string_view` of the specified component or empty if component not found. Throws a `std::out_of_range` if not a legal component.
+Return a `std::string_view` of the specified component or empty if component not found. Returns an empty `std::string_view` if not found or not a legal component.
 
 ### `get_present`
 ```c++
@@ -452,7 +452,7 @@ they are in the form `%XX` where X is a hex digit (octet) `[0-9a-fA-F]`. If not 
 ```c++
 static constexpr std::string_view get_name(component what);
 ```
-Return a `std::string_view` of the specified component name. Throws a `std::out_of_range` if not a legal component.
+Return a `std::string_view` of the specified component name. Returns an empty `std::string_view` if not found or not a legal component.
 
 ### `get_uri`
 ```c++
@@ -465,7 +465,7 @@ Return a `std::string_view` of the source uri. If not set return value will be e
 constexpr value_pair get_named_pair(component what) const;
 ```
 Return a `std::pair` of `std::string_view` for the specified component. The `first` will be the component name, `second` the component value. Suitable
-for populating a JSON field. Throws a `std::out_of_range` if not a legal component. No copying, results point to uri source.
+for populating a JSON field. No copying, results point to uri source. Returns an empty `std::string_view` pair if not found or not a legal component.
 
 ### `count`
 ```c++

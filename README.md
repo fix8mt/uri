@@ -549,7 +549,7 @@ static constexpr void sort_query(query_result& query);
 ```
 Sort the supplied query alphanumerically based on the tag in the query value pair.
 
-## v1. Generation and editing
+## vi. Generation and editing
 ### `factory`
 ```c++
 static constexpr uri::factory(std::initializer_list<comp_pair> from);

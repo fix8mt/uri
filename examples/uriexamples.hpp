@@ -326,20 +326,16 @@ const std::vector<std::pair<const char *, std::vector<std::pair<uri::component, 
 			{ query, "third=3rd&first=1st&second=2nd" },
 		}
 	},
-	{ "magnet:?xt=urn:btih:A388187004472792BA9D4390B79A46FEBD540652"
-		"&dn=Mind%20Conflict%20-%20Temple%20Of%20God%20(2024)&tr=udp%3A%2F%2Ftracker.coppersurfer.tk%3A6969%2Fannounce"
-		"&tr=udp%3A%2F%2Ftracker.openbittorrent.com%3A6969%2Fannounce&tr=udp%3A%2F%2Ftracker.opentrackr.org%3A1337"
-		"&tr=udp%3A%2F%2Fmovies.zsw.ca%3A6969%2Fannounce&tr=udp%3A%2F%2Ftracker.dler.org%3A6969%2Fannounce"
-		"&tr=udp%3A%2F%2Fopentracker.i2p.rocks%3A6969%2Fannounce&tr=udp%3A%2F%2Fopen.stealth.si%3A80%2Fannounce"
-		"&tr=udp%3A%2F%2Ftracker.0x.tf%3A6969%2Fannounce",
+	{ "magnet:?xt=urn:btih:08ada5a7a6183aae1e09d831df6748d566095a10&dn=Sintel&tr=udp%3A%2F%2Fexplodie.org%3A6969&tr=udp"
+		"%3A%2F%2Ftracker.coppersurfer.tk%3A6969&tr=udp%3A%2F%2Ftracker.empire-js.us%3A1337&tr=udp%3A%2F%2Ftracker.leechers-paradise.org"
+		"%3A6969&tr=udp%3A%2F%2Ftracker.opentrackr.org%3A1337&tr=wss%3A%2F%2Ftracker.btorrent.xyz&tr=wss%3A%2F%2Ftracker.fastcast.nz&tr=wss"
+		"%3A%2F%2Ftracker.openwebtorrent.com&ws=https%3A%2F%2Fwebtorrent.io%2Ftorrents%2F&xs=https%3A%2F%2Fwebtorrent.io%2Ftorrents%2Fsintel.torrent",
 		{
 			{ scheme, "magnet" },
-			{ query,	"xt=urn:btih:A388187004472792BA9D4390B79A46FEBD540652&dn=Mind Conflict - Temple Of God (2024)"
-						"&tr=udp://tracker.coppersurfer.tk:6969/announce"
-						"&tr=udp://tracker.openbittorrent.com:6969/announce&tr=udp://tracker.opentrackr.org:1337"
-						"&tr=udp://movies.zsw.ca:6969/announce&tr=udp://tracker.dler.org:6969/"
-						"announce&tr=udp://opentracker.i2p.rocks:6969/announce&tr=udp://open.stealth."
-						"si:80/announce&tr=udp://tracker.0x.tf:6969/announce" },
+			{ query,	"xt=urn:btih:08ada5a7a6183aae1e09d831df6748d566095a10&dn=Sintel&tr=udp://explodie.org:6969"
+						"&tr=udp://tracker.coppersurfer.tk:6969&tr=udp://tracker.empire-js.us:1337&tr=udp://tracker.leechers-paradise.org:6969"
+						"&tr=udp://tracker.opentrackr.org:1337&tr=wss://tracker.btorrent.xyz&tr=wss://tracker.fastcast.nz&tr=wss://tracker.openwebtorrent.com"
+						"&ws=https://webtorrent.io/torrents/&xs=https://webtorrent.io/torrents/sintel.torrent" },
 		}
 	},
 };

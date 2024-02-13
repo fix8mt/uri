@@ -349,13 +349,13 @@ fails, you can check for error using `operator bool` or `count()` and then `get_
 1. Construct an empty `basic_uri`. It can be populated using `assign()`.
 1. Construct a `uri` from a `std::string`. By default, the source string is percent decoded before parsing. Calls `parse()`. Optionally pass `false` to prevent percent decoding.
 The supplied string is moved or copied and stored by the object. You can check for error using `operator bool` or `count()` and then `get_error()` for more info.
-1. Construct a `uri` from a `std::string_view`. Creates a `std::string` and delegates to (4).
-1. Construct a `uri` from a `const char *`. Creates a `std::string` and delegates to (4).
+1. Construct a `uri` from a `std::string_view`. Creates a `std::string` from src and delegates to (4).
+1. Construct a `uri` from a `null` terminated `const char *`. Creates a `std::string` from src and delegates to (4).
 1. Construct an empty `uri`. It can be populated using `replace()`.
 1. Construct a `uri_static` from a `std::string`. The class is templated by the non-type parameter `sz` which sets the static size and maximum storage capacity
 for the uri. By default, the source string is percent decoded before parsing. Calls `parse()`. Optionally pass `false` to prevent percent decoding.
-1. Construct a `uri_static` from a `std::string_view`. Creates a `std::string` and delegates to (8).
-1. Construct a `uri_static` from a `const char *`. Creates a `std::string` and delegates to (8).
+1. Construct a `uri_static` from a `std::string_view`. Creates a `std::string` from src and delegates to (8).
+1. Construct a `uri_static` from a `null` terminated `const char *`. Creates a `std::string` from src and delegates to (8).
 1. Construct an empty `uri_static` from a `std::string`. The class is templated by the non-type parameter `sz` which sets the static size and maximum storage capacity for the uri.
 
 All of `uri` is within the namespace **`FIX8`**.

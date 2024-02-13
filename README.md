@@ -283,7 +283,7 @@ using enum uri::component;
 # 4. API
 ## i. Class hierarchy
 The base class `basic_uri` performs the bulk of the work, holding a `std::string_view` of the source uri string. If you wish to manage the scope of the source uri yourself then
-this class is the most efficient way to do so.
+this class is the most efficient way to use uri functionality.
 
 The derived class `uri` stores the source string and then builds a `basic_uri` using that string as its reference. `uri` derives from `basic_uri` and a private storage class
 `uri_storage`. The supplied string is moved or copied and stored by the object. If your application needs the uri to hold and persist the source uri, this class is suitable.
@@ -330,16 +330,16 @@ constexpr basic_uri(int bits);                                       (2)
 constexpr basic_uri() = default;                                     (3)
 
 class uri;
-constexpr uri(std::string src, bool decode=true);                    (4)
-constexpr uri(std::string_view src, bool decode=true);               (5)
-constexpr uri(const char *src, bool decode=true);                    (6)
+constexpr uri(std::string src);                                      (4)
+constexpr uri(std::string_view src);                                 (5)
+constexpr uri(const char *src);                                      (6)
 constexpr uri() = default;                                           (7)
 
 template<size_t sz>
 class uri_static;
-constexpr uri_static(std::string src, bool decode=true);             (8)
-constexpr uri_static(std::string_view src, bool decode=true);        (9)
-constexpr uri_static(const char *src, bool decode=true);             (10)
+constexpr uri_static(std::string src);                               (8)
+constexpr uri_static(std::string_view src);                          (9)
+constexpr uri_static(const char *src);                               (10)
 constexpr uri_static() = default;                                    (11)
 ```
 
@@ -347,13 +347,13 @@ constexpr uri_static() = default;                                    (11)
 fails, you can check for error using `operator bool` or `count()` and then `get_error()` for more info. Since this method takes a `std::string_view` you can declare objects `constexpr`.
 1. Construct a `basic_uri` that has the corresponding bitset passed in `bits`. No components are present. Permits object to be used as a bitset.
 1. Construct an empty `basic_uri`. It can be populated using `assign()`.
-1. Construct a `uri` from a `std::string`. By default, the source string is percent decoded before parsing. Calls `parse()`. Optionally pass `false` to prevent percent decoding.
+1. Construct a `uri` from a `std::string`. The source string is percent decoded before parsing. Calls `parse()`.
 The supplied string is moved or copied and stored by the object. You can check for error using `operator bool` or `count()` and then `get_error()` for more info.
 1. Construct a `uri` from a `std::string_view`. Creates a `std::string` from src and delegates to (4).
 1. Construct a `uri` from a `null` terminated `const char *`. Creates a `std::string` from src and delegates to (4).
 1. Construct an empty `uri`. It can be populated using `replace()`.
 1. Construct a `uri_static` from a `std::string`. The class is templated by the non-type parameter `sz` which sets the static size and maximum storage capacity
-for the uri. By default, the source string is percent decoded before parsing. Calls `parse()`. Optionally pass `false` to prevent percent decoding.
+for the uri. The source string is percent decoded before parsing. Calls `parse()`.
 1. Construct a `uri_static` from a `std::string_view`. Creates a `std::string` from src and delegates to (8).
 1. Construct a `uri_static` from a `null` terminated `const char *`. Creates a `std::string` from src and delegates to (8).
 1. Construct an empty `uri_static` from a `std::string`. The class is templated by the non-type parameter `sz` which sets the static size and maximum storage capacity for the uri.

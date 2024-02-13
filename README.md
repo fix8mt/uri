@@ -634,12 +634,13 @@ This is a simple CLI test app which allows you to run individual or all tests fr
 
 ```bash
 $ ./uritest -h
-Usage: ./uritest [uri...] [-t:d:hlas]
+Usage: ./uritest [uri...] [-t:T:d:hlas]
  -a run all tests
  -d [uri] parse uri from CLI, show debug output
  -h help
  -l list tests
  -s show sizes
+ -T [num] static test to run
  -t [num] test to run
 $
 ```

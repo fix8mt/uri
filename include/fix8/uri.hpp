@@ -342,6 +342,26 @@ public:
 		return make_uri(ibase, std::move(ilist));
 	}
 
+	friend std::ostream& operator<<(std::ostream& os, const basic_uri& what)
+	{
+		if (!what)
+			os << "error: " << static_cast<int>(what.get_error()) << '\n';
+		os << std::setw(12) << std::left << "uri" << what._source << '\n';
+		for (component ii{}; ii != countof; ii = component(ii + 1))
+		{
+			if (what.test(ii))
+			{
+				os << std::setw(12) << std::left << what.get_name(ii)
+					<< (what.get(ii).size() ? what.get(ii) : "(empty)") << '\n';
+				if (ii == query)
+					for (auto qresult { what.decode_query() }; const auto [tag,value] : qresult)
+						os << "   " << std::setw(12) << std::left << tag << (value.size() ? value : "(empty)") << '\n';
+			}
+		}
+		return os;
+	}
+
+private:
 	static constexpr std::string make_uri(basic_uri ibase, comp_list ilist) noexcept
 	{
 		if (!ibase.test())
@@ -424,25 +444,6 @@ public:
 			done.set(ii);
 		}
 		return result;
-	}
-
-	friend std::ostream& operator<<(std::ostream& os, const basic_uri& what)
-	{
-		if (!what)
-			os << "error: " << static_cast<int>(what.get_error()) << '\n';
-		os << std::setw(12) << std::left << "uri" << what._source << '\n';
-		for (component ii{}; ii != countof; ii = component(ii + 1))
-		{
-			if (what.test(ii))
-			{
-				os << std::setw(12) << std::left << what.get_name(ii)
-					<< (what.get(ii).size() ? what.get(ii) : "(empty)") << '\n';
-				if (ii == query)
-					for (auto qresult { what.decode_query() }; const auto [tag,value] : qresult)
-						os << "   " << std::setw(12) << std::left << tag << (value.size() ? value : "(empty)") << '\n';
-			}
-		}
-		return os;
 	}
 };
 

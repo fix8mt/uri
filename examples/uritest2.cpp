@@ -107,16 +107,10 @@ void run_test_comp(int id, const auto& ui)
 TEST_CASE("uri component validations")
 {
 	for (int ii{}; ii < tests.size(); ++ii)
-		run_test_comp(ii, uri{tests[ii].first});
-}
-
-TEST_CASE("uri component validations (static)")
-{
-	using stat_uri = uri_static<>;
-	for (int ii{}; ii < tests.size(); ++ii)
 	{
-		REQUIRE(std::string_view(tests[ii].first).size() < stat_uri::max_storage());
-		run_test_comp(ii, stat_uri{tests[ii].first});
+		run_test_comp(ii, uri{tests[ii].first});
+		REQUIRE(std::string_view(tests[ii].first).size() < uri_static<>::max_storage());
+		run_test_comp(ii, uri_static<>{tests[ii].first});
 	}
 }
 
@@ -141,18 +135,12 @@ TEST_CASE("replace")
 	uri u2{u1.replace(src1)};
 	REQUIRE(u1.get_component(host) == "example.com");
 	REQUIRE(u2.get_component(host) == "www.blah.com");
-}
 
-//-----------------------------------------------------------------------------------------
-TEST_CASE("replace (static)")
-{
-	const auto& [src,vec] { tests[0] };
-	const auto& [src1,vec1] { tests[4] };
-	uri_static<> u1{src};
-	REQUIRE(u1.get_component(host) == "www.blah.com");
-	uri_static<> u2{u1.replace(src1)};
-	REQUIRE(u1.get_component(host) == "example.com");
-	REQUIRE(u2.get_component(host) == "www.blah.com");
+	uri_static<> u3{src};
+	REQUIRE(u3.get_component(host) == "www.blah.com");
+	uri_static<> u4{u3.replace(src1)};
+	REQUIRE(u3.get_component(host) == "example.com");
+	REQUIRE(u4.get_component(host) == "www.blah.com");
 }
 
 //-----------------------------------------------------------------------------------------
@@ -246,14 +234,9 @@ void do_decode()
 	REQUIRE(tbl == result2);
 }
 
-//-----------------------------------------------------------------------------------------
 TEST_CASE("query decode")
 {
 	do_decode<uri>();
-}
-
-TEST_CASE("query decode (static)")
-{
 	do_decode<uri_static<>>();
 }
 
@@ -288,10 +271,6 @@ void do_factory()
 TEST_CASE("factory")
 {
 	do_factory<uri>();
-}
-
-TEST_CASE("factory (static)")
-{
 	do_factory<uri_static<>>();
 }
 
@@ -315,10 +294,6 @@ void do_edit()
 TEST_CASE("edit")
 {
 	do_edit<uri>();
-}
-
-TEST_CASE("edit (static)")
-{
 	do_edit<uri_static<>>();
 }
 

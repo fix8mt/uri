@@ -7,7 +7,7 @@
 ### A lightweight C++20 URI parser
 
 ------------------------------------------------------------------------
-## Introduction
+# A. Introduction
 This is a lightweight URI parser implementation featuring zero-copy, minimal storage and high performance.
 
 ## Quick links
@@ -40,7 +40,7 @@ This is a lightweight URI parser implementation featuring zero-copy, minimal sto
 - built-in unit test cases with exhaustive test URI cases; simple test case addition
 - support for [**RFC 3986**](https://datatracker.ietf.org/doc/html/rfc3986)
 
-# A. Examples
+# B. Examples
 ## 1. Parse and hold a URI
 This example parses a URI string and prints out all the contained elements. Then individual components are queried and printed if present.
 
@@ -242,7 +242,7 @@ $
 </p>
 </details>
 
-# B. Building
+# C. Building
 This implementation is header only. Apart from standard C++20 includes there are no external dependencies needed in your application.
 [Catch2](https://github.com/catchorg/Catch2.git) is used for the built-in unit tests.
 
@@ -274,7 +274,7 @@ in your application. Everything in this class is within the namespace `FIX8`, so
 using namespace FIX8;
 ```
 
-# C. API
+# D. API
 ## Class hierarchy
 The base class `basic_uri` performs the bulk of the work, holding a `std::string_view` of the source uri string. If you wish to manage the scope of the source uri yourself then
 this class is the most efficient way to do so.
@@ -574,7 +574,7 @@ static constexpr std::string make_edit(const auto& what, std::initializer_list<c
 Construct a `std::string` repesentation of a `uri` from the supplied `uri` (`what`) and components. The returned string is based on the existing `uri` with replacements of the supplied components.
 Components not specified are left unchanged. The `initializer_list` contains a 1..n `comp_pair` objects. The same constraints as `factory` apply.
 
-# D. Testing
+# E. Testing
 ## Test cases
 The header file `uriexamples.hpp` contains a data structure holding test cases used by the [Catch2](https://github.com/catchorg/Catch2.git) unit test app `uritest2` and by the CLI test app `uritest`.
 You can add your own test cases to `uriexamples.hpp` - the structure is easy enough to follow.
@@ -689,7 +689,7 @@ $
 </p>
 </details>
 
-# E. Discussion
+# F. Discussion
 ## Non-validating
 This class is non-validating. The source URI is expected to be normalised or at least parsable. Validation is out of scope for this implementation.
 We decided against validating for a few reasons:

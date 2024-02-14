@@ -424,7 +424,7 @@ constexpr query_result decode_query(bool sort=false) const;
 ```
 Returns a `std::vector` of pairs of `std::string_view` of the query component if present.  You can optionally override the value pair separator character using
 the first non-type template parameter - some queries use `;`. You can also optionally override the value equality separator character using the second non-type
-template parameter (some queries use `:`). Pass `true` to optionally sort the `query_result` lexographically by the key. No copying, results point to uri source.
+template parameter (some queries use `:`). Pass `true` to optionally sort the `query_result` lexicographically by the key. No copying, results point to uri source.
 Returns an empty vector if no query was found. The query is assumed to be in the form:
 ```
 &tag=value[&tag=value...]
@@ -580,13 +580,13 @@ Modify an existing `uri` by replacing existing components with the supplied comp
 ```c++
 static constexpr std::string make_uri(std::initializer_list<comp_pair> from);
 ```
-Construct a `std::string` repesentation of a `uri` from the supplied components. The `initializer_list` contains a 1..n `comp_pair` objects. The same constraints as `factory` apply.
+Construct a `std::string` representation of a `uri` from the supplied components. The `initializer_list` contains a 1..n `comp_pair` objects. The same constraints as `factory` apply.
 
 ### `make_edit`
 ```c++
 static constexpr std::string make_edit(const auto& what, std::initializer_list<comp_pair> from);
 ```
-Construct a `std::string` repesentation of a `uri` from the supplied `uri` (`what`) and components. The returned string is based on the existing `uri` with replacements of the supplied components.
+Construct a `std::string` representation of a `uri` from the supplied `uri` (`what`) and components. The returned string is based on the existing `uri` with replacements of the supplied components.
 Components not specified are left unchanged. The `initializer_list` contains a 1..n `comp_pair` objects. The same constraints as `factory` apply.
 
 # 5. Testing
@@ -732,7 +732,7 @@ If you need to store the source URI but wish to avoid using dynamic memory, use 
 (and excluding edits) a statically stored URI is the most efficient storage option. This is also suitable for storage in other containers. Be aware that the template parameter `sz`
 must be large enough for any URI you wish to store and of course objects created with different templated sizes will be different types.
 
-The `factory` and `edit` have more copying although even these still use `std::string_view` where possible with actual copying of strings or sub-strings occuring
+The `factory` and `edit` have more copying although even these still use `std::string_view` where possible with actual copying of strings or sub-strings occurring
 once at most.
 
 With all methods `constexpr` and `noexcept`, no `virtual` methods and header only your compiler should be able to optimise your code most efficiently.

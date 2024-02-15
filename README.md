@@ -293,10 +293,10 @@ The storage class used is a specialisation of `uri_storage` which specifies `0` 
 ```c++
 uri u1{"https://www.example.com:8080/path1"};
 ```
-***
 
 ![class diagram](https://github.com/fix8mt/uri/blob/master/assets/classdynamic.png)
 
+***
 ### `uri_static`
 The derived class `uri_static` stores the source string and then builds a `basic_uri` using that string as its reference. `uri_static` derives from `basic_uri` and a private **static** storage class
 `uri_storage`. The supplied string is moved or copied and stored by the object. The class is templated by the non-type parameter `sz` which sets the static size and maximum storage capacity
@@ -306,10 +306,10 @@ If your application needs the uri to hold and persist the source uri statically 
 ```c++
 uri_static<256> u1{"https://www.example.com:8080/path1"};
 ```
-***
 
 ![class diagram (static)](https://github.com/fix8mt/uri/blob/master/assets/classstatic.png)
 
+***
 ### `uri_fixed`
 The derived class `uri_fixed` stores the source string and then builds a `basic_uri` using that string as its reference. `uri_fixed` derives from `basic_uri` and a private **fixed** storage class
 `uri_storage_base`. The supplied string is moved or copied and stored by the object. The class is templated by the non-type parameter `lit` which is a string literal wrapper.

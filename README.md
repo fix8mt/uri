@@ -282,6 +282,7 @@ using enum uri::component;
 
 # 4. API
 ## i. Class hierarchy
+### `uri`
 The base class `basic_uri` performs the bulk of the work, holding a `std::string_view` of the source uri string. If you wish to manage the scope of the source uri yourself then
 this class is the most efficient way to use uri functionality.
 
@@ -295,6 +296,7 @@ uri u1{"https://www.example.com:8080/path1"};
 
 ![class diagram](https://github.com/fix8mt/uri/blob/master/assets/classdynamic.png)
 
+### `uri_static`
 The derived class `uri_static` stores the source string and then builds a `basic_uri` using that string as its reference. `uri_static` derives from `basic_uri` and a private storage class
 `uri_storage`. The supplied string is moved or copied and stored by the object. The class is templated by the non-type parameter `sz` which sets the static size and maximum storage capacity
 for the uri. `sz` defaults to `1024`. Storage is allocated once with the object in a `std::array`. No dynamic memory is used.
@@ -306,6 +308,7 @@ uri_static<256> u1{"https://www.example.com:8080/path1"};
 
 ![class diagram (static)](https://github.com/fix8mt/uri/blob/master/assets/classstatic.png)
 
+### `uri_fixed`
 The derived class `uri_fixed` stores the source string and then builds a `basic_uri` using that string as its reference. `uri_fixed` derives from `basic_uri` and a private storage class
 `uri_storage_base`. The supplied string is moved or copied and stored by the object. The class is templated by the non-type parameter `lit` which is a string literal wrapper.
 The storage required will be the exact size of the supplied string plus the size of `basic_uri`. This class is the most efficient and minimal storage required. This class can be `constexpr`

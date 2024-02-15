@@ -311,7 +311,7 @@ uri_static<256> u1{"https://www.example.com:8080/path1"};
 ### `uri_fixed`
 The derived class `uri_fixed` stores the source string and then builds a `basic_uri` using that string as its reference. `uri_fixed` derives from `basic_uri` and a private **fixed** storage class
 `uri_storage_base`. The supplied string is moved or copied and stored by the object. The class is templated by the non-type parameter `lit` which is a string literal wrapper.
-The storage required will be the exact size of the supplied string plus the size of `basic_uri`. This class is the most efficient and minimal storage required. This class can be `constexpr`
+The storage required will be the exact size of the supplied string plus the size of `basic_uri`. This class is the most efficient using the minimal storage required. This class can be `constexpr`
 (some compilers may require `static`).  If your application needs the uri to hold and persist the source uri statically (for example in another container) and with _minimal_ storage, this class is suitable.
 
 > [!NOTE]

@@ -298,6 +298,14 @@ If your application needs the uri to hold and persist the source uri statically 
 
 ![class diagram (static)](https://github.com/fix8mt/uri/blob/master/assets/classstatic.png)
 
+The derived class `uri_fixed` stores the source string and then builds a `basic_uri` using that string as its reference. `uri_fixed` derives from `basic_uri` and a private storage class
+`uri_storage_base`. The supplied string is moved or copied and stored by the object. The class is templated by the non-type parameter `lit` which is a string literal wrapper.
+The storage required will be the exact size of the supplied string plus the size of `basic_uri`. This class is the most efficient and minimal storage required. This class can be `constexpr`
+(some compilers may require `static`). Note: no editing or factory methods are available with `uri_fixed`.
+If your application needs the uri to hold and persist the source uri statically (for example in another container) and with _minimal_ storage, this class is suitable.
+
+![class diagram (static)](https://github.com/fix8mt/uri/blob/master/assets/classfixed.png)
+
 ## ii. Types
 ### component
 ```c++

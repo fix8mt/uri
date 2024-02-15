@@ -399,20 +399,20 @@ Components are named by a public enum called `component`.  Note that the compone
 class basic_uri;
 constexpr basic_uri(std::string_view src);                           // (1)
 constexpr basic_uri(int bits);                                       // (2)
-constexpr basic_uri() = default;                                     // (3)
+constexpr basic_uri();                                               // (3)
 
 class uri;
 constexpr uri(std::string src);                                      // (4)
 constexpr uri(std::string_view src);                                 // (5)
 constexpr uri(const char *src);                                      // (6)
-constexpr uri() = default;                                           // (7)
+constexpr uri();                                                     // (7)
 
 template<size_t sz>
 class uri_static;
 constexpr uri_static(std::string src);                               // (8)
 constexpr uri_static(std::string_view src);                          // (9)
 constexpr uri_static(const char *src);                               // (10)
-constexpr uri_static() = default;                                    // (11)
+constexpr uri_static();                                              // (11)
 
 template<size_t N>
 struct literal;

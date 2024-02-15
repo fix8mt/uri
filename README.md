@@ -820,9 +820,9 @@ This class is the most efficient using the minimal storage required.
 The `factory` and `edit` have more copying although even these still use `std::string_view` where possible with actual copying of strings or sub-strings occurring
 once at most.
 
-With all methods `constexpr` and `noexcept`, no `virtual` methods and header only your compiler should be able to optimise your code most efficiently.
+-With all methods `constexpr` and `noexcept`, no `virtual` methods and header only your compiler should be able to optimise your code most efficiently.
 
-If you want to reduce the size of `basic_uri` further, you can change:
+-If you want to reduce the size of `basic_uri` further, you can change:
 ```c++
 using uri_len_t = std::uint16_t;
 ```
@@ -831,3 +831,5 @@ to:
 using uri_len_t = std::uint8_t;
 ```
 This will limit the maximum length of a URI to 256 bytes, but reduce the overall storage needed for `basic_uri` from `64` to `40` bytes.
+
+-All of the classes `uri`, `uri-static` and `uri_fixed` derive from `basic_uri` so they can be `static_cast<basic_uri&>` to `basic_uri`, allowing common code use across these classes.

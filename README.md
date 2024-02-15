@@ -236,7 +236,7 @@ $
 </p>
 </details>
 
-## iv. Edit a URI
+## v. Edit a URI
 Create a URI and then edit it.
 
 <details><summary><i>source</i></summary>
@@ -265,7 +265,7 @@ int main(int argc, char *argv[])
 </p>
 
 ```CSV
-$ ./example4
+$ ./example5
 uri         https://dakka@www.blah.com:3000
 scheme      https
 authority   dakka@www.blah.com:3000

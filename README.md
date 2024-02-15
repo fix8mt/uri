@@ -203,12 +203,12 @@ Create a fixed URI with a storage equal to the source string. Print out the resu
 #include <fix8/uri.hpp>
 using namespace FIX8;
 
+constexpr uri_fixed<"telnet://user:password@192.0.2.16:80/"> u1;
 int main(int argc, char *argv[])
 {
-   static constexpr uri_fixed<"telnet://192.0.2.16:80/"> u1;
    std::cout << u1 << '\n';
-   std::cout << "max storage: " << u3.max_storage() << '\n';
-   std::cout << "total object size: " << sizeof(u3) << '\n';
+   std::cout << "max storage: " << u1.max_storage() << '\n';
+   std::cout << "total object size: " << sizeof(u1) << '\n';
    return 0;
 }
 ```
@@ -221,15 +221,18 @@ int main(int argc, char *argv[])
 
 ```CSV
 $ ./example4
-uri         telnet://192.0.2.16:80/
+uri         telnet://user:password@192.0.2.16:80/
 scheme      telnet
-authority   192.0.2.16:80
+authority   user:password@192.0.2.16:80
+userinfo    user:password
+user        user
+password    password
 host        192.0.2.16
 port        80
 path        /
 
-max storage: 24
-total object size: 88
+max storage: 38
+total object size: 104
 $
 ```
 

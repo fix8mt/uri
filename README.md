@@ -150,7 +150,7 @@ $
 </details>
 
 ## iii. Create a fixed uri
-Create a fixed URI. Print out the result and total storage.
+Create a fixed URI. Print out the result, max storage and object size.
 
 <details><summary><i>source</i></summary>
 <p>
@@ -164,7 +164,8 @@ int main(int argc, char *argv[])
 {
    static constexpr uri_fixed<"telnet://192.0.2.16:80/"> u1;
    std::cout << u1 << '\n';
-   std::cout << "total storage: " << sizeof(u3) << '\n';
+   std::cout << "max storage: " << u3.max_storage() << '\n';
+   std::cout << "total object size: " << sizeof(u3) << '\n';
    return 0;
 }
 ```
@@ -184,7 +185,8 @@ host        192.0.2.16
 port        80
 path        /
 
-max storage: 88
+max storage: 24
+total object size: 88
 $
 ```
 

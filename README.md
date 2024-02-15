@@ -371,6 +371,7 @@ constexpr uri_static() = default;                                    (11)
 template<size_t N>
 struct literal;
 constexpr literal(const char (&str)[N]);                             (12)
+
 template<literal lit>
 class uri_fixed;
 constexpr uri_fixed();                                               (13)

@@ -36,7 +36,7 @@ This is a lightweight URI parser implementation featuring zero-copy, minimal sto
 - query decode and search - no copying, results point to uri source
 - fast, very lightweight, predictive non brute force parser
 - small memory footprint - base class object is only 64 bytes
-- support for static or dynamic uri storage
+- support for dynamic, static or fixed uri storage
 - built-in unit test cases with exhaustive test URI cases; simple test case addition
 - support for [**RFC 3986**](https://datatracker.ietf.org/doc/html/rfc3986)
 
@@ -149,7 +149,49 @@ $
 </p>
 </details>
 
-## iii. Use the factory
+## iii. Create a fixed uri
+Create a fixed URI. Print out the result and max storage.
+
+<details><summary><i>source</i></summary>
+<p>
+
+```c++
+#include <iostream>
+#include <fix8/uri.hpp>
+using namespace FIX8;
+
+int main(int argc, char *argv[])
+{
+   static constexpr uri_fixed<"telnet://192.0.2.16:80/"> u1;
+   std::cout << u1 << '\n';
+   std::cout << "max storage: " << u1.max_storage() << '\n';
+   return 0;
+}
+```
+
+</p>
+</details>
+
+<details><summary><i>output</i></summary>
+</p>
+
+```CSV
+$ ./example3
+uri         telnet://192.0.2.16:80/
+scheme      telnet
+authority   192.0.2.16:80
+host        192.0.2.16
+port        80
+path        /
+
+max storage: 24
+$
+```
+
+</p>
+</details>
+
+## iv. Use the factory
 Create a URI from an initializer list. Print out the result.
 
 <details><summary><i>source</i></summary>
@@ -177,7 +219,7 @@ int main(int argc, char *argv[])
 </p>
 
 ```CSV
-$ ./example3
+$ ./example4
 uri         https://dakka@www.blah.com:3000/
 scheme      https
 authority   dakka@www.blah.com:3000

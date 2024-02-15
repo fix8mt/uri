@@ -41,7 +41,50 @@ This is a lightweight URI parser implementation featuring zero-copy, minimal sto
 - support for [**RFC 3986**](https://datatracker.ietf.org/doc/html/rfc3986)
 
 # 2. Examples
-## i. Parse and hold a URI
+## i. Use `basic_uri` as a view
+This example parses a list of URI strings and prints out `host` component. `basic_uri` creates a no-copy view of the source.
+
+<details><summary><i>source</i></summary>
+<p>
+
+```c++
+#include <iostream>
+#include <array>
+#include <fix8/uri.hpp>
+using namespace FIX8;
+
+int main(int argc, char *argv[])
+{
+   static constexpr const std::array uris
+   {
+      "https://www.blah.com:3000/test",
+      "https://dakka@www.staylate.net:3000/",
+      "https://www.buyexample.com/over/there?name=ferret&time=any#afrag",
+   };
+   for (const auto& pp : uris)
+      std::cout << basic_uri(pp).get_component(uri::host) << '\n';
+   return 0;
+}
+```
+
+</p>
+</details>
+
+<details><summary><i>output</i></summary>
+</p>
+
+```CSV
+$ ./example1
+www.blah.com
+www.staylate.net
+www.buyexample.com
+$
+```
+
+</p>
+</details>
+
+## ii. Parse and hold a URI
 This example parses a URI string and prints out all the contained elements. Then individual components are queried and printed if present.
 
 <details><summary><i>source</i></summary>
@@ -80,7 +123,7 @@ int main(int argc, char *argv[])
 </p>
 
 ```CSV
-$ ./example1
+$ ./example2
 uri         http://nodejs.org:89/docs/latest/api/foo/bar/qua/13949281/0f28b/5d49/b3020/url.html?payload1=true&payload2=false&test=1&benchmark=3&foo=38.38.011.293&bar=1234834910480&test=19299&3992&key=f5c65e1e98fe07e648249ad41e1cfdb0#test
 scheme      http
 authority   nodejs.org:89
@@ -111,7 +154,7 @@ $
 </p>
 </details>
 
-## ii. Create a static uri
+## iii. Create a static uri
 Create a static URI with a maximum storage of 256 bytes, from the supplied initializer list. Print out the result and max storage.
 
 <details><summary><i>source</i></summary>
@@ -138,7 +181,7 @@ int main(int argc, char *argv[])
 </p>
 
 ```CSV
-$ ./example2
+$ ./example3
 uri         mailto:John.Smith@example.com
 scheme      mailto
 path        John.Smith@example.com
@@ -149,7 +192,7 @@ $
 </p>
 </details>
 
-## iii. Create a fixed uri
+## iv. Create a fixed uri
 Create a fixed URI with a storage equal to the source string. Print out the result, max storage and object size.
 
 <details><summary><i>source</i></summary>
@@ -177,7 +220,7 @@ int main(int argc, char *argv[])
 </p>
 
 ```CSV
-$ ./example3
+$ ./example4
 uri         telnet://192.0.2.16:80/
 scheme      telnet
 authority   192.0.2.16:80
@@ -193,7 +236,7 @@ $
 </p>
 </details>
 
-## iv. Use the factory
+## v. Use the factory
 Create a URI from an initializer list. Print out the result.
 
 <details><summary><i>source</i></summary>
@@ -221,7 +264,7 @@ int main(int argc, char *argv[])
 </p>
 
 ```CSV
-$ ./example4
+$ ./example5
 uri         https://dakka@www.blah.com:3000/
 scheme      https
 authority   dakka@www.blah.com:3000
@@ -236,7 +279,7 @@ $
 </p>
 </details>
 
-## v. Edit a URI
+## vi. Edit a URI
 Create a URI and then edit it.
 
 <details><summary><i>source</i></summary>
@@ -265,7 +308,7 @@ int main(int argc, char *argv[])
 </p>
 
 ```CSV
-$ ./example5
+$ ./example6
 uri         https://dakka@www.blah.com:3000
 scheme      https
 authority   dakka@www.blah.com:3000

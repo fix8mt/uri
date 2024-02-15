@@ -155,7 +155,7 @@ $
 </details>
 
 ## iii. Create a static uri
-Create a static URI with a maximum storage of 256 bytes, from the supplied initializer list. Print out the result and max storage.
+Create a static URI with a maximum storage of 256 bytes, from the supplied string. Print out the result and max storage.
 
 <details><summary><i>source</i></summary>
 <p>

@@ -43,6 +43,7 @@
 #include <string_view>
 #include <stdexcept>
 #include <utility>
+#include <limits>
 #include <cstdint>
 #include <vector>
 #include <list>
@@ -62,13 +63,13 @@ public:
 	using range_pair = std::pair<uri_len_t, uri_len_t>; // offset, len
 	enum component { scheme, authority, userinfo, user, password, host, port, path, query, fragment, countof };
 	enum class error : uri_len_t { no_error, too_long, illegal_chars, empty_src, countof };
-	static constexpr const auto uri_max_len {UINT16_MAX};
+	static constexpr const auto uri_max_len {std::numeric_limits<uri_len_t>::max()};
 	using comp_pair = std::pair<component, std::string_view>;
 	using comp_list = std::vector<std::string_view>;
 private:
 	std::string_view _source;
 	std::array<range_pair, component::countof> _ranges{};
-	uri_len_t _present{};
+	std::uint16_t _present{};
 	static constexpr const std::array _component_names { "scheme", "authority", "userinfo", "user", "password", "host", "port", "path", "query", "fragment", };
 	static constexpr bool query_comp(const value_pair& pl, const value_pair& pr) noexcept { return pl.first < pr.first; }
 public:
@@ -102,7 +103,7 @@ public:
 		return what < countof ? value_pair(_component_names[what], get(what)) : value_pair();
 	}
 	constexpr int count() const noexcept { return std::popcount(_present); } // upgrade to std::bitset when constexpr in c++23
-	constexpr uri_len_t get_present() const noexcept { return _present; }
+	constexpr std::uint16_t get_present() const noexcept { return _present; }
 	constexpr void set(component what=countof) noexcept { what == countof ? _present = (1 << countof) - 1 : _present |= (1 << what); }
 	constexpr void clear(component what=countof) noexcept { what == countof ? _present = 0 : _present &= ~(1 << what); }
 	constexpr bool any_authority() const noexcept { return _present & (1 << host | 1 << password | 1 << port | 1 << user | 1 << userinfo); };
@@ -448,28 +449,40 @@ private:
 };
 
 //-----------------------------------------------------------------------------------------
+/// fixed static storage
+template<size_t sz>
+class uri_storage_base
+{
+protected:
+	std::array<char, sz> _buffer;
+	constexpr uri_storage_base(std::array<char, sz> src) noexcept : _buffer(std::move(src)) {}
+	constexpr uri_storage_base() = default;
+	~uri_storage_base() = default;
+public:
+	constexpr std::string_view buffer() const noexcept { return {this->_buffer.cbegin(), sz}; }
+	static constexpr auto max_storage() noexcept { return sz; }
+};
+
 /// static storage
 template<size_t sz>
-class uri_storage
+class uri_storage : public uri_storage_base<sz>
 {
-	std::array<char, sz> _buffer;
 	size_t _sz{};
 protected:
 	constexpr uri_storage(std::string src) noexcept : _sz(src.size() > sz ? 0 : src.size())
-		{ std::copy_n(src.cbegin(), _sz, _buffer.begin()); }
+		{ std::copy_n(src.cbegin(), _sz, this->_buffer.begin()); }
 	constexpr uri_storage() = default;
 	~uri_storage() = default;
 	constexpr std::string swap(std::string src) noexcept
 	{
 		if (src.size() > sz)
 			return {};
-		std::string old(_buffer.cbegin(), _sz);
-		std::copy_n(src.cbegin(), _sz = src.size(), _buffer.begin());
+		std::string old(this->_buffer.cbegin(), _sz);
+		std::copy_n(src.cbegin(), _sz = src.size(), this->_buffer.begin());
 		return old;
 	}
 public:
-	constexpr std::string_view buffer() const noexcept { return {_buffer.cbegin(), _sz}; }
-	static constexpr auto max_storage() noexcept { return sz; }
+	constexpr std::string_view buffer() const noexcept { return {this->_buffer.cbegin(), _sz}; }
 };
 
 //-----------------------------------------------------------------------------------------
@@ -543,6 +556,23 @@ public:
 	{
 		return uri_static(make_uri(std::move(from)));
 	}
+};
+
+//-----------------------------------------------------------------------------------------
+template<size_t N>
+struct literal
+{
+	static constexpr size_t _sz{N};
+	std::array<char, N> _value;
+   constexpr literal(const char (&str)[N]) noexcept : _value(std::to_array<char, N>(const_cast<char (&)[N]>(str))) {}
+};
+
+template<literal lit>
+class uri_fixed : public uri_storage_base<lit._sz>, public basic_uri
+{
+public:
+	constexpr uri_fixed() noexcept : uri_storage_base<lit._sz>(std::move(lit._value)), basic_uri(this->buffer()) {}
+	~uri_fixed() = default;
 };
 
 } // FIX8

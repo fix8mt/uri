@@ -47,7 +47,7 @@ using namespace FIX8;
 //-----------------------------------------------------------------------------------------
 int main(int argc, char *argv[])
 {
-   static constexpr const char *optstr{"t:T:d:hlas"};
+   static constexpr const char *optstr{"t:T:d:hlasx"};
 	static constexpr const auto long_options { std::to_array<option>
    ({
       { "help",	no_argument,			nullptr, 'h' },
@@ -80,9 +80,42 @@ int main(int argc, char *argv[])
  -T [num] static test to run
  -t [num] test to run)" << '\n';
 				return 1;
+			case 'x':
+				{
+					/*
+					using namespace std::literals;
+					constexpr auto svs { "https://www.hello.com/au/page1"sv };
+					constexpr auto svss { svs.size() };
+					const uri_static<svss> u1{svs};
+					std::cout << u1 << '\n' << u1.max_storage() << '\n' << svss << '\n';
+					for (uri::component ii{}; ii != uri::countof; ii = uri::component(ii + 1))
+					{
+						if (u1.test(ii))
+						{
+							const auto [pos,len] { u1[ii] };
+							std::cout << uri::get_name(ii) << ' ' << pos << " (" << len << ")\n";
+						}
+					}
+					*/
+
+					//const uri_fixed<"https://www.hello.com/au/page1"> u1;
+					static constexpr uri_fixed<"https://user:password@example.com/path?search=1"> u1;
+					static constexpr uri_fixed<"https://hello.com/path?search=1"> u2;
+					std::cout << u1 << '\n';
+					std::cout << u1.max_storage() << '\n';
+					std::cout << sizeof(u1) << '\n';
+					std::cout << u2 << '\n';
+					std::cout << u2.max_storage() << '\n';
+					std::cout << sizeof(u2) << '\n';
+   uri_fixed<"telnet://192.0.2.16:80/"> u3;
+   std::cout << u3 << '\n';
+   std::cout << "max storage: " << u3.max_storage() << '\n';
+   std::cout << "total object size: " << sizeof(u3) << '\n';
+				}
+				break;
 			case 'l':
 				for (int ii{}; const auto& [src,vec] : tests)
-					std::cout << ii++ << '\t' << src << '\n';
+					std::cout << ii++ << '\t' << src << " (" << std::string_view(src).size() << ")\n";
 				break;
 			case 'T':
 				if (const auto tnum {std::stoul(optarg)}; tnum >= tests.size())

@@ -112,7 +112,7 @@ $
 </details>
 
 ## ii. Create a static uri
-Create a static URI from the supplied initializer list. Print out the result and max storage.
+Create a static URI with a maximum storage of 256 bytes, from the supplied initializer list. Print out the result and max storage.
 
 <details><summary><i>source</i></summary>
 <p>
@@ -150,7 +150,7 @@ $
 </details>
 
 ## iii. Create a fixed uri
-Create a fixed URI. Print out the result, max storage and object size.
+Create a fixed URI with a storage equal to the source string. Print out the result, max storage and object size.
 
 <details><summary><i>source</i></summary>
 <p>
@@ -833,4 +833,4 @@ using uri_len_t = std::uint8_t;
 ```
 This will limit the maximum length of a URI to 256 bytes, but reduce the overall storage needed for `basic_uri` from `64` to `40` bytes.
 
-- All of the classes `uri`, `uri-static` and `uri_fixed` derive from `basic_uri` so they can be `static_cast<basic_uri&>` to `basic_uri&`, allowing common code use across these classes.
+- All of the classes `uri`, `uri-static` and `uri_fixed` derive from `basic_uri` so they can be `static_cast<basic_uri&>` to `basic_uri&`, allowing common code use across all instances.

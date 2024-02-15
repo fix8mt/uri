@@ -289,12 +289,20 @@ The derived class `uri` stores the source string and then builds a `basic_uri` u
 `uri_storage`. The supplied string is moved or copied and stored by the object. If your application needs the uri to hold and persist the source uri, this class is suitable.
 The storage class used is a specialisation of `uri_storage` which specifies `0` as the non-type parameter `sz`, selecting dynamic storage.
 
+```c++
+uri u1{"https://www.example.com:8080/path1"};
+```
+
 ![class diagram](https://github.com/fix8mt/uri/blob/master/assets/classdynamic.png)
 
 The derived class `uri_static` stores the source string and then builds a `basic_uri` using that string as its reference. `uri_static` derives from `basic_uri` and a private storage class
 `uri_storage`. The supplied string is moved or copied and stored by the object. The class is templated by the non-type parameter `sz` which sets the static size and maximum storage capacity
 for the uri. `sz` defaults to `1024`. Storage is allocated once with the object in a `std::array`. No dynamic memory is used.
 If your application needs the uri to hold and persist the source uri statically (for example in another container), this class is suitable.
+
+```c++
+uri_static<256> u1{"https://www.example.com:8080/path1"};
+```
 
 ![class diagram (static)](https://github.com/fix8mt/uri/blob/master/assets/classstatic.png)
 
@@ -303,6 +311,10 @@ The derived class `uri_fixed` stores the source string and then builds a `basic_
 The storage required will be the exact size of the supplied string plus the size of `basic_uri`. This class is the most efficient and minimal storage required. This class can be `constexpr`
 (some compilers may require `static`). Note: no editing or factory methods are available with `uri_fixed`.
 If your application needs the uri to hold and persist the source uri statically (for example in another container) and with _minimal_ storage, this class is suitable.
+
+```c++
+uri_fixed<"https://www.example.com:8080/path1"> u1;
+```
 
 ![class diagram (static)](https://github.com/fix8mt/uri/blob/master/assets/classfixed.png)
 
@@ -350,6 +362,12 @@ constexpr uri_static(std::string src);                               (8)
 constexpr uri_static(std::string_view src);                          (9)
 constexpr uri_static(const char *src);                               (10)
 constexpr uri_static() = default;                                    (11)
+
+template<size_t N>
+struct literal;
+template<literal lit>
+class uri_fixed;
+constexpr uri_fixed();                                               (12)
 ```
 
 1. Construct a `basic_uri` from a `std::string_view`. This base class does not store the string. Calls `parse()`. The source string must not go out of scope to use this object. If parsing

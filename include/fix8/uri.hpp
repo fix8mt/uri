@@ -463,6 +463,7 @@ public:
 	static constexpr auto max_storage() noexcept { return sz; }
 };
 
+//-----------------------------------------------------------------------------------------
 /// static storage
 template<size_t sz>
 class uri_storage : public uri_storage_base<sz>
@@ -563,7 +564,7 @@ template<size_t N>
 struct literal
 {
 	static constexpr size_t _sz{N};
-	std::array<char, N> _value;
+	const std::array<char, N> _value;
    constexpr literal(const char (&str)[N]) noexcept : _value(std::to_array<char, N>(const_cast<char (&)[N]>(str))) {}
 };
 

@@ -184,12 +184,15 @@ const std::vector<std::pair<const char *, std::vector<std::pair<uri::component, 
 			{ path, "+1-816-555-1212" },
 		}
 	},
-	{ "telnet://192.0.2.16:80/",
+	{ "telnet://user:password@192.0.2.16:8888/",
 		{
 			{ scheme, "telnet" },
-			{ authority, "192.0.2.16:80" },
+			{ authority, "user:password@192.0.2.16:8888" },
+			{ userinfo, "user:password" },
+			{ user, "user" },
+			{ password, "password" },
 			{ host, "192.0.2.16" },
-			{ port, "80" },
+			{ port, "8888" },
 			{ path, "/" },
 		}
 	},

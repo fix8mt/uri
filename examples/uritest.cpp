@@ -99,6 +99,7 @@ int main(int argc, char *argv[])
 					*/
 
 					//const uri_fixed<"https://www.hello.com/au/page1"> u1;
+					/*
 					static constexpr uri_fixed<"https://user:password@example.com/path?search=1"> u1;
 					static constexpr uri_fixed<"https://hello.com/path?search=1"> u2;
 					std::cout << u1 << '\n';
@@ -107,10 +108,25 @@ int main(int argc, char *argv[])
 					std::cout << u2 << '\n';
 					std::cout << u2.max_storage() << '\n';
 					std::cout << sizeof(u2) << '\n';
-   uri_fixed<"telnet://192.0.2.16:80/"> u3;
-   std::cout << u3 << '\n';
-   std::cout << "max storage: " << u3.max_storage() << '\n';
-   std::cout << "total object size: " << sizeof(u3) << '\n';
+					uri_fixed<"telnet://192.0.2.16:80/"> u3;
+					std::cout << u3 << '\n';
+					std::cout << "max storage: " << u3.max_storage() << '\n';
+					std::cout << "total object size: " << sizeof(u3) << '\n';
+					*/
+					/*
+					static constexpr const std::array uris
+					{
+						"https://www.blah.com:3000/test",
+						"https://dakka@www.staylate.net:3000/",
+						"https://www.buyexample.com/over/there?name=ferret&time=any#afrag",
+					};
+					for (const auto& pp : uris)
+						std::cout << basic_uri(pp).get_component(host) << '\n';
+						*/
+					static constexpr uri_fixed<"telnet://user:password@192.0.2.16:80/"> u1;
+					std::cout << u1 << '\n';
+					std::cout << "max storage: " << u1.max_storage() << '\n';
+					std::cout << "total object size: " << sizeof(u1) << '\n';
 				}
 				break;
 			case 'l':
@@ -133,8 +149,8 @@ int main(int argc, char *argv[])
 				{
 					const uri u1{optarg};
 					if (!u1)
-						std::cout << "error: " << static_cast<int>(u1.get_error()) << '\n';
-					std::cout << u1 << '\n' << std::bitset<uri::countof>(u1.get_present()) << " ("
+						std::cout << "error " << static_cast<int>(u1.get_error()) << '\n';
+					std::cout << u1 << '\n' << "bitset " << std::bitset<uri::countof>(u1.get_present()) << " ("
 						<< std::hex << std::showbase << u1.get_present() << std::dec << std::noshowbase << ")\n";
 					for (uri::component ii{}; ii != uri::countof; ii = uri::component(ii + 1))
 					{

@@ -293,6 +293,7 @@ The storage class used is a specialisation of `uri_storage` which specifies `0` 
 ```c++
 uri u1{"https://www.example.com:8080/path1"};
 ```
+***
 
 ![class diagram](https://github.com/fix8mt/uri/blob/master/assets/classdynamic.png)
 
@@ -305,6 +306,7 @@ If your application needs the uri to hold and persist the source uri statically 
 ```c++
 uri_static<256> u1{"https://www.example.com:8080/path1"};
 ```
+***
 
 ![class diagram (static)](https://github.com/fix8mt/uri/blob/master/assets/classstatic.png)
 

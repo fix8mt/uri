@@ -807,22 +807,23 @@ This class will perform basic sanity checks on the source URI and refuses to con
 ## iv. Performance
 This class performs well, with minimal latency. Since there is no copying of strings or sub-strings, the decoding functionality in `basic_uri` uses minimal cycles
 \- especially for applications that can manage the storage of the source string themselves. The memory footprint of `basic_uri` is 64 bytes and will fit in a cache-line.
-If storage of the source is needed, `uri` performs a single string copy (or move), and aside from that will have the same performance as `basic_uri`.
 
-If you need to store the source URI but wish to avoid using dynamic memory, use `uri_static`. This ensures a single allocation for the entire object. For most purposes
+- If storage of the source is needed, `uri` performs a single string copy (or move), and aside from that will have the same performance as `basic_uri`.
+
+- If you need to store the source URI but wish to avoid using dynamic memory, use `uri_static`. This ensures a single allocation for the entire object. For most purposes
 (and excluding edits) a statically stored URI is the most efficient storage option. This is also suitable for storage in other containers. Be aware that the template parameter `sz`
 must be large enough for any URI you wish to store and of course objects created with different templated sizes will be different types.
 
-If you need to store the source URI but wish to avoid using dynamic memory and you don't need to modify the URI, use `uri_fixed`. As with `uri_static`, there is a single allocation for the entire object.
+- If you need to store the source URI but wish to avoid using dynamic memory and you don't need to modify the URI, use `uri_fixed`. As with `uri_static`, there is a single allocation for the entire object.
 The class is templated by the non-type parameter `lit` which is a string literal wrapper. The storage required will be the exact size of the supplied string plus the size of `basic_uri`.
 This class is the most efficient using the minimal storage required.
 
-The `factory` and `edit` have more copying although even these still use `std::string_view` where possible with actual copying of strings or sub-strings occurring
+- The `factory` and `edit` have more copying although even these still use `std::string_view` where possible with actual copying of strings or sub-strings occurring
 once at most.
 
--With all methods `constexpr` and `noexcept`, no `virtual` methods and header only your compiler should be able to optimise your code most efficiently.
+- With all methods `constexpr` and `noexcept`, no `virtual` methods and header only your compiler should be able to optimise your code most efficiently.
 
--If you want to reduce the size of `basic_uri` further, you can change:
+- If you want to reduce the size of `basic_uri` further, you can change:
 ```c++
 using uri_len_t = std::uint16_t;
 ```
@@ -832,4 +833,4 @@ using uri_len_t = std::uint8_t;
 ```
 This will limit the maximum length of a URI to 256 bytes, but reduce the overall storage needed for `basic_uri` from `64` to `40` bytes.
 
--All of the classes `uri`, `uri-static` and `uri_fixed` derive from `basic_uri` so they can be `static_cast<basic_uri&>` to `basic_uri`, allowing common code use across these classes.
+- All of the classes `uri`, `uri-static` and `uri_fixed` derive from `basic_uri` so they can be `static_cast<basic_uri&>` to `basic_uri`, allowing common code use across these classes.

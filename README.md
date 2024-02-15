@@ -830,4 +830,4 @@ to:
 ```c++
 using uri_len_t = std::uint8_t;
 ```
-This will limit the maximum length of a URI to 256 bytes.
+This will limit the maximum length of a URI to 256 bytes, but reduce the overall storage needed for `basic_uri` from `64` to `40` bytes.

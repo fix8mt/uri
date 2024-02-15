@@ -370,9 +370,10 @@ constexpr uri_static() = default;                                    (11)
 
 template<size_t N>
 struct literal;
+constexpr literal(const char (&str)[N]);                             (12)
 template<literal lit>
 class uri_fixed;
-constexpr uri_fixed();                                               (12)
+constexpr uri_fixed();                                               (13)
 ```
 
 1. Construct a `basic_uri` from a `std::string_view`. This base class does not store the string. Calls `parse()`. The source string must not go out of scope to use this object. If parsing
@@ -389,6 +390,8 @@ for the uri. The source string is percent decoded before parsing. Calls `parse()
 1. Construct a `uri_static` from a `std::string_view`. Creates a `std::string` from src and delegates to (8).
 1. Construct a `uri_static` from a `null` terminated `const char *`. Creates a `std::string` from src and delegates to (8).
 1. Construct an empty `uri_static` from a `std::string`. The class is templated by the non-type parameter `sz` which sets the static size and maximum storage capacity for the uri.
+1. Construct a `literal` object from a supplied `const char[]`. This constructor is implicitly called when you pass a string literal as a non-type template parameter to `uri_fixed`.
+1. Construct a `uri_fixed` from a `literal` (12).
 
 All of `uri` is within the namespace **`FIX8`**.
 

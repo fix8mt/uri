@@ -406,10 +406,10 @@ uri_static<256> u1{"https://www.example.com:8080/path1"};
 The derived class `uri_fixed` stores the source string and then builds a `basic_uri` using that string as its reference. `uri_fixed` derives from `basic_uri` and a private **fixed** storage class
 `uri_storage_base`. The supplied string is moved or copied and stored by the object. The class is templated by the non-type parameter `lit` which is a string literal wrapper.
 The storage required will be the exact size of the supplied string plus the size of `basic_uri`. This class is the most efficient using the minimal storage required. This class can be `constexpr`
-(some compilers may require `static`).  If your application needs the uri to hold and persist the source uri statically (for example in another container) and with _minimal_ storage, this class is suitable.
+(some situations may require `static` as well).  If your application needs the uri to hold and persist the source uri statically (for example in another container) and with _minimal_ storage, this class is suitable.
 
 > [!NOTE]
-> No editing or factory methods are available with `uri_fixed`.
+> No edit or factory methods are available with `uri_fixed`.
 
 ```c++
 constexpr uri_fixed<"https://www.example.com:8080/path1"> u1;
@@ -816,7 +816,7 @@ query       search=1&key=val&when=now
    when        now
 fragment    frag
 
-1111111111 (0x3ff)
+bitset 1111111111 (0x3ff)
 scheme 0 (5)
 authority 8 (30)
 userinfo 8 (13)

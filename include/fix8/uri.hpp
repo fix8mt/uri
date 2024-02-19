@@ -449,41 +449,28 @@ private:
 };
 
 //-----------------------------------------------------------------------------------------
-/// fixed static storage
-template<size_t sz>
-class uri_storage_base
-{
-protected:
-	std::array<char, sz> _buffer;
-	constexpr uri_storage_base(std::array<char, sz> src) noexcept : _buffer(std::move(src)) {}
-	constexpr uri_storage_base() = default;
-	~uri_storage_base() = default;
-public:
-	constexpr std::string_view buffer() const noexcept { return {this->_buffer.cbegin(), sz}; }
-	static constexpr auto max_storage() noexcept { return sz; }
-};
-
-//-----------------------------------------------------------------------------------------
 /// static storage
 template<size_t sz>
-class uri_storage : public uri_storage_base<sz>
+class uri_storage
 {
+	std::array<char, sz> _buffer;
 	size_t _sz{};
 protected:
 	constexpr uri_storage(std::string src) noexcept : _sz(src.size() > sz ? 0 : src.size())
-		{ std::copy_n(src.cbegin(), _sz, this->_buffer.begin()); }
+		{ std::copy_n(src.cbegin(), _sz, _buffer.begin()); }
 	constexpr uri_storage() = default;
 	~uri_storage() = default;
 	constexpr std::string swap(std::string src) noexcept
 	{
 		if (src.size() > sz)
 			return {};
-		std::string old(this->_buffer.cbegin(), _sz);
-		std::copy_n(src.cbegin(), _sz = src.size(), this->_buffer.begin());
+		std::string old(_buffer.cbegin(), _sz);
+		std::copy_n(src.cbegin(), _sz = src.size(), _buffer.begin());
 		return old;
 	}
 public:
-	constexpr std::string_view buffer() const noexcept { return {this->_buffer.cbegin(), _sz}; }
+	constexpr std::string_view buffer() const noexcept { return {_buffer.cbegin(), _sz}; }
+	static constexpr auto max_storage() noexcept { return sz; }
 };
 
 //-----------------------------------------------------------------------------------------
@@ -557,23 +544,6 @@ public:
 	{
 		return uri_static(make_uri(std::move(from)));
 	}
-};
-
-//-----------------------------------------------------------------------------------------
-template<size_t N>
-struct literal
-{
-	static constexpr size_t _sz{N};
-	const std::array<char, N> _value;
-   constexpr literal(const char (&str)[N]) noexcept : _value(std::to_array<char, N>(const_cast<char (&)[N]>(str))) {}
-};
-
-template<literal lit>
-class uri_fixed : public uri_storage_base<lit._sz>, public basic_uri
-{
-public:
-	constexpr uri_fixed() noexcept : uri_storage_base<lit._sz>(std::move(lit._value)), basic_uri(this->buffer()) {}
-	~uri_fixed() = default;
 };
 
 } // FIX8

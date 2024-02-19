@@ -33,8 +33,10 @@
 #include <iostream>
 #include <vector>
 #include <stdexcept>
+#include <memory>
 #include <string_view>
 #include <bitset>
+#include <any>
 #include <getopt.h>
 #include <fix8/uri.hpp>
 
@@ -123,10 +125,19 @@ int main(int argc, char *argv[])
 					for (const auto& pp : uris)
 						std::cout << basic_uri(pp).get_component(host) << '\n';
 						*/
-					static constexpr uri_fixed<"telnet://user:password@192.0.2.16:80/"> u1;
-					std::cout << u1 << '\n';
-					std::cout << "max storage: " << u1.max_storage() << '\n';
-					std::cout << "total object size: " << sizeof(u1) << '\n';
+					//static constexpr uri_fixed<"telnet://user:password@192.0.2.16:80/"> u1;
+					/*
+					static const std::array fixes { std::to_array<std::any>
+					({
+					 	{ uri_fixed<"telnet://user:password@192.0.2.16:80/">() },
+						{ uri_fixed<"https://www.blah.com:3000/test">() },
+						{ uri_fixed<"https://dakka@www.blah.com:3000/">() },
+						{ uri_fixed<"https://example.com/over/there?name=ferret&time=any#afrag">() },
+					})};
+					auto ptr { std::make_unique<uri_fixed<"telnet://user:password@192.0.2.16:80/">>() };
+					std::cout << sizeof(uri_fixed<"telnet://user:password@192.0.2.16:80/">) << '\n';
+					std::cout << *ptr << '\n';
+					*/
 				}
 				break;
 			case 'l':

@@ -36,7 +36,7 @@ This is a lightweight URI parser implementation featuring zero-copy, minimal sto
 - query decode and search - no copying, results point to uri source
 - fast, very lightweight, predictive non brute force parser
 - small memory footprint - base class object is only 64 bytes
-- support for dynamic, static or fixed uri storage
+- support for dynamic or static uri storage
 - built-in unit test cases with exhaustive test URI cases; simple test case addition
 - support for [**RFC 3986**](https://datatracker.ietf.org/doc/html/rfc3986)
 
@@ -192,54 +192,7 @@ $
 </p>
 </details>
 
-## iv. Create a fixed uri
-Create a fixed URI with a storage equal to the source string. Print out the result, max storage and object size.
-
-<details><summary><i>source</i></summary>
-<p>
-
-```c++
-#include <iostream>
-#include <fix8/uri.hpp>
-using namespace FIX8;
-
-constexpr uri_fixed<"telnet://user:password@192.0.2.16:80/"> u1;
-int main(int argc, char *argv[])
-{
-   std::cout << u1 << '\n';
-   std::cout << "max storage: " << u1.max_storage() << '\n';
-   std::cout << "total object size: " << sizeof(u1) << '\n';
-   return 0;
-}
-```
-
-</p>
-</details>
-
-<details><summary><i>output</i></summary>
-</p>
-
-```CSV
-$ ./example4
-uri         telnet://user:password@192.0.2.16:80/
-scheme      telnet
-authority   user:password@192.0.2.16:80
-userinfo    user:password
-user        user
-password    password
-host        192.0.2.16
-port        80
-path        /
-
-max storage: 38
-total object size: 104
-$
-```
-
-</p>
-</details>
-
-## v. Use the factory
+## 4. Use the factory
 Create a URI from an initializer list. Print out the result.
 
 <details><summary><i>source</i></summary>
@@ -267,7 +220,7 @@ int main(int argc, char *argv[])
 </p>
 
 ```CSV
-$ ./example5
+$ ./example4
 uri         https://dakka@www.blah.com:3000/
 scheme      https
 authority   dakka@www.blah.com:3000
@@ -282,7 +235,7 @@ $
 </p>
 </details>
 
-## vi. Edit a URI
+## v. Edit a URI
 Create a URI and then edit it.
 
 <details><summary><i>source</i></summary>
@@ -311,7 +264,7 @@ int main(int argc, char *argv[])
 </p>
 
 ```CSV
-$ ./example6
+$ ./example5
 uri         https://dakka@www.blah.com:3000
 scheme      https
 authority   dakka@www.blah.com:3000
@@ -401,22 +354,6 @@ uri_static<256> u1{"https://www.example.com:8080/path1"};
 
 ![class diagram (static)](https://github.com/fix8mt/uri/blob/master/assets/classstatic.png)
 
-***
-### `uri_fixed`
-The derived class `uri_fixed` stores the source string and then builds a `basic_uri` using that string as its reference. `uri_fixed` derives from `basic_uri` and a private **fixed** storage class
-`uri_storage_base`. The supplied string is moved or copied and stored by the object. The class is templated by the non-type parameter `lit` which is a string literal wrapper.
-The storage required will be the exact size of the supplied string plus the size of `basic_uri`. This class is the most efficient using the minimal storage required. This class can be `constexpr`
-(some situations may require `static` as well).  If your application needs the uri to hold and persist the source uri statically (for example in another container) and with _minimal_ storage, this class is suitable.
-
-> [!NOTE]
-> No edit or factory methods are available with `uri_fixed`.
-
-```c++
-constexpr uri_fixed<"https://www.example.com:8080/path1"> u1;
-```
-
-![class diagram (static)](https://github.com/fix8mt/uri/blob/master/assets/classfixed.png)
-
 ## ii. Types
 ### component
 ```c++
@@ -461,14 +398,6 @@ constexpr uri_static(std::string src);                               // (8)
 constexpr uri_static(std::string_view src);                          // (9)
 constexpr uri_static(const char *src);                               // (10)
 constexpr uri_static();                                              // (11)
-
-template<size_t N>
-struct literal;
-constexpr literal(const char (&str)[N]);                             // (12)
-
-template<literal lit>
-class uri_fixed;
-constexpr uri_fixed();                                               // (13)
 ```
 
 1. Construct a `basic_uri` from a `std::string_view`. This base class does not store the string. Calls `parse()`. The source string must not go out of scope to use this object. If parsing
@@ -485,8 +414,6 @@ for the uri. The source string is percent decoded before parsing. Calls `parse()
 1. Construct a `uri_static` from a `std::string_view`. Creates a `std::string` from src and delegates to (8).
 1. Construct a `uri_static` from a `null` terminated `const char *`. Creates a `std::string` from src and delegates to (8).
 1. Construct an empty `uri_static` from a `std::string`. The class is templated by the non-type parameter `sz` which sets the static size and maximum storage capacity for the uri.
-1. Construct a `literal` object from a supplied `const char[]`. This constructor is implicitly called when you pass a string literal as a non-type template parameter to `uri_fixed`.
-1. Construct a `uri_fixed` from a `literal` (12).
 
 All of `uri` is within the namespace **`FIX8`**.
 
@@ -862,10 +789,6 @@ This class performs well, with minimal latency. Since there is no copying of str
 (and excluding edits) a statically stored URI is the most efficient storage option. This is also suitable for storage in other containers. Be aware that the template parameter `sz`
 must be large enough for any URI you wish to store and of course objects created with different templated sizes will be different types.
 
-- If you need to store the source URI but wish to avoid using dynamic memory and you don't need to modify the URI, use `uri_fixed`. As with `uri_static`, there is a single allocation for the entire object.
-The class is templated by the non-type parameter `lit` which is a string literal wrapper. The storage required will be the exact size of the supplied string plus the size of `basic_uri`.
-This class is the most efficient using the minimal storage required.
-
 - The `factory` and `edit` have more copying although even these still use `std::string_view` where possible with actual copying of strings or sub-strings occurring
 once at most.
 
@@ -880,5 +803,3 @@ to:
 using uri_len_t = std::uint8_t;
 ```
 This will limit the maximum length of a URI to 256 bytes, but reduce the overall storage needed for `basic_uri` from `64` to `40` bytes.
-
-- All of the classes `uri`, `uri-static` and `uri_fixed` derive from `basic_uri` so they can be `static_cast<basic_uri&>` to `basic_uri&`, allowing common code use across all instances.

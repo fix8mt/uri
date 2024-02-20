@@ -766,7 +766,7 @@ We use the [Criterion](https://github.com/p-ranav/criterion) benchmarking librar
 
 <details><summary><i>Benchmarks</i></summary>
 </p>
-![Becnhmarks](https://github.com/fix8mt/uri/blob/master/assets/benchmarks.png)
+[Becnhmarks](https://github.com/fix8mt/uri/blob/master/assets/benchmarks.png)
 </p>
 </details>
 

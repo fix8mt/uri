@@ -773,8 +773,9 @@ $
 </details>
 
 ## Benchmarks
-We use the [Criterion](https://github.com/p-ranav/criterion) benchmarking library. The file `basiclist.hpp` contains 1000 generic URIs. The benchmark creates 1000 `basic_uri`, `uri` and
-`uri_static` objects and measures the total time taken. We can calculate the average time to decode each URI. The benchmark app is built by default.
+We use the [Criterion](https://github.com/p-ranav/criterion) benchmarking library. The benchmark app is built by default.
+The file `basiclist.hpp` contains 1000 generic URIs. The benchmark **creates 1000** `basic_uri`, `uri` and
+`uri_static` objects and measures the total time taken. We can calculate the average time to decode each URI.
 
 ![Benchmarks](https://github.com/fix8mt/uri/blob/master/assets/benchmarks.png)
 

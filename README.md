@@ -28,13 +28,13 @@ This is a lightweight URI parser implementation featuring zero-copy, minimal sto
 
 ## Features
 - single _header-only_
+- fast, very lightweight, predictive non brute force parser: avg 52ns to decode a URI with `basic_uri`
 - base class is zero-copy, using `std::string_view`
 - derived class moves (or copies) source string once
 - all methods `constexpr`; no virtual methods
 - extracts all components `scheme`, `authority`, `userinfo`, `user`, `password`, `host`, `port`, `path`, `query`, `fragment`
 - query components returned as `std::string_view`
 - query decode and search - no copying, results point to uri source
-- fast, very lightweight, predictive non brute force parser
 - small memory footprint - base class object is only 64 bytes
 - support for dynamic or static uri storage
 - built-in unit test cases with exhaustive test URI cases; simple test case addition
@@ -647,7 +647,7 @@ Components not specified are left unchanged. The `initializer_list` contains a 1
 
 # 5. Testing
 ## Test cases
-The header file `uriexamples.hpp` contains a data structure holding test cases used by the [Catch2](https://github.com/catchorg/Catch2.git) unit test app `uritest2` and by the CLI test app `uritest`.
+The header file `uriexamples.hpp` contains a data structure holding test cases used by the [Catch2](https://github.com/catchorg/Catch2.git) unit test app `unittests` and by the CLI test app `uritest`.
 You can add your own test cases to `uriexamples.hpp` - the structure is easy enough to follow.
 
 <details><summary><i>sample</i></summary>
@@ -699,7 +699,7 @@ const std::vector<std::pair<const char *, std::vector<std::pair<uri::component, 
 </p>
 </details>
 
-## `uritest2`
+## `unittests`
 This application is run by default if you run `make test` or `ctest`. When running using `ctest` use the following command:
 
 ```bash
@@ -759,6 +759,17 @@ $
 
 </p>
 </details>
+
+## Benchmarks
+We use the [Criterion](https://github.com/p-ranav/criterion) benchmarking library. The file `basiclist.hpp` contains 1000 genenric URIs. The benchmark creates 1000 `basic_uri`, `uri` and
+`uri_static` objects and measures the total time taken. We can calculate the average time to decode each URI.
+
+<details><summary><i>Benchmarks</i></summary>
+</p>
+![Becnhmarks](https://github.com/fix8mt/uri/blob/master/assets/benchmarks.png)
+</p>
+</details>
+
 
 # 6. Discussion
 ## i. Non-validating

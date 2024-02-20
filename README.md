@@ -635,8 +635,8 @@ template<size_t sz>
 static constexpr uri_static<sz>::factory(std::initializer_list<comp_pair> from);
 ```
 Create a `uri` from the supplied components. The `initializer_list` contains a 1..n `comp_pair` objects. The following constraints apply:
-1. If `authority` is supplied and any of the following components present `host`, `password`, `port`, `user` or `userinfo` then `authority` is ignored;
-1. If `userinfo` is supplied and any of the following components present `user` or `password` then `userinfo` is ignored;
+1. If `authority` is supplied and any of the following components are present `host`, `password`, `port`, `user` or `userinfo` then `authority` is ignored;
+1. If `userinfo` is supplied and any of the following components are present `user` or `password` then `userinfo` is ignored;
 
 ### `edit`
 ```c++
@@ -774,7 +774,7 @@ $
 
 ## Benchmarks
 We use the [Criterion](https://github.com/p-ranav/criterion) benchmarking library. The file `basiclist.hpp` contains 1000 generic URIs. The benchmark creates 1000 `basic_uri`, `uri` and
-`uri_static` objects and measures the total time taken. We can calculate the average time to decode each URI.
+`uri_static` objects and measures the total time taken. We can calculate the average time to decode each URI. The benchmark app is built by default.
 
 ![Benchmarks](https://github.com/fix8mt/uri/blob/master/assets/benchmarks.png)
 

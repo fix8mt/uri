@@ -28,7 +28,7 @@ This is a lightweight URI parser implementation featuring zero-copy, minimal sto
 
 ## Features
 - single _header-only_
-- fast, very lightweight, predictive non brute force parser: avg 52ns to decode a URI with `basic_uri`
+- fast, very lightweight, predictive non brute force parser: avg 53ns to decode a URI with `basic_uri`
 - base class is zero-copy, using `std::string_view`
 - derived class moves (or copies) source string once
 - all methods `constexpr`; no virtual methods
@@ -192,7 +192,7 @@ $
 </p>
 </details>
 
-## 4. Use the factory
+## iv. Use the factory
 Create a URI from an initializer list. Print out the result.
 
 <details><summary><i>source</i></summary>
@@ -329,6 +329,10 @@ using enum uri::component;
 The base class `basic_uri` performs the bulk of the work, holding a `std::string_view` of the source uri string. If you wish to manage the scope of the source uri yourself then
 this class is the most efficient way to use uri functionality.
 
+```c++
+basic_uri u1{"https://www.example.com:8080/path1"};
+```
+
 ***
 ### `uri`
 The derived class `uri` stores the source string and then builds a `basic_uri` using that string as its reference. `uri` derives from `basic_uri` and a private **dynamic** storage class
@@ -336,7 +340,11 @@ The derived class `uri` stores the source string and then builds a `basic_uri` u
 The storage class used is a specialisation of `uri_storage` which specifies `0` as the non-type parameter `sz`, selecting dynamic storage.
 
 ```c++
-uri u1{"https://www.example.com:8080/path1"};
+std::string myuri;
+.
+.
+.
+uri u1{myuri};
 ```
 
 ![class diagram](https://github.com/fix8mt/uri/blob/master/assets/classdynamic.png)
@@ -349,7 +357,11 @@ for the uri. `sz` defaults to `1024`. Storage is allocated once with the object 
 If your application needs the uri to hold and persist the source uri statically (for example in another container), this class is suitable.
 
 ```c++
-uri_static<256> u1{"https://www.example.com:8080/path1"};
+std::string myuri;
+.
+.
+.
+uri_static<256> u1{myuri};
 ```
 
 ![class diagram (static)](https://github.com/fix8mt/uri/blob/master/assets/classstatic.png)

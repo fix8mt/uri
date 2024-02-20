@@ -766,13 +766,13 @@ We use the [Criterion](https://github.com/p-ranav/criterion) benchmarking librar
 
 ![Benchmarks](https://github.com/fix8mt/uri/blob/master/assets/benchmarks.png)
 
-From the above results we can see the following average performance:
+From the above results we can see the following average performance per URI:
 
-| class | Decode(ns) |
+| Class | Decode(ns) |
 | --- | --- |
-| `basic_uri`  | 53 _ns_ |
-| `uri`  | 94 _ns_ |
-| `uri_static`  | 96 _ns_ |
+| `basic_uri`  | **53** _ns_ |
+| `uri`  | **94** _ns_ |
+| `uri_static`  | **96** _ns_ |
 
 # 6. Discussion
 ## i. Non-validating

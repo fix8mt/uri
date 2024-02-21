@@ -6,10 +6,6 @@
 
 ### A lightweight C++20 URI parser
 
-------------------------------------------------------------------------
-# 1. Introduction
-This is a lightweight URI parser implementation featuring zero-copy, minimal storage and high performance.
-
 ## Quick links
 |**Link**|**Description**|
 --|--
@@ -20,6 +16,10 @@ This is a lightweight URI parser implementation featuring zero-copy, minimal sto
 |[Testing](#testing)| Testing apps|
 |[Benchmark](#benchmarks)| Benchmark info|
 |[Discussion](#6-discussion)| Discussion |
+
+------------------------------------------------------------------------
+# 1. Introduction
+This is a lightweight URI parser implementation featuring zero-copy, minimal storage and high performance.
 
 ## Motivation
 - header-only
@@ -293,7 +293,7 @@ $
 
 # 3. Building
 This implementation is header only. Apart from standard C++20 includes there are no external dependencies needed in your application.
-[Catch2](https://github.com/catchorg/Catch2.git) is used for the built-in unit tests.
+[Catch2](https://github.com/catchorg/Catch2.git) is used for the built-in unit tests. [Criterion](https://github.com/p-ranav/criterion) is used for benchmarking.
 
 ## i. Obtaining the source, building the examples
 To clone and default build all the examples, including the unit tests.
@@ -805,7 +805,7 @@ See [URL Standard](https://url.spec.whatwg.org/) for complete validation rules.
 
 ## ii. Low level access
 There are two methods that provide unchecked direct access to the `range` table and `component`. You must ensure that you don't pass an invalid component
-index when using these. Making changes to the range object with `operator[]` can have serious consequences. Use carefully!
+index when using these. Making changes to the range object with `operator[]` can have serious consequences. Use carefully.
 1. `constexpr std::string_view get(component what) const;`
 1. `constexpr range_pair& operator[](component idx)`;
 
@@ -822,7 +822,7 @@ This class performs well, with minimal latency. Since there is no copying of str
 
 - If you need to store the source URI but wish to avoid using dynamic memory, use `uri_static` (for example for including in another container).
 This ensures a single allocation for the entire object. For most purposes
-(and excluding edits) a statically stored URI is the most efficient storage option. This is also suitable for storage in other containers. Be aware that the template parameter `sz`
+(and excluding edits) a statically stored URI is the most efficient storage option. Be aware that the template parameter `sz`
 must be large enough for any URI you wish to store and of course objects created with different templated sizes will be different types.
 
 - The `factory` and `edit` have more copying although even these still use `std::string_view` where possible with actual copying of strings or sub-strings occurring

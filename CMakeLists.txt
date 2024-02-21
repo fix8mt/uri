@@ -44,8 +44,25 @@ project (uri
 	LANGUAGES CXX
 	HOMEPAGE_URL https://github.com/fix8mt/uri
 	DESCRIPTION "Lightweight header-only C++20 URI parser"
-	VERSION 2.3
+	VERSION 1.3.1
 )
+
+include(FetchContent)
+message(STATUS "Downloading Criterion...")
+FetchContent_Declare(Criterion
+	GIT_REPOSITORY https://github.com/p-ranav/criterion.git
+	GIT_SHALLOW	ON
+)
+
+message(STATUS "Downloading Catch2...")
+FetchContent_MakeAvailable(Criterion)
+FetchContent_Declare(Catch2
+	GIT_REPOSITORY https://github.com/catchorg/Catch2.git
+	GIT_SHALLOW	ON
+	GIT_TAG devel
+)
+FetchContent_MakeAvailable(Catch2)
+list(APPEND CMAKE_MODULE_PATH ${catch2_SOURCE_DIR}/extras)
 
 foreach(x IN ITEMS uritest.cpp unittests.cpp benchmarks.cpp)
 	cmake_path(GET x STEM LAST_ONLY target)
@@ -58,38 +75,6 @@ foreach(x IN ITEMS uritest.cpp unittests.cpp benchmarks.cpp)
 	message("-- adding ${fname} cxx std: C++${cppstd}")
 endforeach()
 
-# to disable building unit tests:
-# cmake -DBUILD_TESTS=false ..
-option(BUILD_TESTS "enable building unit tests" true)
-message("-- Build unit tests: ${BUILD_TESTS}")
-if(BUILD_TESTS)
-	include(FetchContent)
-	message(STATUS "Populating Criterion...")
-	FetchContent_Declare(Criterion
-		GIT_REPOSITORY https://github.com/p-ranav/criterion.git
-		GIT_SHALLOW	ON
-	)
-	message(STATUS "Populating Catch2...")
-	FetchContent_MakeAvailable(Criterion)
-	FetchContent_Declare(Catch2
-		GIT_REPOSITORY https://github.com/catchorg/Catch2.git
-		GIT_SHALLOW	ON
-		GIT_TAG devel
-	)
-	FetchContent_MakeAvailable(Catch2)
-	list(APPEND CMAKE_MODULE_PATH ${catch2_SOURCE_DIR}/extras)
-	include(Catch)
-	catch_discover_tests(unittests)
-endif()
+include(Catch)
+catch_discover_tests(unittests)
 
-# to dump all non-empty cmake variables
-# cmake -DCMAKE_DUMP_VARS=true ..
-option(CMAKE_DUMP_VARS "dump all cmake vars" false)
-if(CMAKE_DUMP_VARS)
-	get_cmake_property(varname VARIABLES)
-	foreach (var ${varname})
-		if(NOT ${var} STREQUAL "")
-			message(STATUS "${var}=${${var}}")
-		endif()
-	endforeach()
-endif()

@@ -15,7 +15,10 @@ This is a lightweight URI parser implementation featuring zero-copy, minimal sto
 --|--
 |[Here](https://github.com/fix8mt/uri/blob/master/include/fix8/uri.hpp)| for implementation|
 |[Examples](https://github.com/fix8mt/uri/blob/master/examples)| for examples and test cases|
-|[Benchmark](#benchmarks)
+|[API](#api)| API detail |
+|[Testing](#testing)| testing apps|
+|[Benchmark](#benchmarks)| benchmark info|
+|[Discussion](#discussion)| Discussion |
 
 ## Motivation
 - header-only

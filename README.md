@@ -6,7 +6,7 @@
 
 ### A lightweight C++20 URI parser
 
-## Quick links
+# Quick links
 |**Link**|**Description**|
 --|--
 |[Here](https://github.com/fix8mt/uri/blob/master/include/fix8/uri.hpp)| For implementation|

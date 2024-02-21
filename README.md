@@ -13,12 +13,12 @@ This is a lightweight URI parser implementation featuring zero-copy, minimal sto
 ## Quick links
 |**Link**|**Description**|
 --|--
-|[Here](https://github.com/fix8mt/uri/blob/master/include/fix8/uri.hpp)| for implementation|
-|[Examples](#2-examples)| for examples and test cases|
-|[Building](#3-building)| API detail |
-|[API](#4-api)| API detail |
-|[Testing](#testing)| testing apps|
-|[Benchmark](#benchmarks)| benchmark info|
+|[Here](https://github.com/fix8mt/uri/blob/master/include/fix8/uri.hpp)| For implementation|
+|[Examples](#2-examples)| For examples|
+|[Building](#3-building)| How to build or include|
+|[API](#4-api)| API details |
+|[Testing](#testing)| Testing apps|
+|[Benchmark](#benchmarks)| Benchmark info|
 |[Discussion](#6-discussion)| Discussion |
 
 ## Motivation

@@ -177,17 +177,20 @@ int main(int argc, char *argv[])
 				std::cout << "uri: " << sizeof(uri) << "\nbasic_uri: " << sizeof(basic_uri) << '\n';
 				std::cout << "uri_static<1024>: " << sizeof(uri_static<1024>) << '\n';
 				break;
+all:
 			case 'a':
 				for (int ii{}; const auto& [src,vec] : tests)
 					std::cout << ii++ << '\n' << uri{src} << '\n';
 				std::cout << tests.size() << " test cases\n";
-				break;
+				return 0;
 			default:
 				break;
 			}
 		}
 		while(optind < argc)
 			std::cout << uri{argv[optind++]} << '\n';
+		if (argc <= 1)
+			goto all;
 	}
 	catch (const std::exception& e)
 	{

@@ -233,17 +233,17 @@ public:
 	template<char valuepair='&',char valueequ='='>
 	constexpr query_result decode_query(bool sort=false) const
 	{
-		constexpr auto decpair([](std::string_view src) noexcept ->value_pair
-		{
-			if (auto fnd { src.find_first_of(valueequ) }; fnd != std::string_view::npos)
-				return {src.substr(0, fnd), src.substr(fnd + 1)};
-			else if (src.size())
-				return {src, ""};
-			return {};
-		});
 		query_result result;
 		if (test(query))
 		{
+			constexpr auto decpair([](std::string_view src) noexcept ->value_pair
+			{
+				if (auto fnd { src.find_first_of(valueequ) }; fnd != std::string_view::npos)
+					return {src.substr(0, fnd), src.substr(fnd + 1)};
+				else if (src.size())
+					return {src, ""};
+				return {};
+			});
 			std::string_view src{get(query)};
 			for (std::string_view::size_type pos{};;)
 			{

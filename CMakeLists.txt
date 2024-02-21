@@ -47,34 +47,16 @@ project (uri
 	VERSION 2.3
 )
 
-set(THREADS_PREFER_PTHREAD_FLAG ON)
-find_package(Threads REQUIRED)
-link_libraries(Threads::Threads)
 include_directories(${CMAKE_SOURCE_DIR}/include ${CMAKE_SOURCE_DIR})
 
-if(CMAKE_BUILD_TYPE STREQUAL "")
-   set(CMAKE_BUILD_TYPE "RELEASE")
-endif()
-if (CMAKE_BUILD_TYPE STREQUAL "DEBUG")
-   set(CMAKE_CXX_FLAGS_DEBUG "-O0 -D_DEBUG -ggdb")
-   set(CMAKE_C_FLAGS_DEBUG ${CMAKE_CXX_FLAGS_DEBUG})
-else(CMAKE_BUILD_TYPE STREQUAL "RELEASE")
-   set(CMAKE_CXX_FLAGS_RELEASE "-O3 -DNDEBUG -ggdb")
-   set(CMAKE_C_FLAGS_RELEASE ${CMAKE_CXX_FLAGS_RELEASE})
-endif()
-message("-- cxx flags ${CMAKE_BUILD_TYPE}: \"${CMAKE_CXX_FLAGS_${CMAKE_BUILD_TYPE}}\"")
-
-set(exdir ${CMAKE_SOURCE_DIR}/examples)
-file(GLOB esrc CONFIGURE_DEPENDS "${exdir}/uri*.cpp")
-enable_testing()
-foreach(x ${esrc})
+foreach(x IN ITEMS uritest.cpp unittests.cpp benchmarks.cpp)
 	cmake_path(GET x STEM LAST_ONLY target)
-	add_executable(${target} ${x})
+	add_executable(${target} ${CMAKE_SOURCE_DIR}/examples/${x})
 	set_target_properties(${target} PROPERTIES CXX_STANDARD 20 CXX_STANDARD_REQUIRED true)
-	get_target_property(v1 ${target} CXX_STANDARD)
-   target_link_libraries(${target} PRIVATE Catch2::Catch2WithMain)
+	get_target_property(cppstd ${target} CXX_STANDARD)
+   target_link_libraries(${target} PRIVATE Catch2::Catch2WithMain Criterion)
 	cmake_path(GET x FILENAME fname)
-	message("-- adding ${fname} cxx std: c++${v1}")
+	message("-- adding ${fname} cxx std: C++${cppstd}")
 endforeach()
 
 # to disable building unit tests:
@@ -82,9 +64,14 @@ endforeach()
 option(BUILD_TESTS "enable building unit tests" true)
 message("-- Build unit tests: ${BUILD_TESTS}")
 if(BUILD_TESTS)
-	message(STATUS "Populating Catch2...")
 	include(FetchContent)
-	enable_testing()
+	message(STATUS "Populating Criterion...")
+	FetchContent_Declare(Criterion
+		GIT_REPOSITORY https://github.com/p-ranav/criterion.git
+		GIT_SHALLOW	ON
+	)
+	message(STATUS "Populating Catch2...")
+	FetchContent_MakeAvailable(Criterion)
 	FetchContent_Declare(Catch2
 		GIT_REPOSITORY https://github.com/catchorg/Catch2.git
 		GIT_SHALLOW	ON
@@ -93,8 +80,7 @@ if(BUILD_TESTS)
 	FetchContent_MakeAvailable(Catch2)
 	list(APPEND CMAKE_MODULE_PATH ${catch2_SOURCE_DIR}/extras)
 	include(Catch)
-	catch_discover_tests(uritest2)
-
+	catch_discover_tests(unittests)
 endif()
 
 # to dump all non-empty cmake variables

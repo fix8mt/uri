@@ -413,7 +413,8 @@ constexpr uri_static();                                              // (11)
 ```
 
 1. Construct a `basic_uri` from a `std::string_view`. This base class does not store the string. Calls `parse()`. The source string must not go out of scope to use this object. If parsing
-fails, you can check for error using `operator bool` or `count()` and then `get_error()` for more info. Since this method takes a `std::string_view` you can declare objects `constexpr`.
+fails, you can check for error using `operator bool` or `count()` and then `get_error()` for more info. Since this method takes a `std::string_view` you can declare objects `constexpr`. Note
+that `std::string` contains a convert to `std::string_view` operator.
 1. Construct a `basic_uri` that has the corresponding bitset passed in `bits`. No components are present. Permits object to be used as a component bitset.
 1. Construct an empty `basic_uri`. It can be populated using `assign()`.
 1. Construct a `uri` from a `std::string`. The source string is percent decoded before parsing. Calls `parse()`.
@@ -772,7 +773,7 @@ $
 </p>
 </details>
 
-## Benchmarks
+## `benchmarks`
 We use the [Criterion](https://github.com/p-ranav/criterion) benchmarking library. The benchmark app is built by default.
 The file `basiclist.hpp` contains 1000 generic URIs. The benchmark **creates 1000** `basic_uri`, `uri` and
 `uri_static` objects and measures the total time taken. We can calculate the average time to decode each URI.

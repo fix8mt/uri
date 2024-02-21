@@ -42,7 +42,7 @@ using namespace FIX8;
 using namespace std::literals;
 
 //-----------------------------------------------------------------------------------------
-#include "uriexamples.hpp"
+#include <uriexamples.hpp>
 
 //-----------------------------------------------------------------------------------------
 // run as: ctest --output-on-failure

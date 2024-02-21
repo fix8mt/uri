@@ -40,7 +40,7 @@ using namespace FIX8;
 //-----------------------------------------------------------------------------------------
 constexpr const std::array uris { std::to_array<std::string_view>
 ({
-#include <examples/basiclist.hpp>
+#include <basiclist.hpp>
 })};
 
 //-----------------------------------------------------------------------------------------

@@ -51,7 +51,7 @@ include_directories(${CMAKE_SOURCE_DIR}/include ${CMAKE_SOURCE_DIR})
 
 foreach(x IN ITEMS uritest.cpp unittests.cpp benchmarks.cpp)
 	cmake_path(GET x STEM LAST_ONLY target)
-	add_executable(${target} ${CMAKE_SOURCE_DIR}/examples/${x})
+	add_executable(${target} examples/${x})
 	set_target_properties(${target} PROPERTIES CXX_STANDARD 20 CXX_STANDARD_REQUIRED true)
 	get_target_property(cppstd ${target} CXX_STANDARD)
    target_link_libraries(${target} PRIVATE Catch2::Catch2WithMain Criterion)

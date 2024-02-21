@@ -44,6 +44,7 @@ This is a lightweight URI parser implementation featuring zero-copy, minimal sto
 - support for dynamic or static uri storage
 - built-in unit test cases with exhaustive test URI cases; simple test case addition
 - support for [**RFC 3986**](https://datatracker.ietf.org/doc/html/rfc3986)
+- cmake integration with FetchContent
 
 # 2. Examples
 ## i. Use `basic_uri` as a view

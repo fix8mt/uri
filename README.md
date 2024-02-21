@@ -780,13 +780,15 @@ The file `basiclist.hpp` contains 1000 generic URIs. The benchmark **creates 100
 
 ![Benchmarks](https://github.com/fix8mt/uri/blob/master/assets/benchmarks.png)
 
-From the above results we can see the following average performance per URI:
+From the above results we can see the following average performance[^1] per URI:
 
 | Class | Decode(ns) |
 | --- | --- |
 | `basic_uri`  | **53** _ns_ |
 | `uri`  | **94** _ns_ |
 | `uri_static`  | **96** _ns_ |
+
+[^1]: Ubuntu 23.10, 12 4.7GHz Intel i7 Cometlake Processors, 15.3GB RAM
 
 # 6. Discussion
 ## i. Non-validating

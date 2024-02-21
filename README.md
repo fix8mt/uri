@@ -306,7 +306,7 @@ cmake ..
 make -j4
 make test (or ctest)
 ```
-## ii. Using in your application
+## ii. Using in your application with cmake
 In `CMakeLists.txt` set your include path to:
 ```cmake
 include_directories([uri directory]/include)
@@ -329,7 +329,7 @@ using enum uri::component;
 ```
 
 ## iii. Integrating in your app with cmake FetchContent
-You can use cmake FetchContent to integrate uri with your project:
+You can use cmake [FetchContent](https://cmake.org/cmake/help/latest/module/FetchContent.html) to integrate uri with your project:
 ```cmake
 project(myproj)
 add_executable (myproj myproj.cpp)

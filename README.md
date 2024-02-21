@@ -328,6 +328,19 @@ This is C++20, so you can also add in your local code:
 using enum uri::component;
 ```
 
+## iii. Integrating in your app with cmake FetchContent
+You can use cmake FetchContent to integrate uri with your project:
+```cmake
+project(myproj)
+add_executable (myproj myproj.cpp)
+set_target_properties(myproj PROPERTIES CXX_STANDARD 20 CXX_STANDARD_REQUIRED true)
+message(STATUS "Populating uri...")
+include(FetchContent)
+FetchContent_Declare(uri GIT_REPOSITORY https://github.com/fix8mt/uri.git)
+FetchContent_MakeAvailable(uri)
+target_include_directories(uricmake PRIVATE ${uri_SOURCE_DIR}/include)
+```
+
 # 4. API
 ## i. Class hierarchy
 ### `basic_uri`

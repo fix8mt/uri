@@ -788,7 +788,7 @@ From the above results we can see the following average performance per URI:
 | `uri`  | **94** _ns_ |
 | `uri_static`  | **96** _ns_ |
 
-[^1]: Ubuntu 23.10, 12 core 4.7GHz Intel i7 Cometlake Processors, 15.3GB RAM
+[^1]: Ubuntu 23.10, 12 core 4.7GHz Intel i7 Cometlake Processors, 15.3GB RAM; gcc-13.2.0
 
 # 6. Discussion
 ## i. Non-validating

@@ -8,6 +8,7 @@
 
 # Status
 [![Ubuntu](https://github.com/fix8mt/uri/actions/workflows/cmake-single-platform.yml/badge.svg)](https://github.com/fix8mt/uri/actions/workflows/cmake-single-platform.yml)
+<a href="http://www.boost.org/LICENSE_1_0.txt" target="_blank">![Boost Licence](http://img.shields.io/badge/license-boost-blue.svg)</a>
 
 # Quick links
 |**Link**|**Description**|
@@ -302,7 +303,7 @@ This implementation is header only. Apart from standard C++20 includes there are
 ## i. Obtaining the source, building the examples
 To clone and default build all the examples, including the unit tests.
 ```bash
-git clone git@github.com:fix8mt/uri.git
+git clone https://github.com/fix8mt/uri.git
 cd uri
 mkdir build
 cd build
@@ -532,7 +533,7 @@ If no value is present, just the tag will be populated with an empty value.
 ```c++
 static constexpr std::string_view find_query (std::string_view what, const query_result& from);
 ```
-Find the specified query key and return its value from the given `query_result`. `query_result` must be sorted by key, as returned by
+Find the specified query key and return its value from the given `query_result`. `query_result` _must be sorted_ by key, as returned when
 passing `true` to `decode_query`. If not sorted, use `sort_query` first. If key not found return empty `std::string_view`. No copying, results point to uri source.
 Complexity at most _2 * log<sub>2</sub>(last - first) + O(1)_ comparisons.
 

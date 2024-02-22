@@ -8,7 +8,7 @@
 
 ------------------------------------------------------------------------
 [![Ubuntu](https://github.com/fix8mt/uri/actions/workflows/cmake-single-platform.yml/badge.svg)](https://github.com/fix8mt/uri/actions/workflows/cmake-single-platform.yml)
-<a href="https://en.wikipedia.org/wiki/C%2B%2B20" target="_blank">![C++20](http://img.shields.io/badge/C++20-orange.svg)</a>
+<a href="https://en.wikipedia.org/wiki/C%2B%2B20" target="_blank">![C++20](http://img.shields.io/badge/C++20-required-orange.svg)</a>
 <a href="http://www.boost.org/LICENSE_1_0.txt" target="_blank">![Boost Licence](http://img.shields.io/badge/license-boost-blue.svg)</a>
 
 # Quick links

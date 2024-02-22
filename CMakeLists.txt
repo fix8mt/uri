@@ -76,5 +76,6 @@ foreach(x IN ITEMS uritest.cpp unittests.cpp benchmarks.cpp)
 endforeach()
 
 include(Catch)
+enable_testing()
 catch_discover_tests(unittests)
 

@@ -331,7 +331,7 @@ using enum uri::component;
 
 ## iii. Integrating uri in your project with cmake FetchContent
 You can use cmake [FetchContent](https://cmake.org/cmake/help/latest/module/FetchContent.html) to integrate uri with your project.
-If your project was called `myproj` with once sourcefile `myproj.cpp`:
+If your project was called `myproj` with the sourcefile `myproj.cpp` then...
 ```cmake
 project(myproj)
 add_executable (myproj myproj.cpp)

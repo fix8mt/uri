@@ -7,7 +7,7 @@
 ### A lightweight C++20 URI parser
 
 # Status
-![Ubuntu](https://github.com/fix8mt/uri/actions/workflows/Ubuntu-cmake.yml/badge.svg)
+[![Ubuntu](https://github.com/fix8mt/uri/actions/workflows/cmake-single-platform.yml/badge.svg)](https://github.com/fix8mt/uri/actions/workflows/cmake-single-platform.yml)
 
 # Quick links
 |**Link**|**Description**|

@@ -6,7 +6,7 @@
 
 ### A lightweight C++20 URI parser
 
-# Status
+------------------------------------------------------------------------
 [![Ubuntu](https://github.com/fix8mt/uri/actions/workflows/cmake-single-platform.yml/badge.svg)](https://github.com/fix8mt/uri/actions/workflows/cmake-single-platform.yml)
 <a href="http://www.boost.org/LICENSE_1_0.txt" target="_blank">![Boost Licence](http://img.shields.io/badge/license-boost-blue.svg)</a>
 

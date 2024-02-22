@@ -340,7 +340,7 @@ message(STATUS "Downloading uri...")
 include(FetchContent)
 FetchContent_Declare(uri GIT_REPOSITORY https://github.com/fix8mt/uri.git)
 FetchContent_MakeAvailable(uri)
-target_include_directories(uricmake PRIVATE ${uri_SOURCE_DIR}/include)
+target_include_directories(myproj PRIVATE ${uri_SOURCE_DIR}/include)
 ```
 
 # 4. API

@@ -457,9 +457,10 @@ All of `uri` is within the namespace **`FIX8`**.
 ```c++
 ~basic_uri();
 ~uri();
+~uri_static();
 ```
 
-Destroy the `uri` or `basic_uri`. The `uri` object will release the stored string.
+Destroy the `uri` or `basic_uri`. The `uri` and `uri_static` objects will release the stored string.
 
 ## iv. Accessors
 ### `test`
@@ -745,7 +746,7 @@ $ ctest --output-on-failure
 ## `uritest`
 This is a simple CLI test app which allows you to run individual or all tests from `uriexamples.hpp`, or test a uri passed from the command line.
 
-```bash
+```CSV
 $ ./uritest -h
 Usage: ./uritest [uri...] [-t:T:d:hlas]
  -a run all tests

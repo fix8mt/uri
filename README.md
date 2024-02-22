@@ -847,7 +847,7 @@ must be large enough for any URI you wish to store and of course objects created
 - The `factory` and `edit` have more copying although even these still use `std::string_view` where possible with actual copying of strings or sub-strings occurring
 once at most.
 
-- With all methods `constexpr` and `noexcept`, no `virtual` methods and header only your compiler should be able to optimise your code most efficiently.
+- With all methods `constexpr` and `noexcept`, no `virtual` methods, header only and optimisation enabled, your compiler should be able to optimise your code most efficiently.
 
 - If you want to reduce the size of `basic_uri` further, you can change:
 ```c++

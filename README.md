@@ -6,6 +6,8 @@
 
 ### A lightweight C++20 URI parser
 
+![Ubuntu](https://github.com/fix8mt/uri/workflows/Ubuntu/badge.svg)
+
 # Quick links
 |**Link**|**Description**|
 --|--

@@ -38,7 +38,7 @@ This is a lightweight URI parser implementation featuring zero-copy, minimal sto
 
 ## Features
 - single _header-only_
-- fast, very lightweight, predictive non brute force parser: avg 53ns to decode a URI with `basic_uri`
+- fast, very lightweight, predictive non brute force parser: avg 52ns to decode a URI with `basic_uri`
 - base class is zero-copy, using `std::string_view`
 - derived class moves (or copies) source string once
 - all methods `constexpr`; no virtual methods
@@ -483,9 +483,9 @@ is present in the uri.
 ```c++
 const uri u1{"https://www.hello.com:8080/"};
 if (u1.has_port())
-	.
-	.
-	.
+   .
+   .
+   .
 ```
 
 ### `get_component`
@@ -840,8 +840,8 @@ From the above results we can see the following average performance per URI:
 
 | Class | Decode(ns) |
 | --- | --- |
-| `basic_uri`  | **53** _ns_ |
-| `uri`  | **94** _ns_ |
+| `basic_uri`  | **52** _ns_ |
+| `uri`  | **95** _ns_ |
 | `uri_static`  | **96** _ns_ |
 
 [^1]: Ubuntu 23.10, 12 core 4.7GHz Intel i7 Cometlake Processors, 15.3GB RAM; gcc-13.2.0

@@ -669,7 +669,7 @@ constexpr void set_error(error what);
 ```
 Set the last `uri::error` error to the error given. Setting an error is destructive and renders the uri unusable.
 
-## `operator[component]`
+### `operator[component]`
 ```c++
 constexpr range_pair& operator[](component idx);
 ```
@@ -678,13 +678,13 @@ access to the offset and length of the specified component and is used to create
 > [!WARNING]
 > This is _not_ range checked. Allows for modification of the `string_view` range. Use carefully.
 
-## `parse`
+### `parse`
 ```c++
 constexpr int parse();
 ```
 Parse the source string into components. Return the count of components found. Will reset a uri if already parsed. You can check for error using `get_error()` for more info.
 
-## `sort_query`
+### `sort_query`
 ```c++
 static constexpr void sort_query(query_result& query);
 ```

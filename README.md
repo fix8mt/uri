@@ -473,11 +473,25 @@ constexpr bool uri::test(uri::component what=countof) const;
 ```
 Return `true` if the specified component is present in the uri. With no parameter (default) returns `true` if any component is present.
 
+### `has_*`
+```c++
+constexpr bool has_[component]() const;
+```
+Return `true` if the specified component (`scheme`, `authority`, `userinfo`, `user`, `password`, `host`, `port`, `path`, `query`, `fragment`)
+is present in the uri.
+
 ### `get_component`
 ```c++
 constexpr std::string_view get_component(component what) const;
 ```
 Return a `std::string_view` of the specified component or empty if component not found. Returns an empty `std::string_view` if not found or not a legal component.
+
+### `get_*`
+```c++
+constexpr std::string_view get_[component]() const;
+```
+Return a `std::string_view` of the specified component (`scheme`, `authority`, `userinfo`, `user`, `password`, `host`, `port`, `path`, `query`, `fragment`).
+Returns an empty `std::string_view` if not found or not a legal component.
 
 ### `get_present`
 ```c++

@@ -8,8 +8,8 @@
 
 ------------------------------------------------------------------------
 [![Ubuntu](https://github.com/fix8mt/uri/actions/workflows/cmake-single-platform.yml/badge.svg)](https://github.com/fix8mt/uri/actions/workflows/cmake-single-platform.yml)
-<a href="https://en.wikipedia.org/wiki/C%2B%2B20" target="_blank">![C++20](http://img.shields.io/badge/C++20-required-orange.svg)</a>
-<a href="http://www.boost.org/LICENSE_1_0.txt" target="_blank">![Boost Licence](http://img.shields.io/badge/license-boost-blue.svg)</a>
+<a href="https://en.wikipedia.org/wiki/C%2B%2B20"><img src="https://github.com/fix8mt/uri/blob/master/assets/badgecpprequired.svg"></a>
+<a href="https://http://www.boost.org/LICENSE_1_0.txt"><img src="https://github.com/fix8mt/uri/blob/master/assets/badgeboostlic.svg"></a>
 
 # Quick links
 |**Link**|**Description**|
@@ -53,7 +53,8 @@ This is a lightweight URI parser implementation featuring zero-copy, minimal sto
 
 # 2. Examples
 ## i. Use `basic_uri` as a view
-This example parses a list of URI strings and prints out `host` component. `basic_uri` creates a no-copy view of the source.
+This example parses a list of URI strings and prints out `host` component. `basic_uri` creates a no-copy view of the source. `get_component()`
+returns a `std::string_view`.
 
 <details><summary><i>source</i></summary>
 <p>
@@ -66,11 +67,12 @@ using namespace FIX8;
 
 int main(int argc, char *argv[])
 {
+   using namespace std::literals;
    static constexpr const std::array uris
    {
-      "https://www.blah.com:3000/test",
-      "https://dakka@www.staylate.net:3000/",
-      "https://www.buyexample.com/over/there?name=ferret&time=any#afrag",
+      "https://www.blah.com:3000/test"sv,
+      "https://dakka@www.staylate.net:3000/"sv,
+      "https://www.buyexample.com/over/there?name=ferret&time=any#afrag"sv,
    };
    for (const auto& pp : uris)
       std::cout << basic_uri(pp).get_component(uri::host) << '\n';

@@ -138,6 +138,20 @@ int main(int argc, char *argv[])
 					std::cout << sizeof(uri_fixed<"telnet://user:password@192.0.2.16:80/">) << '\n';
 					std::cout << *ptr << '\n';
 					*/
+					/*
+					using namespace std::literals;
+					static constexpr const std::array uris
+					{
+						"https://www.blah.com:3000/test"sv,
+						"https://dakka@www.staylate.net:3000/"sv,
+						"https://www.buyexample.com/over/there?name=ferret&time=any#afrag"sv,
+					};
+					for (const auto& pp : uris)
+					{
+						std::cout << typeid(pp).name() << '\n';
+						std::cout << basic_uri(pp).get_component(uri::host) << '\n';
+					}
+					*/
 				}
 				break;
 			case 'l':

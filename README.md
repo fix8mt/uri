@@ -473,12 +473,20 @@ constexpr bool uri::test(uri::component what=countof) const;
 ```
 Return `true` if the specified component is present in the uri. With no parameter (default) returns `true` if any component is present.
 
-### `has_*`
+### `has_[?]`
 ```c++
-constexpr bool has_[component]() const;
+constexpr bool has_[?component]() const;
 ```
 Return `true` if the specified component (`scheme`, `authority`, `userinfo`, `user`, `password`, `host`, `port`, `path`, `query`, `fragment`)
 is present in the uri.
+
+```c++
+const uri u1{"https://www.hello.com:8080/"};
+if (u1.has_port())
+	.
+	.
+	.
+```
 
 ### `get_component`
 ```c++
@@ -486,12 +494,17 @@ constexpr std::string_view get_component(component what) const;
 ```
 Return a `std::string_view` of the specified component or empty if component not found. Returns an empty `std::string_view` if not found or not a legal component.
 
-### `get_*`
+### `get_[?]`
 ```c++
-constexpr std::string_view get_[component]() const;
+constexpr std::string_view get_[?component]() const;
 ```
 Return a `std::string_view` of the specified component (`scheme`, `authority`, `userinfo`, `user`, `password`, `host`, `port`, `path`, `query`, `fragment`).
 Returns an empty `std::string_view` if not found or not a legal component.
+
+```c++
+const uri u1{"https://www.hello.com:8080/"};
+std::cout << u1.get_host() << '\n';
+```
 
 ### `get_present`
 ```c++

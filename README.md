@@ -625,11 +625,17 @@ constexpr const std::string& get_buffer() const;
 ```
 Return a `const std::string&` to the stored buffer. Only available from `uri`.
 
-### `any_authority`
+### `has_any_authority`
 ```c++
-constexpr bool any_authority() const;
+constexpr bool has_any_authority() const;
 ```
 Returns true if any authority components are present. This means any one of `host`, `password`, `port`, `user` or `userinfo`.
+
+### `has_any_userinfo`
+```c++
+constexpr bool has_any_userinfo() const;
+```
+Returns true if any userinfo components are present. This means any one of `user` or `password`.
 
 
 ## v. Mutators

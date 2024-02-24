@@ -143,6 +143,17 @@ authority   nodejs.org:89
 host        nodejs.org
 port        89
 path        /docs/latest/api/foo/bar/qua/13949281/0f28b/5d49/b3020/url.html
+   docs
+   latest
+   api
+   foo
+   bar
+   qua
+   13949281
+   0f28b
+   5d49
+   b3020
+   url.html
 query       payload1=true&payload2=false&test=1&benchmark=3&foo=38.38.011.293&bar=1234834910480&test=19299&3992&key=f5c65e1e98fe07e648249ad41e1cfdb0
    payload1    true
    payload2    false
@@ -242,6 +253,7 @@ user        dakka
 host        www.blah.com
 port        3000
 path        /
+   (empty)
 $
 ```
 
@@ -293,6 +305,7 @@ authority   www.blah.com:80
 host        www.blah.com
 port        80
 path        /newpath
+   newpath
 $
 ```
 
@@ -410,6 +423,7 @@ Components are named by a public enum called `component`.  Note that the compone
 | `range_pair`  | `std::pair<uri_len_t,uri_len_t>` |used to store offset and length |
 | `comp_pair` | `std::pair<component, std::string_view>`|used by `factory` to pass individual `component` pairs|
 | `comp_list` | `std::vector<std::string_view>`|used by `factory`,`edit` and `make_source` to pass individual `component` values; each position in the vector corresponds to the component index|
+| `segments` | same as `comp_list`|used by `decode_segments`|
 | `error` | `enum class error : uri_len_t { no_error, too_long, illegal_chars, empty_src, countof };`|error types|
 
 ### consts
@@ -588,6 +602,13 @@ static constexpr std::string_view::size_type find_hex(std::string_view src);
 Return the position of the first hex value (if any) in the supplied string. Hex values are only recognised if
 they are in the form `%XX` where X is a hex digit (octet) `[0-9a-fA-F]`. If not found returns `std::string_view::npos`.
 
+### `decode_segments`
+```c++
+constexpr segments decode_segments() const;
+```
+Returns a `std::vector` of segments as `std::string_view` of the path component if present.
+Returns an empty vector if no path was found.
+
 ### `get_name`
 ```c++
 static constexpr std::string_view get_name(component what);
@@ -617,7 +638,8 @@ Return the count of components in the uri.
 ```c++
 friend std::ostream& operator<<(std::ostream& os, const basic_uri& what);
 ```
-Print the uri object to the specified stream. The source and individual components are printed. If a query is present, each tag value pair is also printed.
+Print the uri object to the specified stream. The source and individual components are printed. If a query is present, each tag value pair is printed; if
+a path is present, each segment value is also printed.
 
 ### `get_buffer`
 ```c++
@@ -693,9 +715,9 @@ Sort the supplied query alphanumerically based on the tag in the query value pai
 ## vi. Generation and editing
 ### `factory`
 ```c++
-static constexpr uri::factory(std::initializer_list<comp_pair> from);
+static constexpr uri uri::factory(std::initializer_list<comp_pair> from);
 template<size_t sz>
-static constexpr uri_static<sz>::factory(std::initializer_list<comp_pair> from);
+static constexpr uri_static<sz> uri_static<sz>::factory(std::initializer_list<comp_pair> from);
 ```
 Create a `uri` from the supplied components. The `initializer_list` contains a 1..n `comp_pair` objects. The following constraints apply:
 1. If `authority` is supplied and any of the following components are present `host`, `password`, `port`, `user` or `userinfo` then `authority` is ignored;

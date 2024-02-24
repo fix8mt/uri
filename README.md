@@ -38,13 +38,13 @@ This is a lightweight URI parser implementation featuring zero-copy, minimal sto
 
 ## Features
 - single _header-only_
-- fast, very lightweight, predictive non brute force parser: avg 52ns to decode a URI with `basic_uri`
+- fast, very lightweight, predictive non brute force parser: avg 52ns[1] to decode a URI with `basic_uri`
 - base class is zero-copy, using `std::string_view`
 - derived class moves (or copies) source string once
 - all methods `constexpr`; no virtual methods
 - extracts all components `scheme`, `authority`, `userinfo`, `user`, `password`, `host`, `port`, `path`, `query`, `fragment`
 - query components returned as `std::string_view`
-- query decode and search - no copying, results point to uri source
+- query decode and search; segment decode; no copying, all results point to uri source
 - small memory footprint - base class object is only 64 bytes
 - support for dynamic or static uri storage
 - built-in unit test cases with exhaustive test URI cases; simple test case addition

@@ -38,7 +38,7 @@ This is a lightweight URI parser implementation featuring zero-copy, minimal sto
 
 ## Features
 - single _header-only_
-- fast, very lightweight, predictive non brute force parser: avg 52ns[1] to decode a URI with `basic_uri`
+- fast, very lightweight, predictive non brute force parser: avg 52ns[^1] to decode a URI with `basic_uri`
 - base class is zero-copy, using `std::string_view`
 - derived class moves (or copies) source string once
 - all methods `constexpr`; no virtual methods

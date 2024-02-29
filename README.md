@@ -877,7 +877,7 @@ This application is run by default if you run `make test` or `ctest`. When runni
 ```bash
 $ ctest --output-on-failure
 ```
-Review of the test cases will provide more insight into using the API.
+Review of the test cases in `unittests.cpp` will provide more insight into using the API.
 
 ## `uritest`
 This is a simple CLI test app which allows you to run individual or all tests from `uriexamples.hpp`, or test a uri passed from the command line.

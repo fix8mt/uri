@@ -32,6 +32,8 @@
 //-----------------------------------------------------------------------------------------
 #include <catch2/catch_test_macros.hpp>
 #include <iostream>
+#include <unordered_set>
+#include <sstream>
 #include <vector>
 #include <algorithm>
 #include <string_view>
@@ -39,7 +41,7 @@
 
 //-----------------------------------------------------------------------------------------
 using namespace FIX8;
-using namespace std::literals;
+using namespace std::literals::string_view_literals;
 
 //-----------------------------------------------------------------------------------------
 #include <uriexamples.hpp>
@@ -58,7 +60,7 @@ TEST_CASE("get component")
 }
 
 //-----------------------------------------------------------------------------------------
-TEST_CASE("operators")
+TEST_CASE("subscript operator")
 {
 	uri u1{tests[0].first};
 	REQUIRE(u1.test());
@@ -106,23 +108,35 @@ void run_test_comp(int id, const auto& ui)
 
 TEST_CASE("uri component validations")
 {
+	static const std::unordered_set<int> decode1st {12, 19, 26, 29, 30, 35};
 	for (int ii{}; ii < tests.size(); ++ii)
 	{
-		run_test_comp(ii, uri{tests[ii].first});
+		auto str{decode1st.contains(ii) ? uri::decode_hex(tests[ii].first, false) : tests[ii].first};
+		run_test_comp(ii, uri{str});
 		REQUIRE(std::string_view(tests[ii].first).size() < uri_static<>::max_storage());
-		run_test_comp(ii, uri_static<>{tests[ii].first});
+		run_test_comp(ii, uri_static<>{str});
 	}
 }
 
 //-----------------------------------------------------------------------------------------
-TEST_CASE("get named pair")
+#define testfuncs(var,x) (var.has_##x() == var.test(x) && var.get_##x() == var.get(x))
+
+TEST_CASE("uri has/get")
 {
-	const uri u1{tests[0].first};
-	REQUIRE_NOTHROW(u1.get_named_pair(host));
-	REQUIRE(u1.get_named_pair(countof).second == "");
-	const auto [tag,value] { u1.get_named_pair(host) };
-	REQUIRE(tag == "host");
-	REQUIRE(value == "www.blah.com");
+	for (const auto& [src,vec] : tests)
+	{
+		const basic_uri u1{src};
+		REQUIRE(testfuncs(u1, scheme));
+		REQUIRE(testfuncs(u1, authority));
+		REQUIRE(testfuncs(u1, userinfo));
+		REQUIRE(testfuncs(u1, user));
+		REQUIRE(testfuncs(u1, password));
+		REQUIRE(testfuncs(u1, host));
+		REQUIRE(testfuncs(u1, port));
+		REQUIRE(testfuncs(u1, path));
+		REQUIRE(testfuncs(u1, query));
+		REQUIRE(testfuncs(u1, fragment));
+	}
 }
 
 //-----------------------------------------------------------------------------------------
@@ -156,15 +170,18 @@ TEST_CASE("storage")
 //-----------------------------------------------------------------------------------------
 TEST_CASE("invalid uri")
 {
-	static constexpr const auto baduris { std::to_array<basic_uri>
-	({
-		"https://www.example.com\n"sv,
-		"https://www.example.com\r"sv,
-		"https://www. example.com"sv,
-		"https://www.example.\tcom"sv,
-		"https://www.example.\vcom"sv,
-		"https://www.example.\fcom"sv,
-	})};
+	static constexpr const auto baduris
+	{
+		std::to_array<basic_uri>
+		({
+			"https://www.example.com\n"sv,
+			"https://www.example.com\r"sv,
+			"https://www. example.com"sv,
+			"https://www.example.\tcom"sv,
+			"https://www.example.\vcom"sv,
+			"https://www.example.\fcom"sv,
+		})
+	};
 	for (auto pp : baduris)
 	{
 		REQUIRE(!pp);
@@ -187,29 +204,119 @@ TEST_CASE("limits")
 //-----------------------------------------------------------------------------------------
 TEST_CASE("empty")
 {
-	uri u1{""};
+	uri u1{""}, u2;
 	REQUIRE(!u1);
+	REQUIRE(!u2);
 	REQUIRE(u1.get_error() == uri::error::empty_src);
+	REQUIRE(u2.get_error() == uri::error::no_error);
+}
+//-----------------------------------------------------------------------------------------
+TEST_CASE("ports")
+{
+	REQUIRE(uri::find_port("ftp") == "21");
+	REQUIRE(uri::find_port("http") == "80");
+	REQUIRE(uri::find_port("https") == "443");
+	REQUIRE(uri::find_port("telnet") == "23");
+}
+
+//-----------------------------------------------------------------------------------------
+TEST_CASE("normalization")
+{
+	static constexpr const std::array uris
+	{
+		std::to_array<std::pair<std::string_view,std::string_view>>
+		({
+			 { "HTTPS://WWW.HELLO.COM/path/%62%6c%6f%67/%75%72%6c%73"sv, "https://www.hello.com/path/blog/urls"sv },
+			 { "HTTPS://WWW.HELLO.COM/path/../this/./blah/blather/../end"sv, "https://www.hello.com/this/blah/end"sv },
+			 { "https://www.buyexample.com/./begin/one-removed/../two-removed/../three-removed/../end?name=ferret&time=any#afrag"sv,
+					"https://www.buyexample.com/begin/end?name=ferret&time=any#afrag"sv },
+			 { "https://www.buyexample.com/.././.././"sv, "https://www.buyexample.com/"sv },
+			 { "https://www.test.com"sv, "https://www.test.com/"sv },
+			 { "https://www.nochange.com/"sv, "https://www.nochange.com/"sv },
+			 { "https://www.boost.org/doc/../index.html"sv, "https://www.boost.org/index.html"sv },
+			 { "http://www.boost.org:80/doc/../index.html"sv, "http://www.boost.org/index.html"sv },
+			 { "https://www.boost.org:443/doc/../index.html"sv, "https://www.boost.org/index.html"sv },
+			 { "https://www.boost.org:8080/doc/../index.html"sv, "https://www.boost.org:8080/index.html"sv },
+			 { "https://www.boost.org/doc/../%69%6e%64%65%78%20file.html"sv, "https://www.boost.org/index%20file.html"sv },
+		})
+	};
+	for (const auto& [before, after] : uris)
+	{
+		if (before != after)
+			REQUIRE(basic_uri(before) != basic_uri(after));
+		REQUIRE(uri::normalize_http(before) == uri(after));
+	}
+}
+
+//-----------------------------------------------------------------------------------------
+TEST_CASE("print")
+{
+	static constexpr const auto str
+	{
+R"(uri         http://nodejs.org:89/docs/latest/api/foo/bar/qua/13949281/0f28b/5d49/b3020/url.html?payload1=true&payload2=false&test=1&benchmark=3&foo=38.38.011.293&bar=1234834910480&test=19299&3992&key=f5c65e1e98fe07e648249ad41e1cfdb0#test
+scheme      http
+authority   nodejs.org:89
+host        nodejs.org
+port        89
+path        /docs/latest/api/foo/bar/qua/13949281/0f28b/5d49/b3020/url.html
+   docs
+   latest
+   api
+   foo
+   bar
+   qua
+   13949281
+   0f28b
+   5d49
+   b3020
+   url.html
+query       payload1=true&payload2=false&test=1&benchmark=3&foo=38.38.011.293&bar=1234834910480&test=19299&3992&key=f5c65e1e98fe07e648249ad41e1cfdb0
+   payload1    true
+   payload2    false
+   test        1
+   benchmark   3
+   foo         38.38.011.293
+   bar         1234834910480
+   test        19299
+   3992        (empty)
+   key         f5c65e1e98fe07e648249ad41e1cfdb0
+fragment    test
+)"
+	};
+
+	std::ostringstream ostr;
+	ostr << basic_uri(tests[9].first);
+	REQUIRE(ostr.str() == str);
 }
 
 //-----------------------------------------------------------------------------------------
 TEST_CASE("hex decode")
 {
-	std::string_view src { "https://www.netmeister.org/%62%6C%6F%67/%75%72%6C%73.%68%74%6D%6C?!@#$%25=+_)(*&^#top%3C" },
-		src1 { "https://www.netmeister.org/blog/urls.html?!@#$%=+_)(*&^#top<" },
-		src2 { "https://www.netmeister.org/path#top%3" };
-	REQUIRE(uri::has_hex(src));
-	REQUIRE(!uri::has_hex(src1));
-	REQUIRE(!uri::has_hex(src2));
-	auto result { uri::decode_hex(src) };
+	static constexpr const auto uris
+	{
+		std::to_array<std::string_view>
+		({
+			{ "https://www.netmeister.org/%62%6C%6F%67/%75%72%6C%73.%68%74%6D%6C?!@#$%25=+_)(*&^#top%3C" },
+			{ "https://www.netmeister.org/blog/urls.html?!@#$%=+_)(*&^#top<" },
+			{ "https://www.netmeister.org/path#top%3" },
+			{ "https://www.netmeister.org/%%62" },
+			{ "https://www.netmeister.org/blog/urls.html?!@#$%=+_)(*&^#top<" },
+			{ "https://www.netmeister.org/%62%6c%6f%67/%75%72%6c%73.%68%74%6d%6c?!@#$%25=+_)(*&^#top%3C" },
+		})
+	};
+
+	REQUIRE(uri::has_hex(uris[0]));
+	REQUIRE(!uri::has_hex(uris[1]));
+	REQUIRE(!uri::has_hex(uris[2]));
+	auto result { uri::decode_hex(uris[0]) };
 	REQUIRE(!uri::has_hex(result));
 	uri u1{result};
-	REQUIRE(u1.get_uri() == src1);
-	basic_uri u2(src);
+	REQUIRE(u1.get_uri() == uris[1]);
+	basic_uri u2(uris[0]);
 	REQUIRE(basic_uri::has_hex(u2.get_uri()));
+	REQUIRE(uri::has_hex(uris[3]));
+	REQUIRE(uri::decode_hex(uris[0]) == uri::decode_hex(uris[5]));
 
-	std::string_view src3 { "https://www.netmeister.org/%%62" };
-	REQUIRE(uri::has_hex(src3));
 }
 
 //-----------------------------------------------------------------------------------------
@@ -241,6 +348,34 @@ TEST_CASE("query decode")
 }
 
 //-----------------------------------------------------------------------------------------
+template<typename T>
+void do_segment()
+{
+	static const auto paths
+	{
+		std::to_array<std::pair<std::string_view, typename T::segments>>
+		({
+			{ "http://host.com/au/locator//area/file.txt", { { "au" }, { "locator" }, {}, { "area" }, { "file.txt" } } },
+			{ "http://host.com/test//this", { { "test" }, {}, { "this" } } },
+			{ "http://host.com/.//", { {}, {}, {} } },
+			{ "http://host.com//./", { {}, {}, {} } },
+		})
+	};
+	for (const auto& [src,tbl] : paths)
+	{
+		const T u1{src};
+		auto result{u1.decode_segments()};
+		REQUIRE(tbl == result);
+	}
+}
+
+TEST_CASE("segment decode")
+{
+	do_segment<uri>();
+	do_segment<uri_static<>>();
+}
+
+//-----------------------------------------------------------------------------------------
 TEST_CASE("query search")
 {
 	static const uri::query_result tbl { { "first", "1st" }, { "second", "2nd" }, { "third", "3rd" } };
@@ -266,6 +401,8 @@ void do_factory()
 	run_test_comp(8, u2);
 	const auto u3 { T::factory({{scheme, "mailto"}, {path, "John.Smith@example.com"}}) };
 	run_test_comp(15, u3);
+	const auto u4 { uri::factory({{scheme, "file"}, {authority, ""}, {path, "/foo/" + basic_uri::encode_hex("this path has embedded spaces") + "/test/node.js"}}) };
+	REQUIRE(u4.get_path() == "/foo/this%20path%20has%20embedded%20spaces/test/node.js"sv);
 }
 
 TEST_CASE("factory")

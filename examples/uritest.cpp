@@ -31,6 +31,7 @@
 // DEALINGS IN THE SOFTWARE.
 //-----------------------------------------------------------------------------------------
 #include <iostream>
+#include <fstream>
 #include <vector>
 #include <stdexcept>
 #include <memory>
@@ -42,6 +43,7 @@
 
 //-----------------------------------------------------------------------------------------
 using namespace FIX8;
+using namespace std::literals::string_view_literals;
 
 //-----------------------------------------------------------------------------------------
 #include <uriexamples.hpp>
@@ -49,18 +51,22 @@ using namespace FIX8;
 //-----------------------------------------------------------------------------------------
 int main(int argc, char *argv[])
 {
-   static constexpr const char *optstr{"t:T:d:hlasx"};
-	static constexpr const auto long_options { std::to_array<option>
-   ({
-      { "help",	no_argument,			nullptr, 'h' },
-      { "list",	no_argument,			nullptr, 'l' },
-      { "sizes",	no_argument,			nullptr, '2' },
-      { "all",		no_argument,			nullptr, 'a' },
-      { "dump",	required_argument,	nullptr, 'd' },
-      { "test",	required_argument,	nullptr, 't' },
-      { "stat",	required_argument,	nullptr, 'T' },
-      {}
-	})};
+   static constexpr const char *optstr{"t:T:d:hlasxf:"};
+	static constexpr const auto long_options
+	{
+		std::to_array<option>
+		({
+			{ "help",	no_argument,			nullptr, 'h' },
+			{ "list",	no_argument,			nullptr, 'l' },
+			{ "sizes",	no_argument,			nullptr, '2' },
+			{ "all",		no_argument,			nullptr, 'a' },
+			{ "file",	required_argument,	nullptr, 'f' },
+			{ "dump",	required_argument,	nullptr, 'd' },
+			{ "test",	required_argument,	nullptr, 't' },
+			{ "stat",	required_argument,	nullptr, 'T' },
+			{}
+		})
+	};
 
 	int val;
 	try
@@ -79,6 +85,7 @@ int main(int argc, char *argv[])
  -h help
  -l list tests
  -s show sizes
+ -f [file] read and dump from file
  -T [num] static test to run
  -t [num] test to run)" << '\n';
 				return 1;
@@ -151,6 +158,35 @@ int main(int argc, char *argv[])
 						std::cout << typeid(pp).name() << '\n';
 						std::cout << basic_uri(pp).get_component(uri::host) << '\n';
 					}
+					static constexpr const auto strv { "HTTPS://WWW.HELLO.COM/path/%62%6c%6f%67/%75%72%6c%73"sv };
+					auto result { uri::normalize(strv) };
+					std::cout << strv << '\n' << result << '\n';
+					*/
+					static constexpr const std::array uris
+					{
+						"HTTPS://WWW.HELLO.COM/path/%62%6c%6f%67/%75%72%6c%73"sv,
+						"HTTPS://WWW.HELLO.COM/path/../this/./blah/blather/../end"sv,
+						"https://www.buyexample.com/./begin/one-removed/../two-removed/../three-removed/../end?name=ferret&time=any#afrag"sv,
+						"https://www.buyexample.com/.././.././"sv,
+						"https://www.test.com"sv,
+						"https://www.nochange.com/"sv,
+						"https://www.boost.org/doc/../index.html"sv,
+						"http://www.boost.org:80/doc/../index.html"sv,
+						"https://www.boost.org:443/doc/../index.html"sv,
+						"https://www.boost.org:8080/doc/../index.html"sv,
+					};
+					for (int ii{}; const auto& pp : uris)
+					{
+						auto result { uri::normalize_http(pp) };
+						std::cout << ii++ << " before: " << pp << '\n' << "after:  " << result << '\n' << '\n';
+					}
+					/*
+					std::cout << basic_uri::encode_hex("The rain in Spain") << '\n';
+					std::cout << basic_uri::encode_hex("/path/blog/urls"sv) << '\n';
+					//const auto u4 { uri::factory({{scheme, "file"}, {authority, ""}, {path, "/foo/" + basic_uri::encode_hex("this path has embedded spaces") + "/test/node.js"}}) };
+					const auto u4 { uri::factory({{scheme, "https"}, {user, "dakka"},
+						{host, "www.blah.com"}, {port, "3000"}, {path, "/foo/" + basic_uri::encode_hex("this path has embedded spaces") + "/test"}}) };
+					std::cout << u4 << '\n';
 					*/
 				}
 				break;
@@ -175,7 +211,7 @@ int main(int argc, char *argv[])
 					const uri u1{optarg};
 					if (!u1)
 						std::cout << "error " << static_cast<int>(u1.get_error()) << '\n';
-					std::cout << u1 << '\n' << "bitset " << std::bitset<uri::countof>(u1.get_present()) << " ("
+					std::cout << u1 << "bitset " << std::bitset<uri::countof>(u1.get_present()) << " ("
 						<< std::hex << std::showbase << u1.get_present() << std::dec << std::noshowbase << ")\n";
 					for (uri::component ii{}; ii != uri::countof; ii = uri::component(ii + 1))
 					{
@@ -185,6 +221,16 @@ int main(int argc, char *argv[])
 							std::cout << uri::get_name(ii) << ' ' << pos << " (" << len << ")\n";
 						}
 					}
+				}
+				break;
+			case 'f':
+				if (std::ifstream ifs(optarg); ifs)
+				{
+					int cnt{};
+					for (char buff[4096]; ifs.good(); ++cnt)
+						if (ifs.getline(buff, sizeof(buff)); !ifs.fail())
+							std::cout << basic_uri(buff) << '\n';
+					std::cout << cnt << " uri(s) read from " << optarg << '\n';
 				}
 				break;
 			case 's':

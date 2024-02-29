@@ -45,6 +45,7 @@
 #include <utility>
 #include <limits>
 #include <cstdint>
+#include <compare>
 #include <vector>
 #include <list>
 #include <algorithm>
@@ -63,15 +64,21 @@ public:
 	using range_pair = std::pair<uri_len_t, uri_len_t>; // offset, len
 	enum component { scheme, authority, userinfo, user, password, host, port, path, query, fragment, countof };
 	enum class error : uri_len_t { no_error, too_long, illegal_chars, empty_src, countof };
+	enum class scheme_t { ftp, http, https, imap, ldap, smtp, telnet, countof };
 	static constexpr const auto uri_max_len {std::numeric_limits<uri_len_t>::max()};
 	using comp_pair = std::pair<component, std::string_view>;
 	using comp_list = std::vector<std::string_view>;
+	using segments = comp_list;
+	using port_pair = value_pair;
 private:
 	std::string_view _source;
 	std::array<range_pair, component::countof> _ranges{};
 	std::uint16_t _present{};
 	static constexpr const std::array _component_names { "scheme", "authority", "userinfo", "user", "password", "host", "port", "path", "query", "fragment", };
-	static constexpr bool query_comp(const value_pair& pl, const value_pair& pr) noexcept { return pl.first < pr.first; }
+	static constexpr const char _hexds[] { "0123456789ABCDEF" };
+	static constexpr const std::string_view _reserved { ":/?#[]@!$&'()*+,;=" };
+	static constexpr const std::array _default_ports { std::to_array<port_pair>
+		({ { "ftp", "21" }, { "http", "80" }, { "https", "443" }, { "imap", "143" }, { "ldap", "389" }, { "smtp", "25" }, { "telnet", "23" }, }) };
 public:
 	constexpr basic_uri(std::string_view src) noexcept : _source(src) { parse(); }
 	constexpr basic_uri(int bits) noexcept : _present(bits) {}
@@ -85,8 +92,10 @@ public:
 		return parse();
 	}
 	constexpr std::string_view get_uri() const noexcept { return _source; }
-	constexpr std::string_view get(component what) const noexcept { return _source.substr(_ranges[what].first, _ranges[what].second); }
-	constexpr std::string_view get_component(component what) const noexcept { return what < countof ? get(what) : std::string_view(); }
+	constexpr std::string_view get(component what) const noexcept
+		{ return _source.substr(_ranges[what].first, _ranges[what].second); }
+	constexpr std::string_view get_component(component what) const noexcept
+		{ return what < countof ? get(what) : std::string_view(); }
 
 	/*! Provides const direct access to the offset and length of the specifed component and is used to create a `std::string_view`.
 	  	\param idx index into table
@@ -98,26 +107,51 @@ public:
 		\return a `range_pair&` which is a `std::pair<uri_len_t, uri_len_t>&` to the specified component at the index given in the ranges table. */
 	constexpr range_pair& operator[](component idx) noexcept { return _ranges[idx]; }
 
-	constexpr value_pair get_named_pair(component what) const noexcept
-	{
-		return what < countof ? value_pair(_component_names[what], get(what)) : value_pair();
-	}
 	constexpr int count() const noexcept { return std::popcount(_present); } // upgrade to std::bitset when constexpr in c++23
 	constexpr std::uint16_t get_present() const noexcept { return _present; }
-	constexpr void set(component what=countof) noexcept { what == countof ? _present = (1 << countof) - 1 : _present |= (1 << what); }
-	constexpr void clear(component what=countof) noexcept { what == countof ? _present = 0 : _present &= ~(1 << what); }
-	constexpr bool any_authority() const noexcept { return _present & (1 << host | 1 << password | 1 << port | 1 << user | 1 << userinfo); };
-	constexpr bool test(component what=countof) const noexcept { return what == countof ? _present : _present & (1 << what); }
+	constexpr void set(component what=countof) noexcept
+		{ what == countof ? _present = (1 << countof) - 1 : _present |= (1 << what); }
+	constexpr void clear(component what=countof) noexcept
+		{ what == countof ? _present = 0 : _present &= ~(1 << what); }
+	constexpr bool test(component what=countof) const noexcept
+		{ return what == countof ? _present : _present & (1 << what); }
 	constexpr operator bool() const noexcept { return count(); }
-	constexpr error get_error() const noexcept { return test() ? error::no_error : static_cast<error>(_ranges[0].first); }
+	constexpr error get_error() const noexcept
+		{ return test() ? error::no_error : static_cast<error>(_ranges[0].first); }
 	constexpr void set_error(error what) noexcept
 	{
 		if (!test())
 			_ranges[0].first = static_cast<uri_len_t>(what);
 	}
+	// syntactic sugar has/get
+	constexpr bool has_scheme() const noexcept { return test(scheme); }
+	constexpr bool has_authority() const noexcept { return test(authority); }
+	constexpr bool has_any_authority() const noexcept
+		{ return _present & (1 << host | 1 << password | 1 << port | 1 << user | 1 << userinfo); }
+	constexpr bool has_userinfo() const noexcept { return test(userinfo); }
+	constexpr bool has_any_userinfo() const noexcept
+		{ return _present & (1 << password | 1 << user); }
+	constexpr bool has_user() const noexcept { return test(user); }
+	constexpr bool has_password() const noexcept { return test(password); }
+	constexpr bool has_host() const noexcept { return test(host); }
+	constexpr bool has_port() const noexcept { return test(port); }
+	constexpr bool has_path() const noexcept { return test(path); }
+	constexpr bool has_query() const noexcept { return test(query); }
+	constexpr bool has_fragment() const noexcept { return test(fragment); }
+	constexpr std::string_view get_scheme() const noexcept { return get(scheme); }
+	constexpr std::string_view get_authority() const noexcept { return get(authority); }
+	constexpr std::string_view get_userinfo() const noexcept { return get(userinfo); }
+	constexpr std::string_view get_user() const noexcept { return get(user); }
+	constexpr std::string_view get_password() const noexcept { return get(password); }
+	constexpr std::string_view get_host() const noexcept { return get(host); }
+	constexpr std::string_view get_port() const noexcept { return get(port); }
+	constexpr std::string_view get_path() const noexcept { return get(path); }
+	constexpr std::string_view get_query() const noexcept { return get(query); }
+	constexpr std::string_view get_fragment() const noexcept { return get(fragment); }
+
 	constexpr int parse() noexcept
 	{
-		using namespace std::literals;
+		using namespace std::literals::string_view_literals;
 		while(true)
 		{
 			if (_source.empty())
@@ -231,7 +265,7 @@ public:
 	}
 
 	template<char valuepair='&',char valueequ='='>
-	constexpr query_result decode_query(bool sort=false) const
+	constexpr query_result decode_query(bool sort=false) const noexcept
 	{
 		query_result result;
 		if (test(query))
@@ -262,41 +296,148 @@ public:
 			sort_query(result);
 		return result;
 	}
-
-	static constexpr void sort_query(query_result& query) noexcept { std::sort(query.begin(), query.end(), query_comp); }
-	static constexpr std::string_view find_query(std::string_view what, const query_result& from) noexcept
+	constexpr segments decode_segments(bool filter=true) const noexcept
 	{
-		auto result { std::equal_range(from.cbegin(), from.cend(), value_pair(what, std::string_view()), query_comp) };
+		segments result;
+		if (test(path))
+		{
+			constexpr auto decuntil([](std::string_view src) noexcept ->std::string_view
+			{
+				if (auto fnd { src.find_first_of('/') }; fnd != std::string_view::npos)
+					return src.substr(0, fnd);
+				else if (src.size())
+					return src;
+				return {};
+			});
+			std::string_view src{get(path)};
+			using namespace std::literals::string_view_literals;
+			for (std::string_view::size_type pos{};;)
+			{
+				if (filter && src.substr(pos, 2) == "./"sv)
+					++pos;
+				if (auto fnd { src.find_first_of('/', pos) }; fnd != std::string_view::npos)
+				{
+					if (auto r1 { decuntil(src.substr(pos, fnd - pos)) }; r1.size() || pos)
+						result.emplace_back(r1);
+					pos = fnd + 1;
+					continue;
+				}
+				if (pos <= src.size())
+					result.emplace_back(decuntil(src.substr(pos, src.size() - pos)));
+				break;
+			}
+		}
+		return result;
+	}
+
+	static constexpr void sort_query(query_result& query) noexcept
+		{ std::sort(query.begin(), query.end(), query_comp); }
+	static constexpr std::string_view find_port(std::string_view what) noexcept
+	{
+		const auto result { std::equal_range(_default_ports.cbegin(), _default_ports.cend(), value_pair(what, std::string_view()), query_comp) };
 		return result.first == result.second ? std::string_view() : result.first->second;
 
 	}
-	static constexpr std::string_view::size_type find_hex(std::string_view src) noexcept
+	static constexpr std::string_view find_query(std::string_view what, const query_result& from) noexcept
 	{
-		for (std::string_view::size_type fnd{}; ((fnd = src.find_first_of('%', fnd))) != std::string_view::npos; ++fnd)
+		const auto result { std::equal_range(from.cbegin(), from.cend(), value_pair(what, std::string_view()), query_comp) };
+		return result.first == result.second ? std::string_view() : result.first->second;
+
+	}
+	static constexpr std::string_view::size_type find_hex(std::string_view src, std::string_view::size_type pos=0) noexcept
+	{
+		for (std::string_view::size_type fnd{pos}; ((fnd = src.find_first_of('%', fnd))) != std::string_view::npos; ++fnd)
 		{
-			if (fnd + 2 < src.size())
-			{
-				if (std::isxdigit(static_cast<unsigned char>(src[fnd + 1]))
-				 && std::isxdigit(static_cast<unsigned char>(src[fnd + 2])))
-					return fnd;
-			}
-			else
+			if (fnd + 2 >= src.size())
 				break;
+			if (std::isxdigit(static_cast<unsigned char>(src[fnd + 1]))
+			 && std::isxdigit(static_cast<unsigned char>(src[fnd + 2])))
+				return fnd;
 		}
 		return std::string_view::npos;
 	}
-	static constexpr bool has_hex(std::string_view src) noexcept { return find_hex(src) != std::string_view::npos; }
-	static constexpr std::string decode_hex(std::string_view src)
+	static constexpr bool has_hex(std::string_view src) noexcept
+		{ return find_hex(src) != std::string_view::npos; }
+	static constexpr std::string decode_hex(std::string_view src, bool unreserved=false)
 	{
 		std::string result{src};
-		for (std::string_view::size_type fnd; ((fnd = find_hex(result))) != std::string_view::npos; )
-			result.replace(fnd, 3, 1, ((result[fnd + 1] & 0xF) + (result[fnd + 1] >> 6) * 9) << 4
-				| ((result[fnd + 2] & 0xF) + (result[fnd + 2] >> 6) * 9));
+		decode_to(result, unreserved);
 		return result;
 	}
+	static constexpr std::string& decode_hex(std::string& result, bool unreserved=false) // inplace decode
+		{ return decode_to(result, unreserved); }
 	static constexpr std::string_view get_name(component what) noexcept
+		{ return what < countof ? _component_names[what] : std::string_view(); }
+	static constexpr std::string normalize(std::string_view src) noexcept
 	{
-		return what < countof ? _component_names[what] : std::string_view();
+		using namespace std::literals::string_view_literals;
+		std::string result{src};
+		basic_uri bu{result};
+		const auto isup([](std::string_view src) noexcept ->bool
+			{ return std::any_of(std::cbegin(src), std::cend(src), [](const auto c) noexcept { return std::isupper(c); }); });
+		auto sch { bu.get_scheme() }, hst { bu.get_host() };
+		if (isup(sch)) // 1. scheme => lower case
+			transform(sch.begin(), sch.end(), std::string::iterator(result.data() + bu[scheme].first),
+				[](auto c) noexcept ->auto { return std::tolower(c); });
+		if (isup(hst)) // 2. host => lower case
+			transform(hst.begin(), hst.end(), std::string::iterator(result.data() + bu[host].first),
+				[](auto c) noexcept ->auto { return std::tolower(c); });
+		if (has_hex(result))
+		{
+			for (std::string_view::size_type hv, pos{}; (hv = find_hex(result, pos)) != std::string_view::npos; pos += 3) // 3. %hex => upper case
+				for (auto pos{hv + 1}; pos < hv + 3; ++pos)
+					if (std::islower(result[pos]))
+						result[pos] = std::toupper(result[pos]);
+			decode_to(result, true); // 5. Decode unreserved hex
+			bu.assign(result);
+		}
+		if (auto segs { bu.decode_segments(false) }; !segs.empty()) // 6. Remove Dot Segments
+		{
+			for (auto itr{segs.cbegin()}; itr != segs.cend();)
+			{
+				if (*itr == "."sv)
+					itr = segs.erase(itr);
+				else if (*itr == ".."sv)
+				{
+					if (itr != segs.cbegin())
+						itr = segs.erase(itr - 1);
+					itr = segs.erase(itr);
+				}
+				else
+					++itr;
+			}
+			std::string nspath;
+			for (const auto& pp : segs)
+			{
+				if (!pp.empty())
+				{
+					nspath += '/';
+					nspath += pp;
+				}
+			}
+			if (nspath.empty())
+				nspath += '/';
+			if (nspath != bu.get_path())
+				result.replace(std::string::iterator(result.data() + bu[path].first),
+					std::string::iterator(result.data() + bu[path].first + bu[path].second), nspath);
+		}
+		else if (!bu.has_any_authority()) // 7. Convert empty path to "/"
+			result += '/';
+		return result;
+	}
+	static constexpr std::string normalize_http(std::string_view src) noexcept
+	{
+		auto result{normalize(src)};
+		basic_uri bu{result};
+		if (!bu.get_port().empty() && (bu.get_port() == _default_ports[static_cast<int>(scheme_t::http)].second
+			|| bu.get_port() == _default_ports[static_cast<int>(scheme_t::https)].second))
+		{
+			auto prec{basic_uri::find_port(bu.get_scheme())};
+			result.erase(bu[port].first - 1, bu[port].second + 1); // remove ":80"
+			bu.assign(result);
+			return std::string(bu.get_uri());
+		}
+		return result;
 	}
 
 	static constexpr std::string make_edit(const auto& what, std::initializer_list<comp_pair> from)
@@ -321,11 +462,23 @@ public:
 		}
 		if (!ibase.test())
 			return 0;
-		if (ibase.any_authority())
+		if (ibase.has_any_authority())
 			ibase.clear(authority);
-		if (ibase.test(userinfo) && (ibase.test(user) || ibase.test(password)))
+		if (ibase.test(userinfo) && ibase.has_any_userinfo())
 			ibase.clear(userinfo);
 		return make_uri(ibase, std::move(ilist));
+	}
+	static constexpr std::string encode_hex(std::string_view src) noexcept
+	{
+		std::string result;
+		for (const auto pp : src)
+		{
+			if (is_reserved(pp) || std::isspace(pp) || !std::isprint(static_cast<unsigned char>(pp)))
+				result += {'%', _hexds[pp >> 4], _hexds[pp & 0xF]};
+			else
+				result += pp;
+		}
+		return result;
 	}
 
 	static constexpr std::string make_uri(std::initializer_list<comp_pair> from) noexcept
@@ -353,21 +506,46 @@ public:
 			if (what.test(ii))
 			{
 				os << std::setw(12) << std::left << what.get_name(ii)
-					<< (what.get(ii).size() ? what.get(ii) : "(empty)") << '\n';
+					<< (!what.get(ii).empty() ? what.get(ii) : "(empty)") << '\n';
+				if (ii == path)
+					if (const auto presult { what.decode_segments() }; presult.size() > 1)
+						for (const auto& tag : presult)
+							os << "   " << (!tag.empty() ? tag : "(empty)") << '\n';
 				if (ii == query)
-					for (auto qresult { what.decode_query() }; const auto [tag,value] : qresult)
-						os << "   " << std::setw(12) << std::left << tag << (value.size() ? value : "(empty)") << '\n';
+					if (const auto qresult { what.decode_query() }; qresult.size() > 1)
+						for (const auto& [tag,value] : qresult)
+							os << "   " << std::setw(12) << std::left << tag << (!value.empty() ? value : "(empty)") << '\n';
 			}
 		}
 		return os;
 	}
 
+	friend constexpr auto operator==(const basic_uri& lhs, const basic_uri& rhs) noexcept
+		{ return lhs._source == rhs._source; }
+
 private:
+	static constexpr bool is_reserved(char c) noexcept
+		{ return _reserved.find_first_of(c) != std::string_view::npos; }
+	static constexpr bool is_unreserved(char c) noexcept
+		{ return std::isalnum(c) || c == '-' || c == '.' || c == '_' || c == '~'; }
+	static constexpr bool is_unreserved_ascii(std::string_view src) noexcept // is %XX unreserved?
+		{ return is_unreserved(cvt_hex_octet(src[1]) << 4 | cvt_hex_octet(src[2])); }
+	static constexpr bool query_comp(const value_pair& pl, const value_pair& pr) noexcept { return pl.first < pr.first; }
+	static constexpr char cvt_hex_octet(char c) noexcept { return (c & 0xF) + (c >> 6) * 9; }
+	static constexpr std::string& decode_to(std::string& result, bool unreserved) // inplace decode
+	{
+		for (std::string_view::size_type fnd{}; ((fnd = find_hex(result, fnd))) != std::string_view::npos;)
+			if (unreserved ? is_unreserved_ascii(result.substr(fnd, 3)) : true)
+				result.replace(fnd, 3, 1, cvt_hex_octet(result[fnd + 1]) << 4 | cvt_hex_octet(result[fnd + 2]));
+			else
+				fnd += 3;
+		return result;
+	}
 	static constexpr std::string make_uri(basic_uri ibase, comp_list ilist) noexcept
 	{
 		if (!ibase.test())
 			return {};
-		using namespace std::literals;
+		using namespace std::literals::string_view_literals;
 		basic_uri done;
 		std::string result;
 		for (component ii{}; ii != countof; ii = component(ii + 1))
@@ -379,16 +557,16 @@ private:
 			case scheme:
 				result += str;
 				result += ':';
-				if (ibase.any_authority())
+				if (ibase.has_any_authority())
 					result += "//"sv;
 				break;
 			case authority:
-				if (!ibase.any_authority())
+				if (!ibase.has_any_authority())
 					result += "//"sv;
 				result += str;
 				break;
 			case userinfo:
-				if (ibase.test(authority) || ibase.test(user) || ibase.test(password))
+				if (ibase.test(authority) || ibase.has_any_userinfo())
 					continue;
 				result += str;
 				break;
@@ -494,7 +672,7 @@ class uri : public uri_storage<0>, public basic_uri
 {
 public:
 	constexpr uri(std::string src) noexcept
-		: uri_storage(uri::has_hex(src) ? uri::decode_hex(src) : std::move(src)), basic_uri(buffer()) {}
+		: uri_storage(uri::has_hex(src) ? uri::decode_hex(src, true) : std::move(src)), basic_uri(buffer()) {}
 	constexpr uri(std::string_view src) noexcept : uri(std::string(src)) {}
 	constexpr uri(const char *src) noexcept : uri(std::string(src)) {}
 	constexpr uri() = default;
@@ -512,9 +690,14 @@ public:
 		return count();
 	}
 	static constexpr auto factory(std::initializer_list<comp_pair> from) noexcept
-	{
-		return uri(make_uri(std::move(from)));
-	}
+		{ return uri(make_uri(std::move(from))); }
+	static constexpr auto normalize_uri(std::string_view src) noexcept
+		{ return uri(normalize(src)); }
+	static constexpr auto normalize_http_uri(std::string_view src) noexcept
+		{ return uri(normalize_http(src)); }
+
+	friend constexpr auto operator==(const uri& lhs, const uri& rhs) noexcept
+		{ return normalize(lhs.get_uri()) == normalize(rhs.get_uri()); }
 };
 
 //-----------------------------------------------------------------------------------------
@@ -523,7 +706,7 @@ class uri_static : public uri_storage<sz>, public basic_uri
 {
 public:
 	constexpr uri_static(std::string src) noexcept
-		: uri_storage<sz>(uri::has_hex(src) ? uri::decode_hex(src) : std::move(src)), basic_uri(this->buffer()) {}
+		: uri_storage<sz>(uri::has_hex(src) ? uri::decode_hex(src, true) : std::move(src)), basic_uri(this->buffer()) {}
 	constexpr uri_static(std::string_view src) noexcept : uri_static(std::string(src)) {}
 	constexpr uri_static(const char *src) noexcept : uri_static(std::string(src)) {}
 	constexpr uri_static() = default;
@@ -541,9 +724,14 @@ public:
 		return count();
 	}
 	static constexpr auto factory(std::initializer_list<comp_pair> from) noexcept
-	{
-		return uri_static(make_uri(std::move(from)));
-	}
+		{ return uri_static(make_uri(std::move(from))); }
+	static constexpr auto normalize_uri(std::string_view src) noexcept
+		{ return uri_static(normalize(src)); }
+	static constexpr auto normalize_http_uri(std::string_view src) noexcept
+		{ return uri_static(normalize_http(src)); }
+
+	friend constexpr auto operator==(const uri_static& lhs, const uri_static& rhs) noexcept
+		{ return normalize(lhs.get_uri()) == normalize(rhs.get_uri()); }
 };
 
 } // FIX8

@@ -38,7 +38,7 @@
 using namespace FIX8;
 
 //-----------------------------------------------------------------------------------------
-constexpr const std::array uris { std::to_array<std::string_view>
+constinit const std::array uris { std::to_array<std::string_view>
 ({
 #include <basiclist.hpp>
 })};
@@ -46,7 +46,7 @@ constexpr const std::array uris { std::to_array<std::string_view>
 //-----------------------------------------------------------------------------------------
 BENCHMARK(basic_uri_1000)
 {
-	//	SETUP_BENCHMARK()
+	// SETUP_BENCHMARK()
 
 	for (const auto& pp : uris)
 	{

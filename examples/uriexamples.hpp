@@ -29,6 +29,8 @@
 // FOR ANY DAMAGES OR OTHER LIABILITY, WHETHER IN CONTRACT, TORT OR OTHERWISE,
 // ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
 // DEALINGS IN THE SOFTWARE.
+//
+// Note: don't change the order of these records
 //-----------------------------------------------------------------------------------------
 using enum uri::component;
 const std::vector<std::pair<const char *, std::vector<std::pair<uri::component, const char *>>>> tests

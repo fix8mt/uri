@@ -25,6 +25,8 @@
 ------------------------------------------------------------------------
 # 1. Introduction
 This is a lightweight URI parser implementation featuring zero-copy, minimal storage and high performance.
+> [!TIP]
+> Use the built-in (table of contents)[https://github.blog/changelog/2021-04-13-table-of-contents-support-in-markdown-files/] to navigate this guide.
 
 ## Motivation
 - header-only
@@ -231,7 +233,7 @@ using enum uri::component;
 int main(int argc, char *argv[])
 {
    const auto u1 { uri::factory({{scheme, "https"}, {user, "dakka"}, {host, "www.blah.com"}, {port, "3000"},
-		{path, "/foo/" + basic_uri::encode_hex("this path has embedded spaces") + "/test"}}) };
+      {path, "/foo/" + basic_uri::encode_hex("this path has embedded spaces") + "/test"}}) };
    std::cout << u1 << '\n';
    return 0;
 }
@@ -425,6 +427,7 @@ Components are named by a public enum called `component`.  Note that the compone
 | `comp_pair` | `std::pair<component, std::string_view>`|used by `factory` to pass individual `component` pairs|
 | `comp_list` | `std::vector<std::string_view>`|used by `factory`,`edit` and `make_source` to pass individual `component` values; each position in the vector corresponds to the component index|
 | `segments` | same as `comp_list`|used by `decode_segments`|
+| `port_pair` | same as `value_pair`|used by `find_port`|
 | `error` | `enum class error : uri_len_t { no_error, too_long, illegal_chars, empty_src, countof };`|error types|
 
 ### consts
@@ -628,8 +631,8 @@ they are in the form `%XX` where X is a hex digit (octet) `[0-9a-fA-F]`. If not 
 ```c++
 static constexpr std::string_view find_port(std::string_view what);
 ```
-Return the default port as a `std::string_view` for the given schema. For example, will return `80` if given `http`. Uses private member `_default_ports`
-which contains pairs of schema/ports.
+Return the default port as a `std::string_view` for the given scheme. For example, will return `80` if given `http`. Uses private member `_default_ports`
+which contains pairs of scheme/ports.
 
 ### `decode_segments`
 ```c++

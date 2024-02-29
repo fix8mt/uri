@@ -48,7 +48,7 @@ This is a lightweight URI parser implementation featuring zero-copy, minimal sto
 - small memory footprint - base class object is only 64 bytes
 - support for dynamic or static uri storage
 - built-in unit test cases with exhaustive test URI cases; simple test case addition
-- support for [**RFC 3986**](https://datatracker.ietf.org/doc/html/rfc3986)
+- normalization (([**RFC 3986**](https://datatracker.ietf.org/doc/html/rfc3986))
 - cmake integration with FetchContent
 
 # 2. Examples
@@ -230,8 +230,8 @@ using enum uri::component;
 
 int main(int argc, char *argv[])
 {
-   const auto u1 { uri::factory({{scheme, "https"}, {user, "dakka"},
-      {host, "www.blah.com"}, {port, "3000"}, {path, "/"}}) };
+   const auto u1 { uri::factory({{scheme, "https"}, {user, "dakka"}, {host, "www.blah.com"}, {port, "3000"},
+		{path, "/foo/" + basic_uri::encode_hex("this path has embedded spaces") + "/test"}}) };
    std::cout << u1 << '\n';
    return 0;
 }
@@ -245,15 +245,17 @@ int main(int argc, char *argv[])
 
 ```CSV
 $ ./example4
-uri         https://dakka@www.blah.com:3000/
+uri         https://dakka@www.blah.com:3000/foo/this%20path%20has%20embedded%20spaces/test
 scheme      https
 authority   dakka@www.blah.com:3000
 userinfo    dakka
 user        dakka
 host        www.blah.com
 port        3000
-path        /
-   (empty)
+path        /foo/this%20path%20has%20embedded%20spaces/test
+   foo
+   this%20path%20has%20embedded%20spaces
+   test
 $
 ```
 
@@ -305,7 +307,6 @@ authority   www.blah.com:80
 host        www.blah.com
 port        80
 path        /newpath
-   newpath
 $
 ```
 
@@ -583,10 +584,31 @@ Complexity at most _2 * log<sub>2</sub>(last - first) + O(1)_ comparisons.
 
 ### `decode_hex`
 ```c++
-static constexpr std::string decode_hex(std::string_view src);
+static constexpr std::string decode_hex(std::string_view src, bool unreserved=false);
+static constexpr std::string& decode_hex(std::string& result, bool unreserved=false); // inplace decode
 ```
-Decode any hex values present in the supplied string. Hex values are only recognised if
-they are in the form `%XX` where X is a hex digit (octet) `[0-9a-fA-F]`. Return in a new string.
+Decode any hex values present in the supplied string. Hex values are only recognised if they are in the form `%XX` where X is a hex digit (octet) `[0-9a-fA-F]`.
+By default all percent-encoded hex values are decoded. Return in a new string or inplace. If unreserved is `true` only unreserved characters will be decoded (see `is_unreserved()`).
+
+### `encode_hex`
+```c++
+static constexpr std::string encode_hex(std::string_view src);
+```
+Encode any hex values present in the supplied string. Hex values are only recognised if they are in the form `%XX` where X is a hex digit (octet) `[0-9a-fA-F]`.
+Only chars that are reserved (see `is_reserved()`), whitespace or not printable are encoded.  Return in a new encoded string.
+
+
+### `is_unreserved`
+```c++
+static constexpr bool is_unreserved(char c);
+```
+Return true if the given char is a member of the unreserved set as per RFC 3986, sec 2.3.
+
+### `is_reserved`
+```c++
+static constexpr bool is_reserved(char c);
+```
+Return true if the given char is a member of the reserved set as per RFC 3986, sec 2.2.
 
 ### `has_hex`
 ```c++
@@ -597,10 +619,17 @@ they are in the form `%XX` where X is a hex digit (octet) `[0-9a-fA-F]`.
 
 ### `find_hex`
 ```c++
-static constexpr std::string_view::size_type find_hex(std::string_view src);
+static constexpr std::string_view::size_type find_hex(std::string_view src, std::string_view::size_type pos=0);
 ```
-Return the position of the first hex value (if any) in the supplied string. Hex values are only recognised if
+Return the position of the first hex value (if any) in the supplied string. Optionally supply the starting offset in pos. Hex values are only recognised if
 they are in the form `%XX` where X is a hex digit (octet) `[0-9a-fA-F]`. If not found returns `std::string_view::npos`.
+
+### `find_port`
+```c++
+static constexpr std::string_view find_port(std::string_view what);
+```
+Return the default port as a `std::string_view` for the given schema. For example, will return `80` if given `http`. Uses private member `_default_ports`
+which contains pairs of schema/ports.
 
 ### `decode_segments`
 ```c++
@@ -608,6 +637,43 @@ constexpr segments decode_segments() const;
 ```
 Returns a `std::vector` of segments as `std::string_view` of the path component if present.
 Returns an empty vector if no path was found.
+
+### `normalize`
+```c++
+static constexpr std::string normalize(std::string_view src);
+```
+Normalize the given string as per RFC 3986, sec 6. The normalizations done are only those that preserve the original semantics. These are:
+
+1. Convert scheme => lower case
+1. Convert host => lower case
+1. Convert %hex => upper case
+1. Decode unreserved hex
+1. Remove Dot Segments
+1. Convert empty path to "/"
+
+Returns a `std::string` of the new normalized string or the same string if no normalizations possible.
+
+### `normalize_http`
+```c++
+static constexpr std::string normalize_http(std::string_view src);
+```
+Normalize the given string as per RFC 3986, sec 6, as in `normalize()` above. In addition the following normalizations are done:
+
+1. Remove default port (http and https only)
+
+Returns a `std::string` of the new normalized string or the same string if no normalizations possible.
+
+### `normalize_uri`
+```c++
+static constexpr uri normalize_uri(std::string_view src);
+```
+Same as `normalize` above but returns a new `uri` object.
+
+### `normalize_http_uri`
+```c++
+static constexpr uri normalize_http_uri(std::string_view src);
+```
+Same as `normalize_http` above but returns a new `uri` object.
 
 ### `get_name`
 ```c++
@@ -640,6 +706,19 @@ friend std::ostream& operator<<(std::ostream& os, const basic_uri& what);
 ```
 Print the uri object to the specified stream. The source and individual components are printed. If a query is present, each tag value pair is printed; if
 a path is present, each segment value is also printed.
+
+### `operator==`
+```c++
+friend constexpr bool operator==(const basic_uri& lhs, const basic_uri& rhs);
+friend constexpr bool operator==(const uri& lhs, const uri& rhs);
+template<size_t sz>
+friend static constexpr bool uri_static<sz>::operator==(const uri_static& lhs, const uri_static& rhs);
+```
+Equivalence operators for `basic_uri`, `uri` and `uri_static`. These are implemented as follows:
+1. `basic_uri` - return `true` if the source uri strings are identical
+1. `uri`, `uri_static` - return `true` if the normalized source uri strings are identical
+
+Since this is C++20, the inequivalence operators `!=` are automatically supplied by your compiler.
 
 ### `get_buffer`
 ```c++

@@ -26,7 +26,7 @@
 # 1. Introduction
 This is a lightweight URI parser implementation featuring zero-copy, minimal storage and high performance.
 > [!TIP]
-> Use the built-in (table of contents)[https://github.blog/changelog/2021-04-13-table-of-contents-support-in-markdown-files/] to navigate this guide.
+> Use the built-in [table of contents](https://github.blog/changelog/2021-04-13-table-of-contents-support-in-markdown-files/] to navigate this guide).
 
 ## Motivation
 - header-only

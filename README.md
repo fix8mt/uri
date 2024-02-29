@@ -50,7 +50,7 @@ This is a lightweight URI parser implementation featuring zero-copy, minimal sto
 - small memory footprint - base class object is only 64 bytes
 - support for dynamic or static uri storage
 - built-in unit test cases with exhaustive test URI cases; simple test case addition
-- normalization (([**RFC 3986**](https://datatracker.ietf.org/doc/html/rfc3986))
+- normalization ([**RFC 3986**](https://datatracker.ietf.org/doc/html/rfc3986))
 - cmake integration with FetchContent
 
 # 2. Examples

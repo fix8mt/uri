@@ -375,13 +375,12 @@ public:
 		basic_uri bu{result};
 		const auto isup([](std::string_view src) noexcept ->bool
 			{ return std::any_of(std::cbegin(src), std::cend(src), [](const auto c) noexcept { return std::isupper(c); }); });
+		const auto tolo([](auto c) noexcept ->auto { return std::tolower(c); });
 		auto sch { bu.get_scheme() }, hst { bu.get_host() };
 		if (isup(sch)) // 1. scheme => lower case
-			transform(sch.begin(), sch.end(), std::string::iterator(result.data() + bu[scheme].first),
-				[](auto c) noexcept ->auto { return std::tolower(c); });
+			transform(sch.begin(), sch.end(), std::string::iterator(result.data() + bu[scheme].first), tolo);
 		if (isup(hst)) // 2. host => lower case
-			transform(hst.begin(), hst.end(), std::string::iterator(result.data() + bu[host].first),
-				[](auto c) noexcept ->auto { return std::tolower(c); });
+			transform(hst.begin(), hst.end(), std::string::iterator(result.data() + bu[host].first), tolo);
 		if (has_hex(result))
 		{
 			for (std::string_view::size_type hv, pos{}; (hv = find_hex(result, pos)) != std::string_view::npos; pos += 3) // 3. %hex => upper case

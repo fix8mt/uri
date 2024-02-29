@@ -290,7 +290,7 @@ fragment    test
 }
 
 //-----------------------------------------------------------------------------------------
-TEST_CASE("hex decode")
+TEST_CASE("decode hex")
 {
 	static constexpr const auto uris
 	{
@@ -317,6 +317,13 @@ TEST_CASE("hex decode")
 	REQUIRE(uri::has_hex(uris[3]));
 	REQUIRE(uri::decode_hex(uris[0]) == uri::decode_hex(uris[5]));
 
+}
+
+//-----------------------------------------------------------------------------------------
+TEST_CASE("encode hex")
+{
+	const std::string str {"/foo/" + basic_uri::encode_hex("this path has embedded spaces") + "/test/node.js"};
+	REQUIRE(str == "/foo/this%20path%20has%20embedded%20spaces/test/node.js"sv);
 }
 
 //-----------------------------------------------------------------------------------------

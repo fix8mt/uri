@@ -636,10 +636,10 @@ which contains pairs of scheme/ports.
 
 ### `decode_segments`
 ```c++
-constexpr segments decode_segments() const;
+constexpr segments decode_segments(bool filter=true) const;
 ```
-Returns a `std::vector` of segments as `std::string_view` of the path component if present.
-Returns an empty vector if no path was found.
+Returns a `std::vector` of segments as `std::string_view` of the path component if present. If filter is `true` (default)
+remove `./` segments if found. Returns an empty vector if no path was found.
 
 ### `normalize`
 ```c++

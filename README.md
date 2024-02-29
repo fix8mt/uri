@@ -219,7 +219,7 @@ $
 </details>
 
 ## iv. Use the factory
-Create a URI from an initializer list. Print out the result.
+Create a URI from an initializer list. Note we chose to percent-encode a part of the path. Print out the result.
 
 <details><summary><i>source</i></summary>
 <p>

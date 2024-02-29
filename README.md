@@ -690,13 +690,6 @@ constexpr std::string_view get_uri() const;
 ```
 Return a `std::string_view` of the source uri. If not set return value will be empty.
 
-### `get_named_pair`
-```c++
-constexpr value_pair get_named_pair(component what) const;
-```
-Return a `std::pair` of `std::string_view` for the specified component. The `first` will be the component name, `second` the component value. Suitable
-for populating a JSON field. No copying, results point to uri source. Returns an empty `std::string_view` pair if not found or not a legal component.
-
 ### `count`
 ```c++
 constexpr int count() const;
@@ -884,6 +877,7 @@ This application is run by default if you run `make test` or `ctest`. When runni
 ```bash
 $ ctest --output-on-failure
 ```
+Review of the test cases will provide more insight into using the API.
 
 ## `uritest`
 This is a simple CLI test app which allows you to run individual or all tests from `uriexamples.hpp`, or test a uri passed from the command line.
@@ -958,8 +952,10 @@ From the above results we can see the following average performance per URI:
 
 # 6. Discussion
 ## i. Non-validating
-This class is non-validating. The source URI is expected to be normalised or at least parsable. Validation is out of scope for this implementation.
-We decided against validating for a few reasons:
+This class is non-validating. The source URI is expected to be normalised or at least parsable. This library provides
+normalization functions which you can apply to your source uri strings before construction.
+
+Validation is out of scope for this implementation.  We decided against validating for a few reasons:
 1. Performance - validating is expensive; most URIs are generally parsable
 1. Complex - validation rules are complicated; for most use cases, simple rejection for gross rule violation is sufficient.
 See [URL Standard](https://url.spec.whatwg.org/) for complete validation rules.

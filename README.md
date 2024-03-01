@@ -377,9 +377,14 @@ basic_uri u1{"https://www.example.com:8080/path1"};
 ```
 
 ***
+### `uri_base`
+This class is inherited by `uri` and `uri_static`. You can inherit from class if you wish to specialise further.
+
+***
 ### `uri`
-The derived class `uri` stores the source string and then builds a `basic_uri` using that string as its reference. `uri` derives from `basic_uri` and a private **dynamic** storage class
-`uri_storage`. The supplied string is moved or copied and stored by the object. If your application needs the uri to hold and persist the source uri, this class is suitable.
+The derived class `uri` stores the source string and then builds a `basic_uri` using that string as its reference. `uri` derives from `uri_base` which derives from
+`basic_uri` and a private **dynamic** storage class `uri_storage`. The supplied string is moved or copied and stored by the object. If your application needs the uri
+to hold and persist the source uri, this class is suitable.
 The storage class used is a specialisation of `uri_storage` which specifies `0` as the non-type parameter `sz`, selecting dynamic storage.
 
 ```c++
@@ -394,9 +399,9 @@ uri u1{myuri};
 
 ***
 ### `uri_static`
-The derived class `uri_static` stores the source string and then builds a `basic_uri` using that string as its reference. `uri_static` derives from `basic_uri` and a private **static** storage class
-`uri_storage`. The supplied string is moved or copied and stored by the object. The class is templated by the non-type parameter `sz` which sets the static size and maximum storage capacity
-for the uri. `sz` defaults to `1024`. Storage is allocated once with the object in a `std::array`. No dynamic memory is used.
+The derived class `uri_static` stores the source string and then builds a `basic_uri` using that string as its reference. `uri_static` derives from `uri_base` which derives from
+`basic_uri` and a private **static** storage class `uri_storage`. The supplied string is moved or copied and stored by the object. The class is templated by the non-type parameter
+`sz` which sets the static size and maximum storage capacity for the uri. `sz` defaults to `1024`. Storage is allocated once with the object in a `std::array`. No dynamic memory is used.
 If your application needs the uri to hold and persist the source uri statically (for example in another container), this class is suitable.
 
 ```c++
@@ -641,9 +646,9 @@ constexpr segments decode_segments(bool filter=true) const;
 Returns a `std::vector` of segments as `std::string_view` of the path component if present. If filter is `true` (default)
 remove `./` segments if found. Returns an empty vector if no path was found.
 
-### `normalize`
+### `normalize_str`
 ```c++
-static constexpr std::string normalize(std::string_view src);
+static constexpr std::string normalize_str(std::string_view src);
 ```
 Normalize the given string as per RFC 3986, sec 6. The normalizations done are only those that preserve the original semantics. These are:
 
@@ -651,32 +656,32 @@ Normalize the given string as per RFC 3986, sec 6. The normalizations done are o
 1. Convert host => lower case
 1. Convert %hex => upper case
 1. Decode unreserved hex
-1. Remove Dot Segments
+1. Remove dot segments (sec 5.2.4)
 1. Convert empty path to "/"
 
 Returns a `std::string` of the new normalized string or the same string if no normalizations possible.
 
-### `normalize_http`
+### `normalize_http_str`
 ```c++
-static constexpr std::string normalize_http(std::string_view src);
+static constexpr std::string normalize_http_str(std::string_view src);
 ```
-Normalize the given string as per RFC 3986, sec 6, as in `normalize()` above. In addition the following normalizations are done:
+Normalize the given string as per RFC 3986, sec 6, as in `normalize_str()` above. In addition the following normalizations are done:
 
 1. Remove default port (http and https only)
 
 Returns a `std::string` of the new normalized string or the same string if no normalizations possible.
 
-### `normalize_uri`
+### `normalize`
 ```c++
-static constexpr uri normalize_uri(std::string_view src);
+constexpr std::string normalize();
 ```
-Same as `normalize` above but returns a new `uri` object.
+Same as `normalize_str` above but operates on the source string in the uri object. Returns the _original_ string and updates the current object with the new normalized string.
 
-### `normalize_http_uri`
+### `normalize_http`
 ```c++
-static constexpr uri normalize_http_uri(std::string_view src);
+static constexpr std::string normalize_http();
 ```
-Same as `normalize_http` above but returns a new `uri` object.
+Same as `normalize_http_str` above but operates on the source string in the uri object. Returns the _original_ string and updates the current object with the new normalized string.
 
 ### `get_name`
 ```c++
@@ -734,6 +739,18 @@ constexpr bool has_any_userinfo() const;
 ```
 Returns true if any userinfo components are present. This means any one of `user` or `password`.
 
+### `buffer`
+```c++
+constexpr std::string_view buffer() const;
+```
+Returns a `std::string_view` of the current buffer used for all uri objects except `basic_uri`.
+
+### `max_storage`
+```c++
+static constexpr uri_len_t max_storage();
+```
+Returns the maximum storage available for all uri objects except `basic_uri`. For `uri` will return `uri_max_len`, for
+`uri_static<sz>` will return the `sz` parameter.
 
 ## v. Mutators
 ### `set`

@@ -70,7 +70,7 @@ using namespace FIX8;
 int main(int argc, char *argv[])
 {
    using namespace std::literals;
-   static constexpr const std::array uris
+   static constexpr std::array uris
    {
       "https://www.blah.com:3000/test"sv,
       "https://dakka@www.staylate.net:3000/"sv,
@@ -118,13 +118,13 @@ int main(int argc, char *argv[])
 
    std::cout << u1 << '\n';
 
-   std::cout << u1.get_component(uri::authority) << '\n'
-      << u1.get_component(uri::host) << '\n'
-      << u1.get_component(uri::port) << '\n'
-      << u1.get_component(uri::query) << '\n'
-      << u1.get_component(uri::fragment) << '\n';
-   if (u1.test(uri::user)) // should be no user
-      std::cout << u1.get_component(uri::user) << '\n';
+   std::cout << u1.get_authority() << '\n'
+      << u1.get_host() << '\n'
+      << u1.get_port() << '\n'
+      << u1.get_query() << '\n'
+      << u1.get_fragment() << '\n';
+   if (u1.has_user()) // should be no user
+      std::cout << u1.get_user() << '\n';
    auto result{u1.decode_query(true)}; // sort result
    std::cout << "key = " << uri::find_query("key", result) << '\n';
    return 0;
@@ -382,7 +382,7 @@ This class is inherited by `uri` and `uri_static`. You can inherit from class if
 
 ***
 ### `uri`
-The derived class `uri` stores the source string and then builds a `basic_uri` using that string as its reference. `uri` derives from `uri_base` which derives from
+The derived class `uri` stores the source string and then builds a `basic_uri` using that string as its reference. `uri` derives from
 `basic_uri` and a private **dynamic** storage class `uri_storage`. The supplied string is moved or copied and stored by the object. If your application needs the uri
 to hold and persist the source uri, this class is suitable.
 The storage class used is a specialisation of `uri_storage` which specifies `0` as the non-type parameter `sz`, selecting dynamic storage.
@@ -399,7 +399,7 @@ uri u1{myuri};
 
 ***
 ### `uri_static`
-The derived class `uri_static` stores the source string and then builds a `basic_uri` using that string as its reference. `uri_static` derives from `uri_base` which derives from
+The derived class `uri_static` stores the source string and then builds a `basic_uri` using that string as its reference. `uri_static` derives from
 `basic_uri` and a private **static** storage class `uri_storage`. The supplied string is moved or copied and stored by the object. The class is templated by the non-type parameter
 `sz` which sets the static size and maximum storage capacity for the uri. `sz` defaults to `1024`. Storage is allocated once with the object in a `std::array`. No dynamic memory is used.
 If your application needs the uri to hold and persist the source uri statically (for example in another container), this class is suitable.
@@ -467,13 +467,13 @@ fails, you can check for error using `operator bool` or `count()` and then `get_
 that `std::string` contains a convert to `std::string_view` operator.
 1. Construct a `basic_uri` that has the corresponding bitset passed in `bits`. No components are present. Permits object to be used as a component bitset.
 1. Construct an empty `basic_uri`. It can be populated using `assign()`.
-1. Construct a `uri` from a `std::string`. The source string is percent decoded before parsing. Calls `parse()`.
+1. Construct a `uri` from a `std::string`. Calls `parse()`.
 The supplied string is moved or copied and stored by the object. You can check for error using `operator bool` or `count()` and then `get_error()` for more info.
 1. Construct a `uri` from a `std::string_view`. Creates a `std::string` from src and delegates to (4).
 1. Construct a `uri` from a `null` terminated `const char *`. Creates a `std::string` from src and delegates to (4).
 1. Construct an empty `uri`. It can be populated using `replace()`.
 1. Construct a `uri_static` from a `std::string`. The class is templated by the non-type parameter `sz` which sets the static size and maximum storage capacity
-for the uri. The source string is percent decoded before parsing. Calls `parse()`.
+for the uri. Calls `parse()`.
 1. Construct a `uri_static` from a `std::string_view`. Creates a `std::string` from src and delegates to (8).
 1. Construct a `uri_static` from a `null` terminated `const char *`. Creates a `std::string` from src and delegates to (8).
 1. Construct an empty `uri_static` from a `std::string`. The class is templated by the non-type parameter `sz` which sets the static size and maximum storage capacity for the uri.
@@ -492,9 +492,12 @@ Destroy the `uri` or `basic_uri`. The `uri` and `uri_static` objects will releas
 ## iv. Accessors
 ### `test`
 ```c++
-constexpr bool uri::test(uri::component what=countof) const;
+constexpr bool test(uri::component what=countof) const;
+template<uri::component what>
+constexpr bool test() const;
 ```
-Return `true` if the specified component is present in the uri. With no parameter (default) returns `true` if any component is present.
+Return `true` if the specified component is present in the uri. Passing `countof` returns `true` if any component is present.
+Use the template version if you know the component ahead of time.
 
 ### `has_[?]`
 ```c++
@@ -514,8 +517,17 @@ if (u1.has_port())
 ### `get_component`
 ```c++
 constexpr std::string_view get_component(component what) const;
+template<component what>
+constexpr std::string_view get_component() const;
 ```
 Return a `std::string_view` of the specified component or empty if component not found. Returns an empty `std::string_view` if not found or not a legal component.
+Use the template version if you know the component ahead of time.
+
+```c++
+const uri u1{"https://www.hello.com:8080/"};
+std::cout << u1.get_component(uri::host) << '\n';
+std::cout << u1.get_component<uri::host>() << '\n';
+```
 
 ### `get_[?]`
 ```c++
@@ -755,15 +767,19 @@ Returns the maximum storage available for all uri objects except `basic_uri`. Fo
 ## v. Mutators
 ### `set`
 ```c++
-constexpr void uri::set(uri::component what=countof);
+constexpr void set(uri::component what);
+template<uri::component what>
+constexpr void set();
 ```
-Set the specified component bit as present in the uri. By default sets all bits. Use carefully.
+Set the specified component bit as present in the uri. Passing `uri::countof` sets all bits. Use the template version if you know the bit ahead of time. Use carefully.
 
 ### `clear`
 ```c++
 constexpr void uri::clear(uri::component what=countof);
+template<uri::component what>
+constexpr void clear();
 ```
-Clear the specified component bit in the uri. By default clears all bits. Use carefully.
+Clear the specified component bit in the uri. Passing `uri::countof` clears all bits. Use the template version if you know the bit ahead of time. Use carefully.
 
 ### `assign`
 ```c++
@@ -962,8 +978,8 @@ From the above results we can see the following average performance per URI:
 | Class | Decode(ns) |
 | --- | --- |
 | `basic_uri`  | **52** _ns_ |
-| `uri`  | **95** _ns_ |
-| `uri_static`  | **96** _ns_ |
+| `uri`  | **90** _ns_ |
+| `uri_static`  | **90** _ns_ |
 
 [^1]: Ubuntu 23.10, 12 core 4.7GHz Intel i7 Cometlake Processors, 15.3GB RAM; gcc-13.2.0
 

@@ -679,7 +679,7 @@ Same as `normalize_str` above but operates on the source string in the uri objec
 
 ### `normalize_http`
 ```c++
-static constexpr std::string normalize_http();
+constexpr std::string normalize_http();
 ```
 Same as `normalize_http_str` above but operates on the source string in the uri object. Returns the _original_ string and updates the current object with the new normalized string.
 

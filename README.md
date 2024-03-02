@@ -1000,6 +1000,10 @@ See [URL Standard](https://url.spec.whatwg.org/) for complete validation rules.
 There are two methods that provide unchecked direct access to the `range` table and `component`. You must ensure that you don't pass an invalid component
 index when using these. Making changes to the range object with `operator[]` can have serious consequences. Use carefully.
 1. `constexpr range_pair& operator[](component idx)`;
+1. `constexpr void set(component what);`
+1. `template<component what> constexpr void set()`;
+1. `constexpr void clear(component what);`
+1. `template<component what> constexpr void clear()`;
 
 ## iii. Sanity checking
 This class will perform basic sanity checks on the source URI and refuses to continue parsing. You can test for failure using the `operator bool`. These are:

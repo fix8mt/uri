@@ -22,11 +22,12 @@
 |[Benchmark](#benchmarks)| Benchmark info|
 |[Discussion](#6-discussion)| Discussion |
 
+> [!TIP]
+> Use the built-in [table of contents](https://github.blog/changelog/2021-04-13-table-of-contents-support-in-markdown-files/) to navigate this guide.
+
 ------------------------------------------------------------------------
 # 1. Introduction
 This is a lightweight URI parser implementation featuring zero-copy, minimal storage and high performance.
-> [!TIP]
-> Use the built-in [table of contents](https://github.blog/changelog/2021-04-13-table-of-contents-support-in-markdown-files/) to navigate this guide.
 
 ## Motivation
 - header-only
@@ -531,7 +532,8 @@ Use the template version if you know the component ahead of time.
 
 ```c++
 const uri u1{"https://www.hello.com:8080/"};
-std::cout << u1.get_component(uri::host) << '\n';
+uri::component what{uri::host};
+std::cout << u1.get_component(what) << '\n';
 std::cout << u1.get_component<uri::host>() << '\n';
 ```
 

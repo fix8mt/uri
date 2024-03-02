@@ -379,7 +379,7 @@ basic_uri u1{"https://www.example.com:8080/path1"};
 
 ***
 ### `uri_base`
-This class is inherited by `uri` and `uri_static`. You can inherit from class if you wish to specialise further.
+This class is aliased by `uri` and `uri_static`. You can inherit from class if you wish to specialise further.
 
 ***
 ### `uri`
@@ -572,7 +572,18 @@ Return the last `uri::error` error enum. If no error returns `error::no_error`. 
 constexpr const range_pair& operator[](component idx) const;
 ```
 Return a `const range_pair&` which is a `std::pair<uri_len_t, uri_len_t>&` to the specified component at the index given in the ranges table. This provides read-only
+access to the offset and length of the specified component and is used to create a `std::string_view`.
+> [!WARNING]
+> This is _not_ range checked.
+
+### `const at`
+```c++
+template<component what>
+constexpr const range_pair& at() const;
+```
+Return a `const range_pair&` which is a `std::pair<uri_len_t, uri_len_t>&` to the specified component at the component given as a template parameter. This provides read-only
 access to the offset and length of the specified component and is used to create a `std::string_view`. No copying, results point to uri source.
+Use this template version if you know the component ahead of time, otherwise use the subscript operator.
 > [!WARNING]
 > This is _not_ range checked.
 
@@ -808,6 +819,17 @@ constexpr range_pair& operator[](component idx);
 ```
 Return a `range_pair&` which is a `std::pair<uri_len_t, uri_len_t>&` to the specified component at the index given in the ranges table. This provides direct
 access to the offset and length of the specified component and is used to create a `std::string_view`.
+> [!WARNING]
+> This is _not_ range checked. Allows for modification of the `string_view` range. Use carefully.
+
+### `at`
+```c++
+template<component what>
+constexpr range_pair& at();
+```
+Return a `range_pair&` which is a `std::pair<uri_len_t, uri_len_t>&` to the specified component at the component given as a template parameter. This provides direct
+access to the offset and length of the specified component and is used to create a `std::string_view`.
+Use this template version if you know the component ahead of time, otherwise use the subscript operator.
 > [!WARNING]
 > This is _not_ range checked. Allows for modification of the `string_view` range. Use carefully.
 

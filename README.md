@@ -948,17 +948,20 @@ This is a simple CLI test app which allows you to run individual or all tests fr
 
 ```CSV
 $ ./uritest -h
-Usage: ./uritest [uri...] [-t:T:d:hlas]
- -a run all tests
+Usage: ./uritest [uri...] [-t:T:d:hlasxf:]
+ -a run all tests (default)
  -d [uri] parse uri from CLI, show debug output
  -h help
  -l list tests
  -s show sizes
+ -f [file] read and dump from file
  -T [num] static test to run
  -t [num] test to run
+ -x special tests
 $
 ```
 
+### adhoc tests
 You can run adhoc tests from the CLI as follows:
 <details><summary><i>output</i></summary>
 </p>
@@ -997,6 +1000,7 @@ $
 </p>
 </details>
 
+### read from file
 You can also read uris from a file and print out the parsed results. This example reads from the supplied `basiclist.hpp`:
 <details><summary><i>output</i></summary>
 </p>

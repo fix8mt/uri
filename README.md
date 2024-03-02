@@ -31,7 +31,7 @@ This is a lightweight URI parser implementation featuring zero-copy, minimal sto
 
 ## Motivation
 - header-only
-- zero-copy where possible (base class uses references only)
+- zero-copy where possible (base class uses views only)
 - no external dependencies
 - simplicity, lightweight
 - make use of C++20 features

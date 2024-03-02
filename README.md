@@ -830,6 +830,12 @@ constexpr range_pair& at();
 Return a `range_pair&` which is a `std::pair<uri_len_t, uri_len_t>&` to the specified component at the component given as a template parameter. This provides direct
 access to the offset and length of the specified component and is used to create a `std::string_view`.
 Use this template version if you know the component ahead of time, otherwise use the subscript operator.
+
+```c++
+uri u1{"https://www.hello.com:8080/"};
+auto& rp{u1.at<uri::host>()};
+std::cout << rp.first << ' ' << rp.second << '\n';
+```
 > [!WARNING]
 > This is _not_ range checked. Allows for modification of the `string_view` range. Use carefully.
 
@@ -990,6 +996,48 @@ $
 
 </p>
 </details>
+
+You can also read uris from a file and print out the parsed results. This example reads from the supplied `basiclist.hpp`:
+<details><summary><i>output</i></summary>
+</p>
+
+```CSV
+$ ./uritest -f ../examples/basiclist.hpp
+uri         https://telegraph.co.uk/index.html
+scheme      https
+authority   telegraph.co.uk
+host        telegraph.co.uk
+path        /index.html
+
+uri         https://bp.blogspot.com/index.html
+scheme      https
+authority   bp.blogspot.com
+host        bp.blogspot.com
+path        /index.html
+.
+.
+.
+uri         https://android.com/index.html
+scheme      https
+authority   android.com
+host        android.com
+path        /index.html
+
+uri         https://blog.me/index.html"
+scheme      https
+authority   blog.me
+host        blog.me
+path        /index.html"
+
+1000 uri(s) read from ../examples/basiclist.hpp
+$
+```
+
+</p>
+</details>
+
+
+
 
 ## `benchmarks`
 We use the [Criterion](https://github.com/p-ranav/criterion) benchmarking library. The benchmark app is built by default.

@@ -77,7 +77,7 @@ int main(int argc, char *argv[])
       "https://www.buyexample.com/over/there?name=ferret&time=any#afrag"sv,
    };
    for (const auto& pp : uris)
-      std::cout << basic_uri(pp).get_component(uri::host) << '\n';
+      std::cout << basic_uri(pp).get_component<uri::host>() << '\n';
    return 0;
 }
 ```
@@ -492,12 +492,18 @@ Destroy the `uri` or `basic_uri`. The `uri` and `uri_static` objects will releas
 ## iv. Accessors
 ### `test`
 ```c++
-constexpr bool test(uri::component what=countof) const;
+constexpr bool test(uri::component what) const;
 template<uri::component what>
 constexpr bool test() const;
 ```
 Return `true` if the specified component is present in the uri. Passing `countof` returns `true` if any component is present.
 Use the template version if you know the component ahead of time.
+
+### `has_any`
+```c++
+constexpr bool has_any() const;
+```
+Return `true` if any component is present.
 
 ### `has_[?]`
 ```c++
@@ -546,14 +552,6 @@ std::cout << u1.get_host() << '\n';
 constexpr uri_len_t get_present() const;
 ```
 Return the present bitset as `uri_len_t` which has bits set corresponding to the component's enum position.
-
-### `get`
-```c++
-constexpr std::string_view get(component what) const;
-```
-Return a `std::string_view` of the specified component.
-> [!WARNING]
-> This is _not_ range checked.
 
 ### `operator bool`
 ```c++
@@ -698,8 +696,11 @@ Same as `normalize_http_str` above but operates on the source string in the uri 
 ### `get_name`
 ```c++
 static constexpr std::string_view get_name(component what);
+template<component what>
+static constexpr std::string_view get_name();
 ```
 Return a `std::string_view` of the specified component name. Returns an empty `std::string_view` if not found or not a legal component.
+Use the template version if you know the component ahead of time.
 
 ### `get_uri`
 ```c++
@@ -775,7 +776,7 @@ Set the specified component bit as present in the uri. Passing `uri::countof` se
 
 ### `clear`
 ```c++
-constexpr void uri::clear(uri::component what=countof);
+constexpr void uri::clear(uri::component what);
 template<uri::component what>
 constexpr void clear();
 ```
@@ -996,7 +997,6 @@ See [URL Standard](https://url.spec.whatwg.org/) for complete validation rules.
 ## ii. Low level access
 There are two methods that provide unchecked direct access to the `range` table and `component`. You must ensure that you don't pass an invalid component
 index when using these. Making changes to the range object with `operator[]` can have serious consequences. Use carefully.
-1. `constexpr std::string_view get(component what) const;`
 1. `constexpr range_pair& operator[](component idx)`;
 
 ## iii. Sanity checking

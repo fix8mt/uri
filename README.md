@@ -997,7 +997,7 @@ Validation is out of scope for this implementation.  We decided against validati
 See [URL Standard](https://url.spec.whatwg.org/) for complete validation rules.
 
 ## ii. Low level access
-There are two methods that provide unchecked direct access to the `range` table and `component`. You must ensure that you don't pass an invalid component
+There are methods that provide direct access to the `range` table and `component` bitsets. You must ensure that you don't pass an invalid component
 index when using these. Making changes to the range object with `operator[]` can have serious consequences. Use carefully.
 1. `constexpr range_pair& operator[](component idx)`;
 1. `constexpr void set(component what);`

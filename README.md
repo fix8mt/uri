@@ -616,10 +616,10 @@ Complexity at most $`2 * log^2(last - first) + O(1)`$ comparisons.
 ### `decode_hex`
 ```c++
 static constexpr std::string decode_hex(std::string_view src, bool unreserved=false);
-static constexpr std::string& decode_hex(std::string& result, bool unreserved=false); // inplace decode
+static constexpr std::string& decode_hex(std::string& result, bool unreserved=false); // in place decode
 ```
 Decode any hex values present in the supplied string. Hex values are only recognised if they are in the form `%XX` where X is a hex digit (octet) `[0-9a-fA-F]`.
-By default all percent-encoded hex values are decoded. Return in a new string or inplace. If unreserved is `true` only unreserved characters will be decoded (see `is_unreserved()`).
+By default all percent-encoded hex values are decoded. Return in a new string or in place. If unreserved is `true` only unreserved characters will be decoded (see `is_unreserved()`).
 
 ### `encode_hex`
 ```c++

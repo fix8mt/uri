@@ -180,7 +180,7 @@ $
 </p>
 </details>
 
-## iii. Create a static uri
+## iii. Using a `uri_static`
 Create a static URI with a maximum storage of 256 bytes, from the supplied string. Print out the result and max storage.
 
 <details><summary><i>source</i></summary>
@@ -264,7 +264,7 @@ $
 </p>
 </details>
 
-## v. Edit a URI
+## v. Using edit
 Create a URI and then edit it.
 
 <details><summary><i>source</i></summary>
@@ -346,7 +346,6 @@ in your application. Everything in this class is within the namespace `FIX8`, so
 ```c++
 using namespace FIX8;
 ```
-
 This is C++20, so you can also add in your local code:
 ```c++
 using enum uri::component;

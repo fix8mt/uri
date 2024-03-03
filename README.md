@@ -196,7 +196,7 @@ int main(int argc, char *argv[])
 {
    uri_static<256> u1{"mailto:John.Smith@example.com"};
    std::cout << u1 << '\n';
-   std::cout << "max storage: " << uri_static<256>::max_storage() << '\n';
+   std::cout << "max storage " << u1.max_storage() << '\n';
    return 0;
 }
 ```
@@ -212,7 +212,7 @@ $ ./example3
 uri         mailto:John.Smith@example.com
 scheme      mailto
 path        John.Smith@example.com
-max storage: 256
+max storage 256
 $
 ```
 
@@ -773,7 +773,13 @@ Equivalence operators for `basic_uri`, `uri` and `uri_static`. These are impleme
 1. `basic_uri` - return `true` if the source uri strings are identical
 1. `uri`, `uri_static` - return `true` if the normalized source uri strings are identical
 
-Since this is C++20, the inequivalence operators `!=` are automatically supplied by your compiler.
+### `operator%`
+```c++
+friend constexpr bool operator%(const uri& lhs, const uri& rhs);
+template<size_t sz>
+friend static constexpr bool uri_static<sz>::operator%(const uri_static& lhs, const uri_static& rhs);
+```
+Http equivalence operators for `uri` and `uri_static`. Return `true` if the `normalized_http` uri strings are identical.
 
 ### `get_buffer`
 ```c++

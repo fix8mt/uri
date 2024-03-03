@@ -611,7 +611,7 @@ static constexpr std::string_view find_query (std::string_view what, const query
 ```
 Find the specified query key and return its value from the given `query_result`. `query_result` _must be sorted_ by key, as returned when
 passing `true` to `decode_query`. If not sorted, use `sort_query` first. If key not found return empty `std::string_view`. No copying, results point to uri source.
-Complexity at most _2 * log<sub>2</sub>(last - first) + O(1)_ comparisons.
+Complexity at most $\2 * log<sub>2</sub>(last - first) + O(1)& comparisons.
 
 ### `decode_hex`
 ```c++
@@ -782,7 +782,7 @@ friend constexpr bool operator%(const uri& lhs, const uri& rhs);
 template<size_t sz>
 friend static constexpr bool uri_static<sz>::operator%(const uri_static& lhs, const uri_static& rhs);
 ```
-Http equivalence operators for `uri` and `uri_static`. Return `true` if the `normalized_http` uri strings are identical.
+Equivalence operators for http protocol for `uri` and `uri_static`. Return `true` if the `normalized_http` uri strings are identical.
 
 ### `get_buffer`
 ```c++

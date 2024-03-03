@@ -949,7 +949,7 @@ This is a simple CLI test app which allows you to run individual or all tests fr
 ```CSV
 $ ./uritest -h
 Usage: ./uritest [uri...] [-t:T:d:hlasxf:]
- -a run all tests (default)
+ -a parse all examples (default)
  -d [uri] parse uri from CLI, show debug output
  -h help
  -l list tests
@@ -961,8 +961,8 @@ Usage: ./uritest [uri...] [-t:T:d:hlasxf:]
 $
 ```
 
-### adhoc tests
-You can run adhoc tests from the CLI as follows:
+### adhoc test
+You can an run adhoc test from the CLI as follows:
 <details><summary><i>output</i></summary>
 </p>
 

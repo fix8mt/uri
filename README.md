@@ -723,7 +723,7 @@ int main(void)
       u1.normalize_http();
       assert(u1.get_uri() == uris[0]);
    }
-	return 0;
+   return 0;
 }
 ```
 

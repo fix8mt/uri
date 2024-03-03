@@ -37,7 +37,6 @@ This is a lightweight URI parser implementation featuring zero-copy, minimal sto
 - make use of C++20 features
 - entirely `constexpr`
 - high performance
-- non-validating
 
 ## Features
 - single _header-only_
@@ -100,7 +99,7 @@ $
 </p>
 </details>
 
-## ii. Parse and hold a URI
+## ii. Using a `uri`
 This example parses a URI string and prints out all the contained elements. Then individual components are queried and printed if present.
 
 <details><summary><i>source</i></summary>
@@ -628,7 +627,6 @@ static constexpr std::string encode_hex(std::string_view src);
 Encode any hex values present in the supplied string. Hex values are only recognised if they are in the form `%XX` where X is a hex digit (octet) `[0-9a-fA-F]`.
 Only chars that are reserved (see `is_reserved()`), whitespace or not printable are encoded.  Return in a new encoded string.
 
-
 ### `is_unreserved`
 ```c++
 static constexpr bool is_unreserved(char c);
@@ -1082,9 +1080,6 @@ $
 
 </p>
 </details>
-
-
-
 
 ## `benchmarks`
 We use the [Criterion](https://github.com/p-ranav/criterion) benchmarking library. The benchmark app is built by default.

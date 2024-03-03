@@ -706,6 +706,22 @@ constexpr std::string normalize_http();
 ```
 Same as `normalize_http_str` above but operates on the source string in the uri object. Returns the _original_ string and updates the current object with the new normalized string.
 
+```c++
+   static constexpr std::array uris
+   {
+      "https://www.test.com/"sv, // all should normalize to this one
+      "https://www.test.com"sv,
+      "https://www.test.com:/"sv,
+      "https://www.test.com:443/"sv,
+   };
+   for (const auto& pp : uris)
+   {
+      uri u1{pp};
+      u1.normalize_http();
+      assert(u1.get_uri() == uris[0]);
+   }
+```
+
 ### `get_name`
 ```c++
 static constexpr std::string_view get_name(component what);

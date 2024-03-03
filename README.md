@@ -886,7 +886,7 @@ Parse the source string into components. Return the count of components found. W
 ```c++
 static constexpr void sort_query(query_result& query);
 ```
-Sort the supplied query alphanumerically based on the tag in the query value pair. Complexity at most _2 * log<sub>2</sub>(last - first) + O(1)_ comparisons.
+Sort the supplied query alphanumerically based on the tag in the query value pair. Complexity at most $`2 * log^2(last - first) + O(1)`$ comparisons.
 
 ## vi. Generation and editing
 ### `factory`

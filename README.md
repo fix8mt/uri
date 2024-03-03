@@ -705,11 +705,12 @@ Same as `normalize_str` above but operates on the source string in the uri objec
 constexpr std::string normalize_http();
 ```
 Same as `normalize_http_str` above but operates on the source string in the uri object. Returns the _original_ string and updates the current object with the new normalized string.
-The following example demonstrates the use and results of `normalize_http`:
+The following example demonstrates the use and results of `normalize_http` (no exception thrown):
 
 ```c++
 #include <cassert>
 #include <iostream>
+#include <exception>
 #include <array>
 #include <fix8/uri.hpp>
 using namespace FIX8;
@@ -726,12 +727,17 @@ int main(void)
    };
    try
    {
-      for (const auto& pp : uris)
+      for (const auto pp : uris)
       {
          uri u1{pp};
          u1.normalize_http();
-         assert(u1.get_uri() == uris[0]);
+         if (u1.get_uri() != uris[0]);
+            throw std::logic_error("http normalization failure");
       }
+   }
+   catch(const std::exception& e)
+   {
+      std::cerr << e.what() << '\n';
    }
    return 0;
 }

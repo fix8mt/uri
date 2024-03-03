@@ -705,8 +705,15 @@ Same as `normalize_str` above but operates on the source string in the uri objec
 constexpr std::string normalize_http();
 ```
 Same as `normalize_http_str` above but operates on the source string in the uri object. Returns the _original_ string and updates the current object with the new normalized string.
+The following example demonstrates the use and results of `normalize_http`:
 
 ```c++
+#include <cassert>
+#include <iostream>
+#include <array>
+#include <fix8/uri.hpp>
+using namespace FIX8;
+
 int main(void)
 {
    using namespace std::literals;

@@ -724,11 +724,14 @@ int main(void)
       "https://www.test.com:/"sv,
       "https://www.test.com:443/"sv,
    };
-   for (const auto& pp : uris)
+   try
    {
-      uri u1{pp};
-      u1.normalize_http();
-      assert(u1.get_uri() == uris[0]);
+      for (const auto& pp : uris)
+      {
+         uri u1{pp};
+         u1.normalize_http();
+         assert(u1.get_uri() == uris[0]);
+      }
    }
    return 0;
 }

@@ -481,9 +481,9 @@ All of `uri` is within the namespace **`FIX8`**.
 
 ### dtor
 ```c++
-~basic_uri();
-~uri();
-~uri_static();
+constexpr ~basic_uri();
+constexpr ~uri();
+constexpr ~uri_static();
 ```
 
 Destroy the `uri` or `basic_uri`. The `uri` and `uri_static` objects will release the stored string.

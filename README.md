@@ -320,7 +320,7 @@ This implementation is header only. Apart from standard C++20 includes there are
 [Catch2](https://github.com/catchorg/Catch2.git) is used for the built-in unit tests. [Criterion](https://github.com/p-ranav/criterion) is used for benchmarking.
 
 ## i. Obtaining the source, building the examples
-To clone and default build all the examples, including the unit tests.
+To clone and default build the test app, unit tests and the benchmark:
 ```bash
 git clone https://github.com/fix8mt/uri.git
 cd uri
@@ -330,6 +330,11 @@ cmake ..
 make -j4
 make test (or ctest)
 ```
+To disable building the benchmarks, pass the following switch to cmake:
+```bash
+# cmake -DBUILD_BENCHMARKS=false ..
+```
+
 ## ii. Using in your application with cmake
 In `CMakeLists.txt` set your include path to:
 ```cmake

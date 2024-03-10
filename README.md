@@ -600,7 +600,7 @@ Use this template version if you know the component ahead of time, otherwise use
 ```c++
 constexpr int in_range(std::string_view::size_type pos) const;
 ```
-Return a bitset of all components that the given position in a uri lie within. You can use `bitsum` to test results. See the `in range` test case for examples.
+Return a bitset of all components that the given position in a uri lie within. You can use `bitsum` to test results. See the "in range" test case for examples.
 
 ### `decode_query`
 ```c++

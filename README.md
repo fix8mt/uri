@@ -499,9 +499,15 @@ Destroy the `uri` or `basic_uri`. The `uri` and `uri_static` objects will releas
 constexpr bool test(uri::component what) const;
 template<uri::component what>
 constexpr bool test() const;
+template<component... comp>
+constexpr int test_any() const;
+template<component... comp>
+constexpr int test_all() const;
 ```
 Return `true` if the specified component is present in the uri. Passing `countof` returns `true` if any component is present.
 Use the template version if you know the component ahead of time.
+`test_any` can be used to test for multiple components (any or all) in a single statement. As above, use the template version if you know the component ahead of time.
+See the test case "test any/all range" for example use.
 
 ### `has_any`
 ```c++
@@ -589,6 +595,12 @@ access to the offset and length of the specified component and is used to create
 Use this template version if you know the component ahead of time, otherwise use the subscript operator.
 > [!WARNING]
 > This is _not_ range checked.
+
+### `in_range`
+```c++
+constexpr int in_range(std::string_view::size_type pos) const;
+```
+Return a bitset of all components that the given position in a uri lie within. You can use `bitsum` to test results. See the `in range` test case for examples.
 
 ### `decode_query`
 ```c++
@@ -829,16 +841,24 @@ Returns the maximum storage available for all uri objects except `basic_uri`. Fo
 constexpr void set(uri::component what);
 template<uri::component what>
 constexpr void set();
+template<component... comp>
+constexpr void set_all();
 ```
 Set the specified component bit as present in the uri. Passing `uri::countof` sets all bits. Use the template version if you know the bit ahead of time. Use carefully.
+`set_all` can be used to set multiple components in a single statement. As above, use the template version if you know the component ahead of time.
+See the test case "clear/set all range" for example use.
 
 ### `clear`
 ```c++
 constexpr void uri::clear(uri::component what);
 template<uri::component what>
 constexpr void clear();
+template<component... comp>
+constexpr void clear_all();
 ```
 Clear the specified component bit in the uri. Passing `uri::countof` clears all bits. Use the template version if you know the bit ahead of time. Use carefully.
+`clear_all` can be used to clear multiple components in a single statement. As above, use the template version if you know the component ahead of time.
+See the test case "clear/set all range" for example use.
 
 ### `assign`
 ```c++

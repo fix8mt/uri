@@ -51,7 +51,7 @@ BENCHMARK(basic_uri_1000)
 	for (const auto& pp : uris)
 	{
 		basic_uri a1{pp};
-		auto hs { a1.get_component(uri::host) };
+		auto hs { a1.get_component<uri::host>() };
 	}
 
 	//	TEARDOWN_BENCHMARK()
@@ -64,7 +64,7 @@ BENCHMARK(uri_1000)
 	for (const auto& pp : uris)
 	{
 		uri a1{pp};
-		auto hs { a1.get_component(uri::host) };
+		auto hs { a1.get_component<uri::host>() };
 	}
 
 	//TEARDOWN_BENCHMARK()
@@ -76,8 +76,8 @@ BENCHMARK(uri_static_1000)
 
 	for (const auto& pp : uris)
 	{
-		uri_static a1{pp};
-		auto hs { a1.get_component(uri::host) };
+		uri_static<> a1{pp};
+		auto hs { a1.get_component<uri::host>() };
 	}
 
 	//TEARDOWN_BENCHMARK()

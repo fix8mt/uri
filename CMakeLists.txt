@@ -46,16 +46,22 @@ project (uri
 	DESCRIPTION "Lightweight header-only C++20 URI parser"
 	VERSION 1.3.1
 )
-
 include(FetchContent)
-message(STATUS "Downloading Criterion...")
-FetchContent_Declare(Criterion
-	GIT_REPOSITORY https://github.com/p-ranav/criterion.git
-	GIT_SHALLOW	ON
-)
+
+# to disable building benchmarking tests:
+# cmake -DBUILD_BENCHMARKS=false ..
+option(BUILD_BENCHMARKS "enable building benchmarking tests" true)
+message("-- Build benchmarking tests: ${BUILD_BENCHMARKS}")
+if(BUILD_BENCHMARKS)
+	message(STATUS "Downloading Criterion...")
+	FetchContent_Declare(Criterion
+		GIT_REPOSITORY https://github.com/p-ranav/criterion.git
+		GIT_SHALLOW	ON
+	)
+	FetchContent_MakeAvailable(Criterion)
+endif()
 
 message(STATUS "Downloading Catch2...")
-FetchContent_MakeAvailable(Criterion)
 FetchContent_Declare(Catch2
 	GIT_REPOSITORY https://github.com/catchorg/Catch2.git
 	GIT_SHALLOW	ON
@@ -64,12 +70,19 @@ FetchContent_Declare(Catch2
 FetchContent_MakeAvailable(Catch2)
 list(APPEND CMAKE_MODULE_PATH ${catch2_SOURCE_DIR}/extras)
 
-foreach(x IN ITEMS uritest.cpp unittests.cpp benchmarks.cpp)
+set(files uritest.cpp unittests.cpp)
+if(BUILD_BENCHMARKS)
+	list(APPEND files benchmarks.cpp)
+endif()
+foreach(x IN LISTS files)
 	cmake_path(GET x STEM LAST_ONLY target)
 	add_executable(${target} examples/${x})
 	set_target_properties(${target} PROPERTIES CXX_STANDARD 20 CXX_STANDARD_REQUIRED true)
 	target_include_directories(${target} PRIVATE include examples)
-   target_link_libraries(${target} PRIVATE Catch2::Catch2WithMain Criterion)
+	target_link_libraries(${target} PRIVATE Catch2::Catch2WithMain)
+	if(BUILD_BENCHMARKS)
+		target_link_libraries(${target} PRIVATE Criterion)
+	endif()
 	cmake_path(GET x FILENAME fname)
 	get_target_property(cppstd ${target} CXX_STANDARD)
 	message("-- adding ${fname} cxx std: C++${cppstd}")

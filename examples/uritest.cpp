@@ -52,7 +52,7 @@ using namespace std::literals::string_view_literals;
 int main(int argc, char *argv[])
 {
    static constexpr const char *optstr{"t:T:d:hlasxf:"};
-	static constexpr const auto long_options
+	static constexpr auto long_options
 	{
 		std::to_array<option>
 		({
@@ -68,9 +68,21 @@ int main(int argc, char *argv[])
 		})
 	};
 
+	auto runall([]
+	{
+		for (int ii{}; const auto& [src,vec] : tests)
+			std::cout << ii++ << '\n' << uri{src} << '\n';
+		std::cout << tests.size() << " test cases\n";
+	});
+
 	int val;
 	try
 	{
+		if (argc <= 1)
+		{
+			runall();
+			return 0;
+		}
 		for (; (val = getopt_long (argc, argv, optstr, long_options.data(), 0)) != -1; )
 		{
 			switch (val)
@@ -80,14 +92,15 @@ int main(int argc, char *argv[])
 				[[fallthrough]];
 			case 'h':
 				std::cout << "Usage: " << argv[0] << " [uri...] [-" << optstr << "]" << R"(
- -a run all tests
+ -a parse all examples (default)
  -d [uri] parse uri from CLI, show debug output
  -h help
  -l list tests
  -s show sizes
  -f [file] read and dump from file
  -T [num] static test to run
- -t [num] test to run)" << '\n';
+ -t [num] test to run
+ -x special tests)" << '\n';
 				return 1;
 			case 'x':
 				{
@@ -123,7 +136,7 @@ int main(int argc, char *argv[])
 					std::cout << "total object size: " << sizeof(u3) << '\n';
 					*/
 					/*
-					static constexpr const std::array uris
+					static constexpr std::array uris
 					{
 						"https://www.blah.com:3000/test",
 						"https://dakka@www.staylate.net:3000/",
@@ -147,7 +160,7 @@ int main(int argc, char *argv[])
 					*/
 					/*
 					using namespace std::literals;
-					static constexpr const std::array uris
+					static constexpr std::array uris
 					{
 						"https://www.blah.com:3000/test"sv,
 						"https://dakka@www.staylate.net:3000/"sv,
@@ -158,11 +171,12 @@ int main(int argc, char *argv[])
 						std::cout << typeid(pp).name() << '\n';
 						std::cout << basic_uri(pp).get_component(uri::host) << '\n';
 					}
-					static constexpr const auto strv { "HTTPS://WWW.HELLO.COM/path/%62%6c%6f%67/%75%72%6c%73"sv };
+					static constexpr auto strv { "HTTPS://WWW.HELLO.COM/path/%62%6c%6f%67/%75%72%6c%73"sv };
 					auto result { uri::normalize(strv) };
 					std::cout << strv << '\n' << result << '\n';
 					*/
-					static constexpr const std::array uris
+					/*
+					static constexpr std::array uris
 					{
 						"HTTPS://WWW.HELLO.COM/path/%62%6c%6f%67/%75%72%6c%73"sv,
 						"HTTPS://WWW.HELLO.COM/path/../this/./blah/blather/../end"sv,
@@ -177,9 +191,10 @@ int main(int argc, char *argv[])
 					};
 					for (int ii{}; const auto& pp : uris)
 					{
-						auto result { uri::normalize_http(pp) };
+						auto result { uri::normalize_http_str(pp) };
 						std::cout << ii++ << " before: " << pp << '\n' << "after:  " << result << '\n' << '\n';
 					}
+					*/
 					/*
 					std::cout << basic_uri::encode_hex("The rain in Spain") << '\n';
 					std::cout << basic_uri::encode_hex("/path/blog/urls"sv) << '\n';
@@ -188,6 +203,8 @@ int main(int argc, char *argv[])
 						{host, "www.blah.com"}, {port, "3000"}, {path, "/foo/" + basic_uri::encode_hex("this path has embedded spaces") + "/test"}}) };
 					std::cout << u4 << '\n';
 					*/
+					uri_static<64> u3{tests[35].first};
+					std::cout << u3 << '\n';
 				}
 				break;
 			case 'l':
@@ -227,9 +244,21 @@ int main(int argc, char *argv[])
 				if (std::ifstream ifs(optarg); ifs)
 				{
 					int cnt{};
-					for (char buff[4096]; ifs.good(); ++cnt)
+					for (char buff[4096]; ifs.good();)
+					{
 						if (ifs.getline(buff, sizeof(buff)); !ifs.fail())
-							std::cout << basic_uri(buff) << '\n';
+						{
+							std::string_view sv{buff};
+							if (sv.starts_with("//"))
+								continue;
+							if (sv.front() == '"')
+								sv.remove_prefix(1);
+							if (sv.ends_with(R"(",)"))
+								sv.remove_suffix(2);
+							std::cout << basic_uri(sv) << '\n';
+							++cnt;
+						}
+					}
 					std::cout << cnt << " uri(s) read from " << optarg << '\n';
 				}
 				break;
@@ -237,20 +266,15 @@ int main(int argc, char *argv[])
 				std::cout << "uri: " << sizeof(uri) << "\nbasic_uri: " << sizeof(basic_uri) << '\n';
 				std::cout << "uri_static<1024>: " << sizeof(uri_static<1024>) << '\n';
 				break;
-all:
 			case 'a':
-				for (int ii{}; const auto& [src,vec] : tests)
-					std::cout << ii++ << '\n' << uri{src} << '\n';
-				std::cout << tests.size() << " test cases\n";
-				return 0;
+				runall();
+				break;
 			default:
 				break;
 			}
 		}
 		while(optind < argc)
 			std::cout << uri{argv[optind++]} << '\n';
-		if (argc <= 1)
-			goto all;
 	}
 	catch (const std::exception& e)
 	{

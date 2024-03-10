@@ -507,7 +507,7 @@ constexpr int test_all() const;
 Return `true` if the specified component is present in the uri. Passing `countof` returns `true` if any component is present.
 Use the template version if you know the component ahead of time.
 `test_any` can be used to test for multiple components (any or all) in a single statement. As above, use the template version if you know the component ahead of time.
-See the test case "test any/all range" for example use.
+See the [test case](https://github.com/fix8mt/uri/blob/master/examples/unittests.cpp) "test any/all range" for example use.
 
 ### `has_any`
 ```c++
@@ -600,7 +600,8 @@ Use this template version if you know the component ahead of time, otherwise use
 ```c++
 constexpr int in_range(std::string_view::size_type pos) const;
 ```
-Return a bitset of all components that the given position in a uri lie within. You can use `bitsum` to test results. See the "in range" test case for examples.
+Return a bitset of all components that the given position in a uri lie within. You can use `bitsum` to test results. See the "in range"
+[test case](https://github.com/fix8mt/uri/blob/master/examples/unittests.cpp) for example use.
 
 ### `decode_query`
 ```c++
@@ -846,7 +847,7 @@ constexpr void set_all();
 ```
 Set the specified component bit as present in the uri. Passing `uri::countof` sets all bits. Use the template version if you know the bit ahead of time. Use carefully.
 `set_all` can be used to set multiple components in a single statement. As above, use the template version if you know the component ahead of time.
-See the test case "clear/set all range" for example use.
+See the [test case](https://github.com/fix8mt/uri/blob/master/examples/unittests.cpp) "clear/set all range" for example use.
 
 ### `clear`
 ```c++
@@ -858,7 +859,7 @@ constexpr void clear_all();
 ```
 Clear the specified component bit in the uri. Passing `uri::countof` clears all bits. Use the template version if you know the bit ahead of time. Use carefully.
 `clear_all` can be used to clear multiple components in a single statement. As above, use the template version if you know the component ahead of time.
-See the test case "clear/set all range" for example use.
+See the [test case](https://github.com/fix8mt/uri/blob/master/examples/unittests.cpp) "clear/set all range" for example use.
 
 ### `assign`
 ```c++
@@ -948,7 +949,8 @@ Components not specified are left unchanged. The `initializer_list` contains a 1
 
 # 5. Testing
 ## Test cases
-The header file `uriexamples.hpp` contains a data structure holding test cases used by the [Catch2](https://github.com/catchorg/Catch2.git) unit test app `unittests` and by the CLI test app `uritest`.
+The header file `uriexamples.hpp` contains a data structure holding the [test cases](https://github.com/fix8mt/uri/blob/master/examples/unittests.cpp)
+used by the [Catch2](https://github.com/catchorg/Catch2.git) unit test app `unittests` and by the CLI test app `uritest`.
 You can add your own test cases to `uriexamples.hpp` - the structure is easy enough to follow.
 
 <details><summary><i>sample</i></summary>

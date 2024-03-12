@@ -219,7 +219,7 @@ $
 </details>
 
 ## iv. Use factory or format
-Create a URI from an initializer list. Note we chose to percent-encode a part of the path. Print out the result.
+Create a URI from an initializer list or from using `std::format`. Note we chose to percent-encode a part of the path. Print out the results.
 Both the factory and format versions produce the same uri.
 
 <details><summary><i>factory source</i></summary>

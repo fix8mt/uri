@@ -974,7 +974,7 @@ Create a `uri` from the supplied components. The `initializer_list` contains a 1
 ### `format`
 ```c++
 template<typename... Args>
-static constexpr auto format(std::format_string<Args...> fmt, Args&&... args);
+static constexpr uri format(std::format_string<Args...> fmt, Args&&... args);
 ```
 Create a `uri` from the supplied format string and arguments. See `std::format` for more on how to use this function. A uri will be created from the resulting string.
 See above for example usage.

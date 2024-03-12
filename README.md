@@ -219,10 +219,10 @@ $
 </details>
 
 ## iv. Use factory or format
-Create a URI from an initializer list or from using `std::format`. Note we chose to percent-encode a part of the path. Print out the results.
+Create a URI from an initializer list or using format specification. Note we chose to percent-encode a part of the path. Print out the results.
 Both the factory and format versions produce the same uri.
 
-<details><summary><i>factory source</i></summary>
+<details><summary><i>source (factory)</i></summary>
 <p>
 
 ```c++
@@ -243,7 +243,7 @@ int main(int argc, char *argv[])
 </p>
 </details>
 
-<details><summary><i>factory output</i></summary>
+<details><summary><i>output (factory)</i></summary>
 </p>
 
 ```CSV
@@ -265,14 +265,13 @@ $
 </p>
 </details>
 
-<details><summary><i>format source</i></summary>
+<details><summary><i>source (format)</i></summary>
 <p>
 
 ```c++
 #include <iostream>
 #include <fix8/uri.hpp>
 using namespace FIX8;
-using enum uri::component;
 
 int main(int argc, char *argv[])
 {
@@ -286,7 +285,7 @@ int main(int argc, char *argv[])
 </p>
 </details>
 
-<details><summary><i>format output</i></summary>
+<details><summary><i>output (format)</i></summary>
 </p>
 
 ```CSV
@@ -963,14 +962,22 @@ Sort the supplied query alphanumerically based on the tag in the query value pai
 
 ## vi. Generation and editing
 ### `factory`
-```c++
 static constexpr uri uri::factory(std::initializer_list<comp_pair> from);
 template<size_t sz>
 static constexpr uri_static<sz> uri_static<sz>::factory(std::initializer_list<comp_pair> from);
+```c++
 ```
 Create a `uri` from the supplied components. The `initializer_list` contains a 1..n `comp_pair` objects. The following constraints apply:
 1. If `authority` is supplied and any of the following components are present `host`, `password`, `port`, `user` or `userinfo` then `authority` is ignored;
 1. If `userinfo` is supplied and any of the following components are present `user` or `password` then `userinfo` is ignored;
+
+### `format`
+```c++
+template<typename... Args>
+static constexpr auto format(std::format_string<Args...> fmt, Args&&... args);
+```
+Create a `uri` from the supplied format string and arguments. See `std::format` for more on how to use this function. A uri will be created from the resulting string.
+See above for example usage.
 
 ### `edit`
 ```c++

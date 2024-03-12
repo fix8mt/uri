@@ -962,10 +962,10 @@ Sort the supplied query alphanumerically based on the tag in the query value pai
 
 ## vi. Generation and editing
 ### `factory`
+```c++
 static constexpr uri uri::factory(std::initializer_list<comp_pair> from);
 template<size_t sz>
 static constexpr uri_static<sz> uri_static<sz>::factory(std::initializer_list<comp_pair> from);
-```c++
 ```
 Create a `uri` from the supplied components. The `initializer_list` contains a 1..n `comp_pair` objects. The following constraints apply:
 1. If `authority` is supplied and any of the following components are present `host`, `password`, `port`, `user` or `userinfo` then `authority` is ignored;

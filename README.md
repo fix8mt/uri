@@ -218,10 +218,11 @@ $
 </p>
 </details>
 
-## iv. Use the factory
+## iv. Use factory or format
 Create a URI from an initializer list. Note we chose to percent-encode a part of the path. Print out the result.
+Both the factory and format versions produce the same uri.
 
-<details><summary><i>source</i></summary>
+<details><summary><i>factory source</i></summary>
 <p>
 
 ```c++
@@ -234,6 +235,49 @@ int main(int argc, char *argv[])
 {
    const auto u1 { uri::factory({{scheme, "https"}, {user, "dakka"}, {host, "www.blah.com"}, {port, "3000"},
       {path, "/foo/" + basic_uri::encode_hex("this path has embedded spaces") + "/test"}}) };
+   std::cout << u1 << '\n';
+   return 0;
+}
+```
+
+</p>
+</details>
+
+<details><summary><i>output</i></summary>
+</p>
+
+```CSV
+$ ./example4
+uri         https://dakka@www.blah.com:3000/foo/this%20path%20has%20embedded%20spaces/test
+scheme      https
+authority   dakka@www.blah.com:3000
+userinfo    dakka
+user        dakka
+host        www.blah.com
+port        3000
+path        /foo/this%20path%20has%20embedded%20spaces/test
+   foo
+   this%20path%20has%20embedded%20spaces
+   test
+$
+```
+
+</p>
+</details>
+
+<details><summary><i>format source</i></summary>
+<p>
+
+```c++
+#include <iostream>
+#include <fix8/uri.hpp>
+using namespace FIX8;
+using enum uri::component;
+
+int main(int argc, char *argv[])
+{
+	const auto u1 { uri::format("{}:{}//{}:{}/{}/{}/{}", "https", "dakka", "www.blah.com", "3000", "foo",
+		basic_uri::encode_hex("this path has embedded spaces"), "test") };
    std::cout << u1 << '\n';
    return 0;
 }

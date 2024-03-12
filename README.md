@@ -243,7 +243,7 @@ int main(int argc, char *argv[])
 </p>
 </details>
 
-<details><summary><i>output</i></summary>
+<details><summary><i>factory output</i></summary>
 </p>
 
 ```CSV
@@ -276,8 +276,8 @@ using enum uri::component;
 
 int main(int argc, char *argv[])
 {
-	const auto u1 { uri::format("{}:{}//{}:{}/{}/{}/{}", "https", "dakka", "www.blah.com", "3000", "foo",
-		basic_uri::encode_hex("this path has embedded spaces"), "test") };
+   const auto u1 { uri::format("{}://{}@{}:{}/{}/{}/{}", "https", "dakka", "www.blah.com", "3000", "foo",
+      basic_uri::encode_hex("this path has embedded spaces"), "test") };
    std::cout << u1 << '\n';
    return 0;
 }
@@ -286,7 +286,7 @@ int main(int argc, char *argv[])
 </p>
 </details>
 
-<details><summary><i>output</i></summary>
+<details><summary><i>format output</i></summary>
 </p>
 
 ```CSV

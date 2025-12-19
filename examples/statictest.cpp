@@ -27,47 +27,34 @@
 // OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE
 // SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 //-----------------------------------------------------------------------------------------
+#include <iostream>
 #include <fix8/uri.hpp>
-#include <criterion/criterion.hpp>
+
 //-----------------------------------------------------------------------------------------
 using namespace FIX8;
 
 //-----------------------------------------------------------------------------------------
-constinit const std::array uris { std::to_array<std::string_view>
-({
-#include <basiclist.hpp>
-})};
-
-//-----------------------------------------------------------------------------------------
-BENCHMARK(uri_view_1000)
+int main(int argc, char *argv[])
 {
-	// SETUP_BENCHMARK()
+	constexpr auto tarr
+	{
+		std::to_array<uri_view>
+		({
+#include <biglist.hpp>
+		})
+	};
 
-	for (const auto& pp : uris)
-		[[maybe_unused]] uri_view a1{pp};
+	int vcnt{};
+	for (int ii{}; const auto& pp : tarr)
+	{
+		++ii;
+		if (pp)
+			++vcnt;
+		else
+			std::cout << pp.get_error_string() << "(line " << ii << ") \"" << pp << '\"' << '\n';
+	}
+	std::cout << vcnt << '/' << tarr.size() << " valid urls parsed\n";
 
-	//	TEARDOWN_BENCHMARK()
+	return 0;
 }
-
-BENCHMARK(uri_1000)
-{
-	//SETUP_BENCHMARK()
-
-	for (const auto& pp : uris)
-		[[maybe_unused]] uri a1{pp};
-
-	//TEARDOWN_BENCHMARK()
-}
-
-BENCHMARK(uri_static_1000)
-{
-	//SETUP_BENCHMARK()
-
-	for (const auto& pp : uris)
-		[[maybe_unused]] uri_static a1{pp};
-
-	//TEARDOWN_BENCHMARK()
-}
-
-CRITERION_BENCHMARK_MAIN()
 

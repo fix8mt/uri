@@ -363,6 +363,10 @@ public:
 		return result;
 	}
 
+#if defined(__GNUC__) && __GNUC__ < 14
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wrange-loop-construct"
+#endif // def __GNUC__
 	constexpr int in_range(std::string_view::size_type pos) const noexcept
 	{
 		int result{};
@@ -374,6 +378,9 @@ public:
 		}
 		return result;
 	}
+#if defined(__GNUC__) && __GNUC__ < 14
+#pragma GCC diagnostic pop
+#endif // def __GNUC__
 
 	constexpr segments decode_segments(bool filter=true) const noexcept
 	{
@@ -591,6 +598,10 @@ public:
 		return make_uri(ibase, std::move(ilist));
 	}
 
+#if defined(__GNUC__) && __GNUC__ < 14
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wrange-loop-construct"
+#endif // def __GNUC__
 	friend std::ostream& operator<<(std::ostream& os, const basic_uri& what)
 	{
 		if (!what)
@@ -614,6 +625,9 @@ public:
 		}
 		return os;
 	}
+#if defined(__GNUC__) && __GNUC__ < 14
+#pragma GCC diagnostic pop
+#endif // def __GNUC__
 
 	friend constexpr auto operator==(const basic_uri& lhs, const basic_uri& rhs) noexcept
 		{ return lhs._source == rhs._source; }

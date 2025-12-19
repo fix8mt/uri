@@ -635,9 +635,9 @@ public:
 private:
 	static constexpr bool is_reserved(char c) noexcept
 		{ return _reserved.find_first_of(c) != std::string_view::npos; }
-	static constexpr bool is_unreserved(char c) noexcept
+	static bool is_unreserved(char c) noexcept
 		{ return std::isalnum(c) || c == '-' || c == '.' || c == '_' || c == '~'; }
-	static constexpr bool is_unreserved_ascii(std::string_view src) noexcept // is %XX unreserved?
+	static bool is_unreserved_ascii(std::string_view src) noexcept // is %XX unreserved?
 		{ return is_unreserved(cvt_hex_octet(src[1]) << 4 | cvt_hex_octet(src[2])); }
 	static constexpr bool query_comp(const value_pair& pl, const value_pair& pr) noexcept { return pl.first < pr.first; }
 	static constexpr char cvt_hex_octet(char c) noexcept { return (c & 0xF) + (c >> 6) * 9; }

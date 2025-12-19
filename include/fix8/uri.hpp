@@ -473,9 +473,9 @@ public:
 		const auto tolo([](auto c) noexcept ->auto { return std::tolower(c); });
 		auto sch { bu.get_scheme() }, hst { bu.get_host() };
 		if (has_bit<scheme>(components) && isup(sch)) // 1. scheme => lower case
-			transform(sch.begin(), sch.end(), std::string::iterator(result.data() + bu[scheme].first), tolo);
+			transform(sch.begin(), sch.end(), result.begin() + bu[scheme].first, tolo);
 		if (has_bit<host>(components) && isup(hst)) // 2. host => lower case
-			transform(hst.begin(), hst.end(), std::string::iterator(result.data() + bu[host].first), tolo);
+			transform(hst.begin(), hst.end(), result.begin() + bu[scheme].first, tolo);
 		if (has_hex(result))
 		{
 			for (std::string_view::size_type hv, pos{}; (hv = find_hex(result, pos)) != std::string_view::npos; pos += 3) // 3. %hex => upper case
@@ -516,8 +516,8 @@ public:
 				if (nspath.empty())
 					nspath += '/';
 				if (nspath != bu.get_path())
-					result.replace(std::string::iterator(result.data() + bu[path].first),
-						std::string::iterator(result.data() + bu[path].first + bu[path].second), nspath);
+					result.replace(result.begin() + bu[path].first,
+						result.begin() + bu[path].first + bu[path].second, nspath);
 			}
 		}
 		bu.assign(result);
